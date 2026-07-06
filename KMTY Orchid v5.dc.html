@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style data-omelette-injected>html,body{background:transparent}</style><script data-omelette-injected>(()=>{{const Y=new URLSearchParams(location.search).get("theme");if(Y==="light"||Y==="dark"){document.documentElement.dataset.theme=Y}}{const Y=()=>{try{if(document.querySelector('meta[name="color-scheme"]'))return;const k=getComputedStyle(document.documentElement).getPropertyValue("color-scheme").trim();if(k&&k!=="normal")return;const w=(X)=>{if(!X)return null;const F=getComputedStyle(X).backgroundColor.match(/^rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)(?:[,\s/]+([\d.]+%?))?\s*\)$/);if(!F)return null;const K=F[4]==null?1:parseFloat(F[4])/(F[4].endsWith("%")?100:1);if(K<0.99)return null;return[+F[1],+F[2],+F[3]]};const U=w(document.body)||w(document.documentElement);if(!U)return;const x=(X)=>{const F=X/255;return F<=0.04045?F/12.92:((F+0.055)/1.055)**2.4};const D=0.2126*x(U[0])+0.7152*x(U[1])+0.0722*x(U[2]);document.documentElement.style.setProperty("color-scheme",D<0.4?"dark":"light")}catch{}};if(document.readyState==="complete")Y();else window.addEventListener("load",Y)}var _=[];var v=false;var P=30000;var h=3000;document.addEventListener("DOMContentLoaded",()=>{const Y=window.Babel;const k="om-src-id";if(Y&&Y.registerPlugin&&!(Y.availablePlugins&&Y.availablePlugins[k])){Y.registerPlugin(k,({types:D})=>({visitor:{JSXOpeningElement(X,F){const K=X.node;if(K.name&&K.name.type==="JSXMemberExpression")return;for(let z=0;z<K.attributes.length;z++){const V=K.attributes[z];if(V.type==="JSXAttribute"&&V.name&&V.name.name==="data-om-id")return}const B=F.file&&F.file.opts&&F.file.opts.filename||"?";const A=K.loc&&K.loc.start;const J=`jsx:${B}:${K.start??0}:${A?A.line:0}:${A?A.column+1:0}`;K.attributes.push(D.jsxAttribute(D.jsxIdentifier("data-om-id"),D.stringLiteral(J)))}}}))}const w="om-text-extract";let U=false;if(v&&Y&&Y.registerPlugin&&!(Y.availablePlugins&&Y.availablePlugins[w])){const D=window.React;if(D&&D.useSyncExternalStore&&D.createElement){U=true;const X={};const F=new Set;let K=0;window.__omTextO=X;window.__omTextSet=(J)=>{for(const z in J){const V=J[z];if(V==null)delete X[z];else X[z]=V}K++;F.forEach((z)=>z())};const B=(J)=>{F.add(J);return()=>F.delete(J)};const A=()=>K;window.__OmT=function J(z){D.useSyncExternalStore(B,A,A);return D.createElement("span",{"data-om-text":z.i,className:"__om-t"},z.i in X?X[z.i]:z.children)};Y.registerPlugin(w,({types:J})=>{const z={style:1,script:1,noscript:1,textarea:1,title:1,option:1,text:1,tspan:1,textPath:1};const V={placeholder:1,alt:1,title:1,label:1,"aria-label":1,"aria-description":1,"aria-placeholder":1};const W=(Z,H)=>J.logicalExpression("??",J.memberExpression(J.logicalExpression("||",J.memberExpression(J.identifier("window"),J.identifier("__omTextO")),J.objectExpression([])),J.stringLiteral(Z),true),H);const Q=(Z)=>Z.file&&Z.file.opts&&Z.file.opts.filename||"?";const j=(Z)=>Z.file&&Z.file.code||"";const G=(Z,H)=>{const N=($)=>$&&$.start!=null&&$.end!=null&&($.type==="StringLiteral"||$.type==="TemplateLiteral"&&$.expressions.length===0)?[$.start,$.end]:null;const L=N(H);if(L)return L;if(H&&H.type==="Identifier"){const $=Z.scope.getBinding(H.name);if($&&$.constant&&$.path.node.type==="VariableDeclarator"){return N($.path.node.init)}}return null};const R=(Z,H,N)=>{const L=Z.node;let $=false;const M=(q,E)=>{$=true;return J.jsxElement(J.jsxOpeningElement(J.jsxIdentifier("__OmT"),[J.jsxAttribute(J.jsxIdentifier("i"),J.stringLiteral(q))],false),J.jsxClosingElement(J.jsxIdentifier("__OmT")),[E],false)};const C=L.children.map((q)=>{if(q.type==="JSXText"){if(q.start==null||q.end==null)return q;const E=N.slice(q.start,q.end);const f=E.length-E.trimStart().length;const I=E.length-E.trimEnd().length;if(f+I>=E.length)return q;return M(`txt:${H}:${q.start+f}:${q.end-I}`,q)}if(q.type==="JSXExpressionContainer"){const E=G(Z,q.expression);if(E)return M(`str:${H}:${E[0]}:${E[1]}`,q)}return q});if($)L.children=C};return{visitor:{JSXOpeningElement(Z,H){const N=Z.node;const L=Q(H);const $={};for(let M=0;M<N.attributes.length;M++){const C=N.attributes[M];if(C.type!=="JSXAttribute"||!C.name)continue;const q=C.name.name;if(!V[q])continue;if(!C.value||C.value.type!=="StringLiteral")continue;if(C.value.start==null||C.value.end==null)continue;const E=`txt:${L}:${C.value.start}:${C.value.end}`;$[q]=E;C.value=J.jsxExpressionContainer(W(E,J.stringLiteral(C.value.value)))}if(Object.keys($).length){N.attributes.push(J.jsxAttribute(J.jsxIdentifier("data-om-text-attrs"),J.stringLiteral(JSON.stringify($))))}},JSXElement(Z,H){const N=Z.node.openingElement;const L=N&&N.name&&N.name.name;if(L==="__OmT")return;if(typeof L==="string"&&z[L])return;R(Z,Q(H),j(H))},JSXFragment(Z,H){R(Z,Q(H),j(H))}}}})}}const x=U?["transform-react-jsx-source",k,w]:["transform-react-jsx-source",k];document.querySelectorAll('script[type="text/babel"],script[type="text/jsx"]').forEach((D,X)=>{const F=D.getAttribute("data-plugins")||"";const K=x.filter((B)=>F.indexOf(B)<0);if(K.length){D.setAttribute("data-plugins",F?`${F},${K.join(",")}`:K.join(","))}if(!D.hasAttribute("data-filename")){D.setAttribute("data-filename",D.getAttribute("src")||`inline-${X}`)}})});var S=window.parent;if(S&&S!==window){const Y=(J,z)=>{try{S.postMessage({__omelette_log:true,type:J,data:z},"*")}catch{}};["log","warn","error"].forEach((J)=>{const z=console[J];console[J]=(...V)=>{const W=V.map((Q)=>{try{return typeof Q==="object"?JSON.stringify(Q):String(Q)}catch{try{return String(Q)}catch{return"[unstringifiable]"}}}).join(" ");Y(J,W);z.apply(console,V)}});window.addEventListener("error",(J)=>{const z=J.target;if(z&&z!==window&&z.tagName){const V=z.src||z.href||"";Y("resource_error",`${z.tagName} failed to load: ${V}`)}else{Y("error",`${J.message||"Unknown error"} at ${J.filename||"?"}:${J.lineno||0}:${J.colno||0}`)}},true);window.addEventListener("unhandledrejection",(J)=>{const z=J.reason;const V=z instanceof Error?`${z.message} ${z.stack}`:String(z);Y("error",`Unhandled rejection: ${V}`)});const k=()=>{try{S.postMessage({type:"omelette:height",height:document.documentElement.scrollHeight},"*")}catch{}};if(window.ResizeObserver)new ResizeObserver(k).observe(document.documentElement);const w=()=>{k();if(!document.querySelector('script[type="text/babel"],script[type="text/jsx"]'))return;const J=()=>document.getElementById("root")||document.querySelector("body > div[id]");const z=J()?.firstElementChild??null;let V=0;const W=()=>{const Q=J();if(Q&&Q.firstElementChild!==z||++V>30){k();return}setTimeout(W,100)};setTimeout(W,100)};if(document.readyState==="complete")w();else window.addEventListener("load",w);const U={};let x=0;const D=(J)=>new Promise((z,V)=>{if(!_.length){V(new Error("claude.complete: no parent origin"));return}const W=`c${++x}`;const Q=()=>setTimeout(()=>{delete U[W];V(new Error(`claude.complete: no data for ${P/1000}s`))},P);const j=Q();U[W]={resolve:z,reject:V,text:"",t:j,arm:Q};try{for(const G of _){S.postMessage({__om_api:true,id:W,body:J},G)}}catch(G){clearTimeout(j);delete U[W];V(G)}});const X=8;const F=async(J,z)=>{if(!Array.isArray(J.messages)){throw new Error("claude.complete: tools require a messages array")}const V=J.messages.slice();const W={...J,tools:J.tools.map((G)=>{if(G===null||typeof G!=="object")return G;const R={};for(const Z of Object.keys(G)){if(typeof G[Z]!=="function")R[Z]=G[Z]}return R})};const Q=W.tool_choice;const j=Q!=null&&(Q.type==="any"||Q.type==="tool")?{...W,tool_choice:Q.disable_parallel_tool_use!==undefined?{type:"auto",disable_parallel_tool_use:Q.disable_parallel_tool_use}:{type:"auto"}}:W;for(let G=0;G<X;G++){const R=await D({...G===0?W:j,messages:V});const Z=R.message;const H=Z&&Array.isArray(Z.content)?Z.content:null;const N=H?H.filter(($)=>$?.type==="tool_use"):[];if(Z?.stop_reason!=="tool_use"||N.length===0){return R.text}const L=[];for(const $ of N){const M=z.get($.name);if(!M){L.push({type:"tool_result",tool_use_id:$.id,content:`no handler for tool "${$.name}"`,is_error:true});continue}try{const C=await M($.input);const q=typeof C==="string"?C:A(C)??"";L.push({type:"tool_result",tool_use_id:$.id,content:q})}catch(C){L.push({type:"tool_result",tool_use_id:$.id,content:String(C?.message??C??"tool handler failed"),is_error:true})}}V.push({role:"assistant",content:H},{role:"user",content:L})}throw new Error(`claude.complete: exceeded ${X} tool turns`)};window.claude={complete(J){const z=J;if(z!==null&&typeof z==="object"&&Array.isArray(z.tools)&&z.tools.some((V)=>V!==null&&typeof V==="object"&&typeof V.run==="function")){const V=new Map;for(const W of z.tools){if(W!==null&&typeof W==="object"&&typeof W.run==="function"){V.set(String(W.name),W.run)}}return F(z,V)}return D(J).then((V)=>V.text)}};const K={};let B=0;window.omelette={writeFile:(J,z)=>new Promise((V,W)=>{if(!_.length){V();return}const Q=`f${++B}`;const j=setTimeout(()=>{delete K[Q];V()},h);K[Q]={resolve:V,reject:W,t:j};try{for(const G of _){S.postMessage({__om_file:true,id:Q,op:"write",path:J,content:z},G)}}catch{clearTimeout(j);delete K[Q];V()}})};const A=(J)=>{try{return JSON.stringify(J)}catch{return JSON.stringify(String(J))}};window.addEventListener("message",(J)=>{if(_.indexOf(J.origin)<0)return;if(J.source!==S)return;const z=J.data;if(!z)return;if(z.type==="omelette-preview-refresh"){if(typeof z.token!=="string"||!/^[0-9a-f.-]+(\.(rc|pr-[0-9]+))?(\.[0-9]+\.[0-9a-f]{16})?$/.test(z.token))return;const Q=Math.max(1,Math.floor((z.expiresAt||0)-Date.now()/1000));document.cookie="__Host-omelette-preview="+z.token+"; Path=/; Secure; SameSite=None; Partitioned; Max-Age="+Q;return}if(z.__om_file_r){const Q=K[z.id];if(!Q)return;clearTimeout(Q.t);delete K[z.id];if(z.ok)Q.resolve();else Q.reject(new Error(z.error||"write failed"));return}if(z.__om_api_r){const Q=U[z.id];if(!Q)return;if(z.error!=null){clearTimeout(Q.t);delete U[z.id];Q.reject(new Error(z.error));return}if(z.chunk!=null){clearTimeout(Q.t);Q.t=Q.arm();Q.text+=z.chunk;return}if(z.done){clearTimeout(Q.t);delete U[z.id];Q.resolve({text:z.text!=null?z.text:Q.text,message:z.message});return}return}if(!z.__om_eval)return;const V=z;const W=(Q)=>{J.source.postMessage({...Q,__om_eval_r:1,id:V.id},J.origin)};try{const Q=(0,eval)(V.code);if(Q&&typeof Q.then==="function"){Q.then((j)=>W({ok:1,v:A(j)}),(j)=>W({ok:0,e:String(j)}))}else{W({ok:1,v:A(Q)})}}catch(Q){W({ok:0,e:String(Q)})}})}})();
+</script>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js?v=2"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<!-- Self-hosted fonts (no external CDN — loads even where fonts.googleapis.com is blocked, e.g. mainland China). Generated by build_fonts.py -->
+<link rel="stylesheet" href="fonts/fonts.css?v=4">
+<script src="image-slot.js"></script>
+<script src="i18n.js?v=19" defer></script>
+<meta name="ext-resource-dependency" content="terroir-geo.json">
+<style>
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+  body{margin:0;background:#F3EEE4;}
+  ::selection{background:#B0552F;color:#F3EEE4;}
+  [data-scroll]::-webkit-scrollbar{height:0;width:0;display:none;}
+  [data-availgrid]::-webkit-scrollbar{height:8px;}
+  [data-availgrid]::-webkit-scrollbar-thumb{background:rgba(26,30,23,.2);border-radius:18px;}
+  @keyframes kmtyKen{from{transform:scale(1.05);}to{transform:scale(1.14) translateY(-2%);}}
+  @keyframes kmtyMarquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+  @keyframes kmtyDriftA{0%{transform:translate3d(-7%,0,0);}100%{transform:translate3d(7%,1.5%,0);}}
+  @keyframes kmtyDriftB{0%{transform:translate3d(7%,1%,0);}100%{transform:translate3d(-9%,-1.5%,0);}}
+  @keyframes kmtyRise{0%{transform:translateY(8%);opacity:0;}45%{opacity:.5;}100%{transform:translateY(-12%);opacity:0;}}
+  @keyframes kmtyScrollCue{0%,100%{transform:translateY(0);opacity:.5;}50%{transform:translateY(7px);opacity:1;}}
+  @keyframes kmtyCloudLTR{0%{transform:translate3d(calc(-100% - 6vw),0,0);}100%{transform:translate3d(106vw,0,0);}}
+  @keyframes kmtyCloudRTL{0%{transform:translate3d(106vw,0,0);}100%{transform:translate3d(calc(-100% - 6vw),0,0);}}
+  @keyframes kmtyPingR{0%{r:4px;opacity:.9;}70%{opacity:0;}100%{r:26px;opacity:0;}}
+  @keyframes kmtyPing{0%{transform:scale(.32);opacity:.7;}70%{opacity:0;}100%{transform:scale(2.5);opacity:0;}}
+  [data-burger]{display:none;}
+  [data-rail]{display:none;}
+  @media(min-width:1160px){[data-rail]{display:flex;}}
+  [data-langsw]{display:flex;align-items:center;gap:3px;padding:4px;border-radius:999px;border:1px solid rgba(243,238,228,.28);}
+  [data-langsw] button{border:none;background:transparent;color:rgba(243,238,228,.78);font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.05em;padding:6px 10px;border-radius:999px;cursor:pointer;transition:all .25s ease;}
+  [data-langsw] button.on{background:#F3EEE4;color:#1A1E17;}
+  [data-langsw-m]{display:flex;gap:8px;margin-top:24px;flex-wrap:wrap;}
+  [data-langsw-m] button{border:1px solid rgba(243,238,228,.3);background:transparent;color:#F3EEE4;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12.5px;padding:9px 16px;border-radius:999px;cursor:pointer;}
+  [data-langsw-m] button.on{background:#F3EEE4;color:#1A1E17;border-color:#F3EEE4;}
+  @media(max-width:1080px){[data-langsw]{display:none;}}
+  @media(max-width:700px){
+    [data-vinesvg]{display:none;}
+    [data-vinestage]{padding:16px 0 !important;}
+    [data-vinestage] [data-reveal]:last-child{align-items:flex-start !important;text-align:left !important;}
+    [data-vinestage] [data-reveal]:last-child p{margin-left:0 !important;}
+  }
+  @media(max-width:900px){
+    [data-desktopnav]{display:none !important;}
+    [data-navcta]{display:none !important;}
+    [data-burger]{display:inline-flex !important;}
+  }
+</style>
+</helmet>
+<div style="font-family:'Hanken Grotesk','Noto Sans SC',system-ui,sans-serif;color:#1A1E17;background:#F3EEE4;overflow-x:clip;position:relative;">
+
+  <div style="position:fixed;inset:0;pointer-events:none;z-index:160;opacity:.07;mix-blend-mode:multiply;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E&quot;);"></div>
+
+  <div data-progress style="position:fixed;top:0;left:0;height:2px;width:0%;background:#B0552F;z-index:200;"></div>
+
+  <!-- rail -->
+  <div data-rail style="position:fixed;right:24px;top:50%;transform:translateY(-50%);z-index:90;flex-direction:column;gap:15px;">
+    <sc-for list="{{ railItems }}" as="r" hint-placeholder-count="7">
+      <a data-railitem href="{{ r.href }}" data-target="{{ r.id }}" style="display:flex;align-items:center;gap:10px;text-decoration:none;justify-content:flex-end;">
+        <span data-railtx style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10px;letter-spacing:.08em;color:rgba(26,30,23,.45);opacity:0;transition:opacity .3s ease;white-space:nowrap;">{{ r.label }}</span>
+        <span data-raildot style="width:7px;height:7px;border-radius:50%;background:rgba(26,30,23,.25);transition:all .35s ease;"></span>
+      </a>
+    </sc-for>
+  </div>
+
+  <!-- NAV -->
+  <nav data-nav style="position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:13px clamp(18px,4vw,44px);background:transparent;border-bottom:1px solid transparent;transition:background .4s ease,box-shadow .4s ease,border-color .4s ease;">
+    <a href="#top" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+      <img src="images/logo.png" alt="KMTY logo" style="height:30px;width:auto;display:block;"/>
+      <span data-wordmark style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:700;font-size:21px;letter-spacing:-.01em;color:#F3EEE4;transition:color .4s ease;">KMTY</span>
+    </a>
+    <div data-desktopnav style="display:flex;align-items:center;gap:28px;">
+      <a href="#story" data-navlink style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;text-decoration:none;color:rgba(243,238,228,.82);transition:color .4s ease;" data-t="nav.s1">01 Story</a>
+      <a href="#grow" data-navlink style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;text-decoration:none;color:rgba(243,238,228,.82);transition:color .4s ease;" data-t="nav.s2">02 Grow</a>
+      <a href="#products" data-navlink style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;text-decoration:none;color:rgba(243,238,228,.82);transition:color .4s ease;" data-t="nav.s3">03 Products</a>
+      <a href="#shipping" data-navlink style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;text-decoration:none;color:rgba(243,238,228,.82);transition:color .4s ease;" data-t="nav.s4">04 Ship</a>
+    </div>
+    <div data-langsw role="group" aria-label="Language">
+      <button data-lang="en" class="on">EN</button><button data-lang="zh" lang="zh">中文</button><button data-lang="ru" lang="ru">РУ</button><button data-lang="vi" lang="vi">VI</button>
+    </div>
+    <a href="#contact" data-navcta data-t="nav.cta" style="display:inline-flex;align-items:center;padding:11px 20px;border-radius:999px;background:#B0552F;color:#F3EEE4;text-decoration:none;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;font-weight:500;">Request catalog</a>
+    <button data-burger style="display:none;align-items:center;justify-content:center;width:44px;height:44px;border:none;border-radius:8px;background:rgba(243,238,228,.16);backdrop-filter:blur(6px);cursor:pointer;">
+      <span style="display:block;width:20px;height:2px;background:#F3EEE4;box-shadow:0 -6px 0 #F3EEE4,0 6px 0 #F3EEE4;"></span>
+    </button>
+  </nav>
+
+  <!-- MOBILE MENU -->
+  <div data-mobilemenu style="position:fixed;inset:0;z-index:210;background:#1A1E17;transform:translateX(100%);transition:transform .5s cubic-bezier(.7,0,.2,1);display:flex;flex-direction:column;padding:22px clamp(20px,6vw,40px);">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <img src="images/logo.png" alt="KMTY" style="height:30px;width:auto;"/>
+      <button data-burger style="width:44px;height:44px;border:none;border-radius:8px;background:rgba(243,238,228,.1);color:#F3EEE4;font-size:22px;cursor:pointer;">&times;</button>
+    </div>
+    <div style="display:flex;flex-direction:column;margin-top:34px;">
+      <a href="#story" style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-size:29px;font-weight:600;color:#F3EEE4;text-decoration:none;padding:13px 0;border-bottom:1px solid rgba(243,238,228,.12);display:flex;justify-content:space-between;align-items:baseline;"><span data-t="m.story">Our story</span> <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:13px;color:#B0552F;">01</span></a>
+      <a href="#grow" style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-size:29px;font-weight:600;color:#F3EEE4;text-decoration:none;padding:13px 0;border-bottom:1px solid rgba(243,238,228,.12);display:flex;justify-content:space-between;align-items:baseline;"><span data-t="m.grow">How we grow</span> <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:13px;color:#B0552F;">02</span></a>
+      <a href="#products" style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-size:29px;font-weight:600;color:#F3EEE4;text-decoration:none;padding:13px 0;border-bottom:1px solid rgba(243,238,228,.12);display:flex;justify-content:space-between;align-items:baseline;"><span data-t="m.products">Products</span> <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:13px;color:#B0552F;">03</span></a>
+      <a href="#shipping" style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-size:29px;font-weight:600;color:#F3EEE4;text-decoration:none;padding:13px 0;border-bottom:1px solid rgba(243,238,228,.12);display:flex;justify-content:space-between;align-items:baseline;"><span data-t="m.ship">How it ships</span> <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:13px;color:#B0552F;">04</span></a>
+      <div data-langsw-m role="group" aria-label="Language">
+        <button data-lang="en" class="on">EN</button><button data-lang="zh" lang="zh">中文</button><button data-lang="ru" lang="ru">Русский</button><button data-lang="vi" lang="vi">Tiếng Việt</button>
+      </div>
+      <a href="#contact" style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-size:29px;font-weight:600;color:#B0552F;text-decoration:none;padding:15px 0;" data-t="m.cta">Request catalog →</a>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <section id="top" data-screen-label="Hero" style="position:relative;min-height:100svh;display:flex;flex-direction:column;justify-content:center;overflow:hidden;background:#12100c;">
+    <img src="images/hero-field.jpg" alt="A sea of magenta Phalaenopsis in the KMTY greenhouse" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;animation:kmtyKen 24s ease-in-out infinite alternate;"/>
+    <div style="position:absolute;inset:0;background:linear-gradient(174deg,rgba(18,16,12,.68) 0%,rgba(18,16,12,.22) 34%,rgba(18,16,12,.4) 68%,rgba(18,16,12,.9) 100%);"></div>
+    <div style="position:relative;width:100%;max-width:1300px;margin:0 auto;padding:104px clamp(18px,4vw,44px) 0;z-index:3;">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;">
+        <span style="display:block;height:2px;width:60px;border-radius:999px;background:linear-gradient(90deg,#4C8C57,#C6952F 55%,#D48CB0);opacity:.85;"></span>
+        <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:rgba(243,238,228,.82);" data-t="hero.kicker">Kunming Tong&nbsp;Yi · 昆明统一 · Est. 2000</span>
+      </div>
+      <h1 data-t-html="hero.h1" style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:480;font-size:clamp(44px,7.6vw,108px);line-height:1.02;letter-spacing:-.012em;color:#F7F3EA;margin:0;max-width:16ch;text-wrap:balance;">
+        Orchids in every color imaginable — <span style="color:#E7B7CF;font-weight:500;">and a few you can't.</span>
+      </h1>
+      <p data-t="hero.lede" style="max-width:540px;margin:26px 0 0;font-size:clamp(15px,1.7vw,18.5px);line-height:1.6;color:rgba(243,238,228,.84);font-weight:300;">
+        China's largest exporter of flowering Phalaenopsis, grown from flask to bloom in the Yunnan highlands — home of the hand-marbled Art Orchid, found nowhere else on earth.
+      </p>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:32px;">
+        <a href="#story" style="display:inline-flex;align-items:center;gap:10px;padding:15px 25px;border-radius:999px;background:#F3EEE4;color:#1A1E17;text-decoration:none;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:13px;font-weight:500;"><span data-t="hero.cta1">Read our story</span>
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h9M8 3l5 5-5 5" stroke="#1A1E17" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a href="#products" style="display:inline-flex;align-items:center;padding:15px 25px;border-radius:999px;background:rgba(243,238,228,.08);border:1px solid rgba(243,238,228,.42);color:#F3EEE4;text-decoration:none;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:13px;font-weight:500;backdrop-filter:blur(4px);" data-t="hero.cta2">See the products</a>
+      </div>
+    </div>
+    <div style="position:relative;z-index:3;width:100%;max-width:1300px;margin:clamp(36px,6vw,64px) auto 0;padding:20px clamp(18px,4vw,44px) 28px;border-top:1px solid rgba(243,238,228,.2);display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:20px;">
+      <div><div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:700;font-size:clamp(26px,3vw,36px);color:#F3EEE4;line-height:1;">Nº 1</div><div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;color:rgba(243,238,228,.6);margin-top:8px;" data-t="hero.s1">flowering-orchid exporter, China</div></div>
+      <div><div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:700;font-size:clamp(26px,3vw,36px);color:#F3EEE4;line-height:1;">50%+</div><div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;color:rgba(243,238,228,.6);margin-top:8px;" data-t="hero.s2">of national export share</div></div>
+      <div><div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:700;font-size:clamp(26px,3vw,36px);color:#F3EEE4;line-height:1;">3</div><div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;color:rgba(243,238,228,.6);margin-top:8px;" data-t="hero.s3">product lines · seedling→cut</div></div>
+      <div><div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:700;font-size:clamp(26px,3vw,36px);color:#F3EEE4;line-height:1;">2000</div><div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;color:rgba(243,238,228,.6);margin-top:8px;" data-t="hero.s4">growing in Yunnan since</div></div>
+    </div>
+    <div style="position:relative;z-index:3;width:100%;max-width:1300px;margin:0 auto;padding:0 clamp(18px,4vw,44px) 30px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;">
+      <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(243,238,228,.55);margin-right:6px;" data-t="hero.mkts">Export markets · 出口市场</span>
+      <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;padding:5px 11px;border:1px solid rgba(243,238,228,.26);border-radius:100px;color:rgba(243,238,228,.88);backdrop-filter:blur(3px);" data-t="mkt.kr">South Korea</span>
+      <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;padding:5px 11px;border:1px solid rgba(243,238,228,.26);border-radius:100px;color:rgba(243,238,228,.88);backdrop-filter:blur(3px);" data-t="mkt.vn">Vietnam</span>
+      <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;padding:5px 11px;border:1px solid rgba(243,238,228,.26);border-radius:100px;color:rgba(243,238,228,.88);backdrop-filter:blur(3px);" data-t="mkt.ph">Philippines</span>
+      <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;padding:5px 11px;border:1px solid rgba(243,238,228,.26);border-radius:100px;color:rgba(243,238,228,.88);backdrop-filter:blur(3px);" data-t="mkt.th">Thailand</span>
+      <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;padding:5px 11px;border:1px solid rgba(243,238,228,.26);border-radius:100px;color:rgba(243,238,228,.88);backdrop-filter:blur(3px);" data-t="mkt.sg">Singapore</span>
+      <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;padding:5px 11px;border:1px solid rgba(243,238,228,.26);border-radius:100px;color:rgba(243,238,228,.88);backdrop-filter:blur(3px);" data-t="mkt.bn">Brunei</span>
+      <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;padding:5px 11px;border:1px solid rgba(243,238,228,.26);border-radius:100px;color:rgba(243,238,228,.88);backdrop-filter:blur(3px);" data-t="mkt.db">Dubai</span>
+      <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;padding:5px 11px;border:1px solid rgba(243,238,228,.26);border-radius:100px;color:rgba(243,238,228,.88);backdrop-filter:blur(3px);" data-t="mkt.om">Oman</span>
+      <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;padding:5px 11px;border:1px solid rgba(243,238,228,.26);border-radius:100px;color:rgba(243,238,228,.88);backdrop-filter:blur(3px);" data-t="mkt.hk">Hong Kong</span>
+    </div>
+  </section>
+
+  <!-- TICKER -->
+  <div style="background:#1A1E17;overflow:hidden;padding:11px 0;">
+    <div style="display:flex;white-space:nowrap;width:max-content;animation:kmtyMarquee 40s linear infinite;">
+      <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12.5px;letter-spacing:.06em;color:rgba(243,238,228,.66);padding:0 22px;" data-t-html="ticker">SEEDLINGS <span style="color:#C86B3E;">/</span> POT FLOWER <span style="color:#C86B3E;">/</span> CUT FLOWER <span style="color:#C86B3E;">/</span> VIRUS-FREE PROPAGATION <span style="color:#C86B3E;">/</span> EUROPEAN-CERTIFIED GREENHOUSES <span style="color:#C86B3E;">/</span> THE ART ORCHID <span style="color:#C86B3E;">/</span> KOREA · VIETNAM · PHILIPPINES · THAILAND · SINGAPORE · DUBAI · OMAN · BRUNEI · HONG KONG <span style="color:#C86B3E;">/</span> </span>
+      <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12.5px;letter-spacing:.06em;color:rgba(243,238,228,.66);padding:0 22px;" data-t-html="ticker">SEEDLINGS <span style="color:#C86B3E;">/</span> POT FLOWER <span style="color:#C86B3E;">/</span> CUT FLOWER <span style="color:#C86B3E;">/</span> VIRUS-FREE PROPAGATION <span style="color:#C86B3E;">/</span> EUROPEAN-CERTIFIED GREENHOUSES <span style="color:#C86B3E;">/</span> THE ART ORCHID <span style="color:#C86B3E;">/</span> KOREA · VIETNAM · PHILIPPINES · THAILAND · SINGAPORE · DUBAI · OMAN · BRUNEI · HONG KONG <span style="color:#C86B3E;">/</span> </span>
+    </div>
+  </div>
+
+  <!-- THE YUNNAN ADVANTAGE — immersive -->
+  <section id="yunnan" data-terroir data-screen-label="Yunnan" style="position:relative;overflow:hidden;background:#0a1611;min-height:max(640px,100svh);display:flex;flex-direction:column;">
+    <img src="images/terroir-bg.jpg" alt="Cloud-forest canopy on the Yunnan plateau" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;"/>
+    <!-- drifting cloud cut-outs (screen blend knocks out the black) — full traverse loops, both directions -->
+    <span aria-hidden="true" style="position:absolute;top:5%;left:0;width:56vw;max-width:920px;pointer-events:none;will-change:transform;animation:kmtyCloudLTR 105s linear infinite;animation-delay:-16s;"><img src="images/cloud.jpg" alt="" style="width:100%;height:auto;display:block;mix-blend-mode:screen;opacity:.55;filter:blur(1px) brightness(1.05);-webkit-mask-image:radial-gradient(56% 44% at 50% 50%,#000 50%,transparent 76%);mask-image:radial-gradient(56% 44% at 50% 50%,#000 50%,transparent 76%);"/></span>
+    <span aria-hidden="true" style="position:absolute;top:1%;left:0;width:30vw;max-width:520px;pointer-events:none;will-change:transform;animation:kmtyCloudRTL 88s linear infinite;animation-delay:-52s;"><img src="images/cloud.jpg" alt="" style="width:100%;height:auto;display:block;mix-blend-mode:screen;opacity:.42;filter:blur(1.5px) brightness(1.04);transform:scaleX(-1) rotate(4deg);-webkit-mask-image:radial-gradient(58% 48% at 46% 52%,#000 46%,transparent 74%);mask-image:radial-gradient(58% 48% at 46% 52%,#000 46%,transparent 74%);"/></span>
+    <span aria-hidden="true" style="position:absolute;top:24%;left:0;width:46vw;max-width:760px;pointer-events:none;will-change:transform;animation:kmtyCloudRTL 142s linear infinite;animation-delay:-70s;"><img src="images/cloud.jpg" alt="" style="width:100%;height:auto;display:block;mix-blend-mode:screen;opacity:.36;filter:blur(2px) brightness(1.03);transform:scaleX(-1);-webkit-mask-image:radial-gradient(52% 42% at 54% 48%,#000 48%,transparent 75%);mask-image:radial-gradient(52% 42% at 54% 48%,#000 48%,transparent 75%);"/></span>
+    <span aria-hidden="true" style="position:absolute;top:40%;left:0;width:34vw;max-width:560px;pointer-events:none;will-change:transform;animation:kmtyCloudLTR 150s linear infinite;animation-delay:-96s;"><img src="images/cloud.jpg" alt="" style="width:100%;height:auto;display:block;mix-blend-mode:screen;opacity:.3;filter:blur(2.5px);transform:rotate(-5deg) scale(1.15);-webkit-mask-image:radial-gradient(50% 40% at 50% 55%,#000 44%,transparent 72%);mask-image:radial-gradient(50% 40% at 50% 55%,#000 44%,transparent 72%);"/></span>
+    <span aria-hidden="true" style="position:absolute;top:56%;left:0;width:62vw;max-width:1000px;pointer-events:none;will-change:transform;animation:kmtyCloudRTL 175s linear infinite;animation-delay:-28s;"><img src="images/cloud.jpg" alt="" style="width:100%;height:auto;display:block;mix-blend-mode:screen;opacity:.26;filter:blur(3px);transform:scaleY(-1) rotate(2deg);-webkit-mask-image:radial-gradient(54% 42% at 48% 50%,#000 46%,transparent 74%);mask-image:radial-gradient(54% 42% at 48% 50%,#000 46%,transparent 74%);"/></span>
+    <span aria-hidden="true" style="position:absolute;top:70%;left:0;width:42vw;max-width:700px;pointer-events:none;will-change:transform;animation:kmtyCloudLTR 128s linear infinite;animation-delay:-64s;"><img src="images/cloud.jpg" alt="" style="width:100%;height:auto;display:block;mix-blend-mode:screen;opacity:.24;filter:blur(2.5px) brightness(1.02);transform:scaleX(-1) scaleY(-1) rotate(-3deg);-webkit-mask-image:radial-gradient(56% 46% at 52% 46%,#000 48%,transparent 76%);mask-image:radial-gradient(56% 46% at 52% 46%,#000 48%,transparent 76%);"/></span>
+    <!-- headline scrims -->
+    <div aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background:linear-gradient(100deg,rgba(6,14,10,.82) 0%,rgba(6,14,10,.5) 34%,rgba(6,14,10,0) 56%),linear-gradient(0deg,rgba(6,14,10,.74) 0%,rgba(6,14,10,0) 40%),linear-gradient(180deg,rgba(6,14,10,.55) 0%,rgba(6,14,10,0) 22%);"></div>
+
+    <!-- the map: neighbours + Yunnan cut-out veil -->
+    <svg viewBox="-150 -130 1900 1480" preserveAspectRatio="xMidYMid meet" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;">
+      <defs>
+        <radialGradient id="kmtyVeilGrad" gradientUnits="userSpaceOnUse" cx="720" cy="600" r="920">
+          <stop offset="0%" stop-color="rgba(6,14,10,0.32)"></stop>
+          <stop offset="52%" stop-color="rgba(6,14,10,0.58)"></stop>
+          <stop offset="100%" stop-color="rgba(4,9,7,0.86)"></stop>
+        </radialGradient>
+        <mask id="kmtyCut">
+          <rect x="-4000" y="-4000" width="12000" height="12000" fill="#fff"></rect>
+          <path d="{{ trYnPath }}" fill="#000"></path>
+        </mask>
+      </defs>
+      <rect data-veil x="-4000" y="-4000" width="12000" height="12000" fill="url(#kmtyVeilGrad)" mask="url(#kmtyCut)" opacity="0" style="transition:opacity 1.1s ease .1s;"></rect>
+      <sc-for list="{{ trRegions }}" as="r" hint-placeholder-count="0">
+        <path d="{{ r.d }}" vector-effect="non-scaling-stroke" style="fill:#a6c7b6;fill-opacity:.028;stroke:#7a9a8a;stroke-opacity:.5;stroke-width:1;cursor:pointer;transition:fill-opacity .35s ease,stroke-opacity .35s ease;" style-hover="fill-opacity:.13;stroke-opacity:.95;stroke:#a6c7b6;"></path>
+      </sc-for>
+      <path data-halo d="{{ trYnPath }}" fill="none" stroke="#9FE4B8" stroke-width="9" stroke-linejoin="round" opacity="0" style="filter:blur(9px);transition:opacity 1.2s ease .6s;"></path>
+      <path data-yn-border d="{{ trYnPath }}" fill="none" stroke="#57C07C" stroke-width="2.4" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round" style="filter:drop-shadow(0 0 5px rgba(87,192,124,.6));"></path>
+      <path data-rim d="{{ trYnPath }}" fill="none" stroke="rgba(255,255,255,.5)" stroke-width=".7" vector-effect="non-scaling-stroke" stroke-linejoin="round" opacity="0" style="transition:opacity .8s ease 1.6s;"></path>
+      <g data-mtb style="opacity:0;transition:opacity 1s ease .9s;"></g>
+      <g data-mpins style="opacity:0;transition:opacity .7s ease 1.15s;"></g>
+    </svg>
+
+    <!-- content overlay -->
+    <div style="position:relative;z-index:6;width:100%;max-width:1300px;margin:0 auto;flex:1 1 auto;box-sizing:border-box;padding:clamp(94px,12vh,150px) clamp(18px,4vw,44px) clamp(30px,4.5vh,54px);display:flex;flex-direction:column;justify-content:space-between;gap:clamp(30px,6vh,64px);">
+
+      <div data-reveal style="opacity:0;transform:translateY(30px);transition:opacity 1.1s ease,transform 1.1s ease;max-width:min(640px,58vw);min-width:min(100%,320px);pointer-events:none;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span style="display:block;height:2px;width:46px;border-radius:999px;background:linear-gradient(90deg,#4C8C57,#C6952F 55%,#D48CB0);opacity:.85;"></span>
+          <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#a6c7b6;" data-t="t.eyebrow">Yunnan · 25°N plateau · 云贵高原</span>
+        </div>
+        <h2 style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:460;font-size:clamp(36px,5.4vw,82px);line-height:1.04;letter-spacing:-.008em;margin:16px 0 0;color:#eef3ee;text-wrap:balance;" data-t-html="t.h2">Grown where the <span style="color:#ff9fcb;font-style:italic;">clouds</span> rest</h2>
+        <div style="font-family:'Noto Serif SC','Playfair Display','Noto Sans SC',serif;font-weight:600;font-size:clamp(18px,2.2vw,30px);letter-spacing:.16em;color:#c4d1c8;margin-top:14px;" data-t="t.zhsub">云栖之地，兰生其间</div>
+        <p data-t-html="t.para" style="max-width:480px;margin:20px 0 0;font-size:clamp(13.5px,1.1vw,15.5px);line-height:1.62;color:#c4d1c8;font-weight:300;">Monsoon air climbs into mountain here — a cool, luminous plateau where mist feeds the canopy the year round. Steady mild warmth, intense high-altitude light and a wide day-to-night swing give <span style="font-style:italic;">Phalaenopsis</span> firmer spikes and deeper colour, on a fraction of the energy a lowland glasshouse burns.<span style="display:block;margin-top:12px;font-family:'Noto Sans SC',sans-serif;font-weight:300;line-height:1.85;color:#a9b8ae;font-size:.95em;">云南地处季风与高原交汇之处，海拔造就四季如春的气候，云雾常年滋养林冠。稳定的温和气温、高海拔强日照与显著昼夜温差，令蝴蝶兰花梗更挺、花色更艳，而温控能耗仅为低地产区的一小部分。</span></p>
+        <div style="margin-top:24px;display:flex;flex-direction:column;gap:15px;max-width:480px;pointer-events:none;">
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <span style="flex:none;margin-top:5px;width:8px;height:8px;border-radius:50%;background:#f27cb2;box-shadow:0 0 0 4px rgba(242,124,178,.16);"></span>
+            <div>
+              <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(14.5px,1.15vw,16.5px);color:#eef3ee;line-height:1.25;" data-t="t.adv1.t">A wide day–night swing</div>
+              <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:clamp(12px,0.95vw,13px);line-height:1.55;color:#a9b8ae;margin-top:3px;" data-t="t.adv1.b">Warm days build sugars, cold mountain nights lock them in — the natural trigger for firmer spikes and deeper, longer-holding colour.</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <span style="flex:none;margin-top:5px;width:8px;height:8px;border-radius:50%;background:#C6952F;box-shadow:0 0 0 4px rgba(198,149,47,.16);"></span>
+            <div>
+              <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(14.5px,1.15vw,16.5px);color:#eef3ee;line-height:1.25;" data-t="t.adv2.t">Stronger high-altitude sun</div>
+              <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:clamp(12px,0.95vw,13px);line-height:1.55;color:#a9b8ae;margin-top:3px;" data-t="t.adv2.b">Thin plateau air lets more ultraviolet through, deepening petal pigment and toughening every plant — richer blooms that travel and last.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div data-reveal style="opacity:0;transform:translateY(24px);transition:opacity 1s ease .15s,transform 1s ease .15s;display:flex;align-items:flex-end;justify-content:space-between;gap:24px 28px;flex-wrap:wrap;">
+        <div style="display:flex;gap:clamp(16px,2.2vw,34px);flex-wrap:wrap;">
+          <div>
+            <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:500;font-size:clamp(26px,3vw,44px);line-height:1;color:#eef3ee;display:flex;align-items:baseline;gap:3px;"><span data-count data-count-to="1910">1,910</span><span style="font-family:'Hanken Grotesk','Noto Sans',sans-serif;font-size:.4em;font-weight:500;color:#f27cb2;">m</span></div>
+            <div style="margin-top:8px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:#7a9a8a;" data-t="t.st1">Elevation</div>
+          </div>
+          <div>
+            <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:500;font-size:clamp(26px,3vw,44px);line-height:1;color:#eef3ee;display:flex;align-items:baseline;gap:3px;"><span data-count data-count-to="15">15</span><span style="font-family:'Hanken Grotesk','Noto Sans',sans-serif;font-size:.4em;font-weight:500;color:#f27cb2;">°C</span></div>
+            <div style="margin-top:8px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:#7a9a8a;" data-t="t.st2">Mean temp</div>
+          </div>
+          <div>
+            <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:500;font-size:clamp(26px,3vw,44px);line-height:1;color:#eef3ee;display:flex;align-items:baseline;gap:3px;"><span data-count data-count-to="12">12</span><span style="font-family:'Hanken Grotesk','Noto Sans',sans-serif;font-size:.4em;font-weight:500;color:#f27cb2;">°C</span></div>
+            <div style="margin-top:8px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:#7a9a8a;" data-t="t.st3">Day–night swing</div>
+          </div>
+          <div>
+            <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:500;font-size:clamp(26px,3vw,44px);line-height:1;color:#eef3ee;display:flex;align-items:baseline;gap:3px;"><span data-count data-count-to="2250">2,250</span><span style="font-family:'Hanken Grotesk','Noto Sans',sans-serif;font-size:.4em;font-weight:500;color:#f27cb2;">h</span></div>
+            <div style="margin-top:8px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:#7a9a8a;" data-t="t.st4">Sunlight</div>
+          </div>
+          <div>
+            <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:500;font-size:clamp(26px,3vw,44px);line-height:1;color:#eef3ee;display:flex;align-items:baseline;gap:3px;"><span data-count data-count-to="235">235</span><span style="font-family:'Hanken Grotesk','Noto Sans',sans-serif;font-size:.4em;font-weight:500;color:#f27cb2;">d</span></div>
+            <div style="margin-top:8px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:#7a9a8a;" data-t="t.st5">Growing window</div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:13px;">
+          <div style="display:flex;flex-direction:column;gap:7px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;color:#c4d1c8;letter-spacing:.04em;">
+            <span style="display:flex;align-items:center;gap:9px;justify-content:flex-end;"><span data-t="t.lg1">Yunnan 云南</span> <i style="width:22px;height:0;flex:none;border-top:2.5px solid #57C07C;box-shadow:0 0 6px rgba(87,192,124,.85);"></i></span>
+            <span style="display:flex;align-items:center;gap:9px;justify-content:flex-end;"><span data-t="t.lg2">Bordering regions 毗邻地区</span> <i style="width:22px;height:0;flex:none;border-top:1.5px solid #7a9a8a;"></i></span>
+            <span style="display:flex;align-items:center;gap:9px;justify-content:flex-end;"><span data-t="t.lg3">Growing bases 种植基地</span> <i style="width:9px;height:9px;border-radius:50%;background:#f27cb2;border:1.5px solid #ffffff;flex:none;box-sizing:border-box;"></i></span>
+          </div>
+          <button data-veilbtn aria-pressed="false" style="cursor:pointer;border:1px solid rgba(166,199,182,.4);background:rgba(10,22,17,.5);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#eef3ee;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;padding:10px 16px;border-radius:999px;transition:border-color .25s ease,color .25s ease;display:flex;align-items:center;gap:9px;" style-hover="border-color:#f27cb2;color:#ff9fcb;">
+            <span data-veildot style="width:7px;height:7px;border-radius:50%;flex:none;background:#f27cb2;box-shadow:0 0 7px #f27cb2;transition:background .25s ease,box-shadow .25s ease;"></span>
+            <span data-veillbl>Reveal full photo</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+    <svg viewBox="-150 -130 1900 1480" preserveAspectRatio="xMidYMid meet" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;z-index:7;pointer-events:none;">
+      <g data-mtf style="opacity:0;transition:opacity 1s ease .9s;"></g>
+    </svg>
+    <!-- production-base cards, relocated to the open area east of the province; leader lines link them to their pins -->
+    <div data-pinlayer aria-hidden="true" style="position:absolute;inset:0;z-index:8;pointer-events:none;">
+      <svg data-leaders width="100%" height="100%" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:0;"></svg>
+      <div data-pincard="kunming" style="position:absolute;left:0;top:0;opacity:0;transition:opacity .9s ease 1.3s;width:clamp(296px,29vw,460px);z-index:1;">
+        <div style="border-radius:20px;overflow:hidden;background:rgba(7,16,11,.74);border:1px solid rgba(166,199,182,.42);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 24px 58px rgba(0,0,0,.5);">
+          <div style="position:relative;">
+            <img src="images/web/kunming-hq.jpg" alt="Kunming Tong Yi headquarters, Songming" style="width:100%;aspect-ratio:16/10;object-fit:cover;object-position:center 42%;display:block;"/>
+            <span style="position:absolute;left:14px;top:13px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:#eef3ee;background:rgba(7,16,11,.5);padding:4px 12px;border-radius:999px;backdrop-filter:blur(4px);" data-t="map.hq">HQ</span>
+          </div>
+          <div style="padding:13px 20px 16px;border-top:1px solid rgba(166,199,182,.22);">
+            <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(17px,1.35vw,21px);color:#eef3ee;line-height:1.2;" data-t="map.kunming.name">Kunming · Songming HQ</div>
+            <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:13px;color:#a6c7b6;margin-top:4px;" data-t="map.kunming.sub">3 growing bases · flask to bloom</div>
+            <div style="font-family:'Hanken Grotesk','Noto Sans',sans-serif;font-size:11.5px;letter-spacing:.05em;color:#7fa892;margin-top:5px;">25.04° N · 102.72° E · 1,910 m</div>
+          </div>
+        </div>
+      </div>
+      <div data-pincard="wenshan" style="position:absolute;left:0;top:0;opacity:0;transition:opacity .9s ease 1.5s;width:clamp(296px,29vw,460px);z-index:1;">
+        <div style="border-radius:20px;overflow:hidden;background:rgba(7,16,11,.74);border:1px solid rgba(166,199,182,.42);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 24px 58px rgba(0,0,0,.5);">
+          <div style="position:relative;">
+            <img src="images/web/wenshan-aerial-1.jpg" alt="Aerial view of the Wenshan greenhouse complex" style="width:100%;aspect-ratio:16/10;object-fit:cover;object-position:center 50%;display:block;"/>
+            <span style="position:absolute;left:14px;top:13px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:#eef3ee;background:rgba(7,16,11,.5);padding:4px 12px;border-radius:999px;backdrop-filter:blur(4px);" data-t="map.base">Base</span>
+          </div>
+          <div style="padding:13px 20px 16px;border-top:1px solid rgba(166,199,182,.22);">
+            <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(17px,1.35vw,21px);color:#eef3ee;line-height:1.2;" data-t="map.wenshan.name">Wenshan base</div>
+            <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:13px;color:#a6c7b6;margin-top:4px;" data-t="map.wenshan.sub">Seedling nursery</div>
+            <div style="font-family:'Hanken Grotesk','Noto Sans',sans-serif;font-size:11.5px;letter-spacing:.05em;color:#7fa892;margin-top:5px;">23.37° N · 104.24° E · 1,270 m</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 01 OUR STORY -->
+  <section id="story" data-screen-label="01 Our story" style="position:relative;overflow:clip;background-color:#F3EEE4;background-image:radial-gradient(circle at 88% 6%,rgba(178,58,118,.07),transparent 40%);padding:clamp(70px,9vw,124px) 0 clamp(56px,7vw,96px);">
+    <div data-fabric aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;z-index:0;"></div>
+    
+    <img src="images/blooms/bloom-08.png" alt="" aria-hidden="true" style="position:absolute;right:-5%;top:3%;width:clamp(200px,20vw,360px);opacity:.13;transform:rotate(16deg);pointer-events:none;filter:saturate(.85);z-index:0;"/>
+    <img src="images/blooms/bloom-05.png" alt="" aria-hidden="true" style="position:absolute;left:-4%;top:30%;width:clamp(170px,16vw,300px);opacity:.12;transform:rotate(-14deg);pointer-events:none;filter:saturate(.85);z-index:0;"/>
+    <img src="images/blooms/bloom-12.png" alt="" aria-hidden="true" style="position:absolute;right:2%;top:62%;width:clamp(150px,14vw,260px);opacity:.12;transform:rotate(24deg) scaleX(-1);pointer-events:none;filter:saturate(.85);z-index:0;"/>
+    <div style="position:relative;z-index:1;max-width:1300px;margin:0 auto;padding:0 clamp(18px,4vw,44px);">
+      <div data-reveal style="opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s ease;">
+        <div style="display:flex;align-items:center;gap:13px;">
+          <span style="display:block;height:2px;width:56px;border-radius:999px;background:linear-gradient(90deg,#4C8C57,#C6952F 55%,#D48CB0);opacity:.85;"></span>
+          <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#2F5D3A;" data-t="st.eyebrow">01 / Our story · 关于我们</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:clamp(30px,5vw,80px);margin-top:clamp(26px,4vw,42px);">
+        <h2 data-reveal style="opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s ease;flex:1.5 1 440px;min-width:300px;font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:460;font-size:clamp(28px,3.9vw,49px);line-height:1.16;letter-spacing:-.006em;color:#1A1E17;margin:0;text-wrap:pretty;" data-t-html="st.h2">
+          A Taiwanese-founded orchid house in the Yunnan highlands, breeding and raising Phalaenopsis from tissue-culture flask to blooming plant — <span style="color:#2F5D3A;font-style:italic;">all in one place.</span>
+        </h2>
+        <div data-reveal style="opacity:0;transform:translateY(26px);transition:opacity .9s ease,transform .9s ease;flex:1 1 300px;min-width:280px;display:flex;flex-direction:column;justify-content:flex-end;gap:18px;">
+          <p style="font-size:15.5px;line-height:1.66;color:#55564A;margin:0;" data-t="st.p1">Since 2000, Kunming Tong Yi Biotechnology has specialised in Phalaenopsis breeding, superior-variety propagation, seedlings and industrial-scale flowering plants — from our bases at the Xiaojie Flower Park in Songming County, Yunnan.</p>
+          <p style="font-size:15.5px;line-height:1.66;color:#55564A;margin:0;" data-t="st.p2">Since 2020, customs data has ranked us China's largest exporter of flowering Phalaenopsis, holding more than half the national export share — with a portfolio of invention patents and New Plant Variety rights behind every plant.</p>
+        </div>
+      </div>
+
+      <div data-reveal style="opacity:0;transform:translateY(26px);transition:opacity 1s ease,transform 1s ease;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;margin-top:clamp(44px,6vw,68px);background:rgba(26,30,23,.14);border:1px solid rgba(26,30,23,.14);border-radius:18px;overflow:hidden;">
+        <div style="background:#F3EEE4;padding:22px 20px;"><div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:700;font-size:clamp(30px,3.4vw,44px);color:#1A1E17;line-height:1;">Nº 1</div><div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;color:#8A8474;margin-top:9px;line-height:1.4;" data-t-html="st.b1">exporter of flowering<br>Phalaenopsis in China</div></div>
+        <div style="background:#F3EEE4;padding:22px 20px;"><div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:700;font-size:clamp(30px,3.4vw,44px);color:#1A1E17;line-height:1;"><span data-count data-count-to="50" data-count-suffix="%+">0</span></div><div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;color:#8A8474;margin-top:9px;line-height:1.4;" data-t-html="st.b2">national export<br>share, since 2020</div></div>
+        <div style="background:#F3EEE4;padding:22px 20px;"><div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:700;font-size:clamp(30px,3.4vw,44px);color:#1A1E17;line-height:1;"><span data-count data-count-to="24" data-count-suffix="">0</span></div><div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;color:#8A8474;margin-top:9px;line-height:1.4;" data-t-html="st.b3">years of breeding<br>&amp; cultivation</div></div>
+        <div style="background:#F3EEE4;padding:22px 20px;"><div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:700;font-size:clamp(30px,3.4vw,44px);color:#1A1E17;line-height:1;"><span data-count data-count-to="10" data-count-suffix="+">0</span></div><div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;color:#8A8474;margin-top:9px;line-height:1.4;" data-t-html="st.b4">export markets across<br>Asia &amp; the Gulf</div></div>
+      </div>
+
+      <figure data-reveal data-clip style="opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s ease;margin:clamp(20px,3vw,26px) 0 0;">
+        <div style="position:relative;overflow:hidden;border-radius:28px;aspect-ratio:16/7;background:#e6dfd1;box-shadow:0 26px 60px rgba(26,30,23,.16);"><img src="images/team.jpg" alt="The Kunming Tong Yi team gathered in front of the Songming headquarters" style="width:100%;height:100%;object-fit:cover;object-position:center 62%;clip-path:inset(0 100% 0 0);transition:clip-path 1.25s cubic-bezier(.7,0,.2,1);"/></div>
+        <figcaption style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;color:#8A8474;margin-top:10px;" data-t="st.f0">FIG. 01 — The Kunming Tong Yi family, Spring Festival at Songming HQ</figcaption>
+      </figure>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:clamp(14px,2vw,22px);margin-top:clamp(20px,3vw,26px);">
+        <figure data-reveal data-clip style="opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s ease;margin:0;">
+          <div style="position:relative;overflow:hidden;border-radius:16px;aspect-ratio:4/3;background:#e6dfd1;"><img src="images/greenhouse-2.jpg" alt="Automated European-certified greenhouse" style="width:100%;height:100%;object-fit:cover;clip-path:inset(0 100% 0 0);transition:clip-path 1.1s cubic-bezier(.7,0,.2,1);"/></div>
+          <figcaption style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;color:#8A8474;margin-top:10px;" data-t="st.f1">FIG. 02 — Automated growing house, Songming</figcaption>
+        </figure>
+        <figure data-reveal data-clip style="opacity:0;transform:translateY(26px);transition:opacity .9s ease,transform .9s ease;margin:0;">
+          <div style="position:relative;overflow:hidden;border-radius:16px;aspect-ratio:4/3;background:#e6dfd1;"><img src="images/rack-multicolor.jpg" alt="A cart of mixed orchid varieties" style="width:100%;height:100%;object-fit:cover;clip-path:inset(0 100% 0 0);transition:clip-path 1.1s cubic-bezier(.7,0,.2,1);"/></div>
+          <figcaption style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;color:#8A8474;margin-top:10px;" data-t="st.f2">FIG. 03 — Mixed varieties, fresh off the bench</figcaption>
+        </figure>
+        <figure data-reveal data-clip style="opacity:0;transform:translateY(26px);transition:opacity 1s ease,transform 1s ease;margin:0;">
+          <div style="position:relative;overflow:hidden;border-radius:16px;aspect-ratio:4/3;background:#e6dfd1;"><img src="images/logistics.jpg" alt="Reefer container loading for export" style="width:100%;height:100%;object-fit:cover;clip-path:inset(0 100% 0 0);transition:clip-path 1.1s cubic-bezier(.7,0,.2,1);"/></div>
+          <figcaption style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;color:#8A8474;margin-top:10px;" data-t="st.f3">FIG. 04 — Reefer loading, Kunming HQ</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 HOW WE GROW -->
+  <section id="grow" data-screen-label="02 How we grow" style="background:linear-gradient(180deg,#E9EEE0 0%,#EEF0E2 26%,#F4F0E2 52%,#F6EFE3 74%,#F5EAE4 100%);position:relative;overflow:clip;padding:clamp(70px,9vw,124px) 0;border-top:1px solid rgba(26,30,23,.08);">
+    <div data-fabric aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;z-index:0;"></div>
+    
+    <div aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(560px 420px at 82% 10%,rgba(76,140,87,.10),transparent 70%),radial-gradient(620px 460px at 10% 36%,rgba(138,134,54,.10),transparent 70%),radial-gradient(620px 460px at 88% 62%,rgba(198,149,47,.11),transparent 70%),radial-gradient(660px 500px at 12% 88%,rgba(212,140,176,.13),transparent 70%);"></div>
+    <div style="max-width:1300px;margin:0 auto;padding:0 clamp(18px,4vw,44px);">
+      <div data-reveal style="opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s ease;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:18px;">
+        <div>
+          <div style="display:flex;align-items:center;gap:13px;">
+            <span style="display:block;height:2px;width:56px;border-radius:999px;background:linear-gradient(90deg,#4C8C57,#C6952F 55%,#D48CB0);opacity:.85;"></span>
+            <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#2F5D3A;" data-t="g.eyebrow">02 / How we grow · 如何种植</span>
+          </div>
+          <h2 style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:500;font-size:clamp(32px,4.4vw,56px);line-height:1.08;letter-spacing:-.008em;margin:18px 0 0;color:#1A1E17;" data-t-html="g.h2">Eighteen months, <span style="color:#2F5D3A;font-style:italic;">four seasons of care.</span></h2>
+        </div>
+        <p style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:13px;line-height:1.7;color:#8A8474;margin:0;max-width:280px;" data-t="g.note">One plant's whole journey, laid out below — follow the stem from flask to bloom. 从组培瓶到开花，顺着茎读下去。</p>
+      </div>
+
+      <!-- the growing season, laid out along one stem -->
+      <div data-vinewrap style="position:relative;margin-top:clamp(36px,5vw,64px);">
+        <img src="images/blooms/bloom-19.png" alt="" aria-hidden="true" style="position:absolute;right:-6%;top:2%;width:clamp(260px,30vw,520px);opacity:.14;transform:rotate(14deg);pointer-events:none;filter:saturate(.85);"/>
+        <img src="images/blooms/bloom-13.png" alt="" aria-hidden="true" style="position:absolute;left:-4%;top:6%;width:clamp(170px,17vw,300px);opacity:.12;transform:rotate(-18deg);pointer-events:none;filter:saturate(.85);"/>
+        <img src="images/blooms/bloom-16.png" alt="" aria-hidden="true" style="position:absolute;right:2%;top:37%;width:clamp(150px,15vw,270px);opacity:.13;transform:rotate(22deg) scaleX(-1);pointer-events:none;filter:saturate(.9);"/>
+        <img src="images/blooms/bloom-10.png" alt="" aria-hidden="true" style="position:absolute;left:1%;top:88%;width:clamp(160px,16vw,290px);opacity:.12;transform:rotate(10deg);pointer-events:none;filter:saturate(.85);"/>
+        <img src="images/blooms/bloom-03.png" alt="" aria-hidden="true" style="position:absolute;left:-7%;top:41%;width:clamp(240px,28vw,480px);opacity:.15;transform:rotate(-11deg);pointer-events:none;filter:saturate(.9);"/>
+        <img src="images/blooms/bloom-18.png" alt="" aria-hidden="true" style="position:absolute;right:-5%;top:66%;width:clamp(220px,24vw,420px);opacity:.13;transform:rotate(9deg);pointer-events:none;filter:saturate(.85);"/>
+        <svg data-vinesvg aria-hidden="true" style="position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;">
+          <defs><mask id="kmtyVineMask" maskUnits="userSpaceOnUse"><path data-vinemask fill="none" stroke="#fff" stroke-width="15" stroke-linecap="round"></path></mask></defs>
+          <path data-vinefill fill="#2F5D3A" opacity=".58" mask="url(#kmtyVineMask)"></path>
+        </svg>
+        <div data-vinestage style="position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:clamp(20px,3.5vw,54px);padding:clamp(10px,1.5vw,18px) 0;">
+          <div data-reveal data-clip style="opacity:0;transform:translateY(26px);transition:opacity .9s ease,transform .9s ease;flex:1.05 1 360px;min-width:290px;">
+            <div style="position:relative;aspect-ratio:5/4;display:flex;align-items:center;justify-content:center;"><img src="images/bottles-cut.png" alt="Phalaenopsis seedlings growing inside sealed transparent culture bottles" loading="lazy" style="width:92%;height:92%;object-fit:contain;filter:drop-shadow(0 22px 34px rgba(26,30,23,.22));clip-path:inset(0 100% 0 0);transition:clip-path 1.1s cubic-bezier(.7,0,.2,1);"/></div>
+          </div>
+          <div data-reveal style="opacity:0;transform:translateY(26px);transition:opacity .9s ease .1s,transform .9s ease .1s;flex:1 1 340px;min-width:280px;">
+            <div style="display:inline-flex;align-items:center;gap:9px;padding:7px 15px;border-radius:999px;background:rgba(47,93,58,.1);font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11.5px;font-weight:500;color:#2F5D3A;" data-t="g.s1.chip">Months 0–5 · 第 0–5 月</div>
+            <div style="display:flex;align-items:baseline;gap:16px;margin-top:16px;">
+              <span style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:400;font-style:italic;font-size:52px;color:#2F5D3A;line-height:1;" data-t="g.s1.word">one</span>
+              <h3 style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(22px,2.4vw,28px);margin:0;color:#1A1E17;" data-t="g.s1.title">Flask &amp; seedling · 组培与种苗</h3>
+            </div>
+            <p style="font-size:15px;line-height:1.66;color:#55564A;margin:13px 0 0;max-width:440px;" data-t="g.s1.body">Only healthy, virus-free specimens enter propagation — every mother plant is screened with PCR and ELISA before a single flask is poured.</p>
+            <div style="margin-top:14px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;color:#8A8474;" data-t="g.s1.fact">Lab-certified virus-free stock</div>
+            <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-style:italic;font-size:15px;line-height:1.5;color:#7c8271;margin-top:10px;max-width:440px;" data-t="g.s1.note">— sown in glass, in sterile air: a whole greenhouse inside a bottle.</div>
+          </div>
+        </div>
+        <div data-vinestage style="position:relative;display:flex;flex-wrap:wrap-reverse;flex-direction:row-reverse;align-items:center;gap:clamp(20px,3.5vw,54px);padding:clamp(10px,1.5vw,18px) 0;">
+          <div data-reveal data-clip style="opacity:0;transform:translateY(26px);transition:opacity .9s ease,transform .9s ease;flex:1.05 1 360px;min-width:290px;">
+            <div style="position:relative;overflow:hidden;border-radius:170px 170px 26px 26px;aspect-ratio:5/4;box-shadow:0 24px 56px rgba(26,30,23,.14);background:#dbe0d0;"><img src="images/greenhouse-veg.jpg" alt="Vegetative growth benches under climate control" loading="lazy" style="width:100%;height:100%;object-fit:cover;clip-path:inset(0 0 0 100%);transition:clip-path 1.1s cubic-bezier(.7,0,.2,1);"/></div>
+          </div>
+          <div data-reveal style="opacity:0;transform:translateY(26px);transition:opacity .9s ease .1s,transform .9s ease .1s;flex:1 1 340px;min-width:280px;display:flex;flex-direction:column;align-items:flex-end;text-align:right;">
+            <div style="display:inline-flex;align-items:center;gap:9px;padding:7px 15px;border-radius:999px;background:rgba(138,134,54,.13);font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11.5px;font-weight:500;color:#6f6b2a;" data-t="g.s2.chip">Months 5–11 · 第 5–11 月</div>
+            <div style="display:flex;align-items:baseline;gap:16px;margin-top:16px;justify-content:flex-end;flex-wrap:wrap;">
+              <span style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:400;font-style:italic;font-size:52px;color:#8A8636;line-height:1;" data-t="g.s2.word">two</span>
+              <h3 style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(22px,2.4vw,28px);margin:0;color:#1A1E17;" data-t="g.s2.title">Vegetative growth · 营养生长</h3>
+            </div>
+            <p style="font-size:15px;line-height:1.66;color:#55564A;margin:13px 0 0;max-width:440px;" data-t="g.s2.body">Seedlings spend at least four to six climate-controlled months per growth interval, with light, humidity and irrigation tuned by sensor data around the clock.</p>
+            <div style="margin-top:14px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;color:#8A8474;" data-t="g.s2.fact">4–6 months per interval, automated</div>
+            <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-style:italic;font-size:15px;line-height:1.5;color:#7c8271;margin-top:10px;max-width:440px;" data-t="g.s2.note">— warm days and misted dawns; the leaves thicken season by season.</div>
+          </div>
+        </div>
+        <div data-vinestage style="position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:clamp(20px,3.5vw,54px);padding:clamp(10px,1.5vw,18px) 0;">
+          <div data-reveal data-clip style="opacity:0;transform:translateY(26px);transition:opacity .9s ease,transform .9s ease;flex:1.05 1 360px;min-width:290px;">
+            <div style="position:relative;overflow:hidden;border-radius:170px 170px 26px 26px;aspect-ratio:5/4;box-shadow:0 24px 56px rgba(26,30,23,.14);background:#dbe0d0;"><img src="images/spiking.jpg" alt="Uniform spikes rising across the cold-room benches" loading="lazy" style="width:100%;height:100%;object-fit:cover;clip-path:inset(0 100% 0 0);transition:clip-path 1.1s cubic-bezier(.7,0,.2,1);"/></div>
+          </div>
+          <div data-reveal style="opacity:0;transform:translateY(26px);transition:opacity .9s ease .1s,transform .9s ease .1s;flex:1 1 340px;min-width:280px;">
+            <div style="display:inline-flex;align-items:center;gap:9px;padding:7px 15px;border-radius:999px;background:rgba(198,149,47,.14);font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11.5px;font-weight:500;color:#8a6420;" data-t="g.s3.chip">Months 11–16 · 第 11–16 月</div>
+            <div style="display:flex;align-items:baseline;gap:16px;margin-top:16px;">
+              <span style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:400;font-style:italic;font-size:52px;color:#C6952F;line-height:1;" data-t="g.s3.word">three</span>
+              <h3 style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(22px,2.4vw,28px);margin:0;color:#1A1E17;" data-t="g.s3.title">Spike &amp; cold room · 抽梗与低温</h3>
+            </div>
+            <p style="font-size:15px;line-height:1.66;color:#55564A;margin:13px 0 0;max-width:440px;" data-t="g.s3.body">A five-to-six-month cold treatment triggers strong, uniform spikes — the long Yunnan autumn does naturally what other growers force.</p>
+            <div style="margin-top:14px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;color:#8A8474;" data-t="g.s3.fact">5–6 month cold treatment</div>
+            <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-style:italic;font-size:15px;line-height:1.5;color:#7c8271;margin-top:10px;max-width:440px;" data-t="g.s3.note">— the mountain autumn is our cold room, with the doors left open.</div>
+          </div>
+        </div>
+        <div data-vinestage style="position:relative;display:flex;flex-wrap:wrap-reverse;flex-direction:row-reverse;align-items:center;gap:clamp(20px,3.5vw,54px);padding:clamp(10px,1.5vw,18px) 0;">
+          <div data-reveal data-clip style="opacity:0;transform:translateY(26px);transition:opacity .9s ease,transform .9s ease;flex:1.05 1 360px;min-width:290px;">
+            <div style="position:relative;aspect-ratio:5/4;display:flex;align-items:center;justify-content:center;"><video data-bgvideo autoplay muted loop playsinline preload="auto" aria-label="Time-lapse of a Phalaenopsis bloom opening on the page itself" style="height:104%;max-width:100%;object-fit:contain;display:block;filter:drop-shadow(0 24px 38px rgba(26,30,23,.20));"><source src="images/web/bloom-alpha.webm" type="video/webm"><source src="images/web/bloom-timelapse.mp4" type="video/mp4"></video></div>
+          </div>
+          <div data-reveal style="opacity:0;transform:translateY(26px);transition:opacity .9s ease .1s,transform .9s ease .1s;flex:1 1 340px;min-width:280px;display:flex;flex-direction:column;align-items:flex-end;text-align:right;">
+            <div style="display:inline-flex;align-items:center;gap:9px;padding:7px 15px;border-radius:999px;background:rgba(212,140,176,.16);font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11.5px;font-weight:500;color:#a4487c;" data-t="g.s4.chip">Months 16–18 · 第 16–18 月</div>
+            <div style="display:flex;align-items:baseline;gap:16px;margin-top:16px;justify-content:flex-end;flex-wrap:wrap;">
+              <span style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:400;font-style:italic;font-size:52px;color:#B0552F;line-height:1;" data-t="g.s4.word">four</span>
+              <h3 style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(22px,2.4vw,28px);margin:0;color:#1A1E17;" data-t="g.s4.title">Bloom &amp; grade · 开花与分级</h3>
+            </div>
+            <p style="font-size:15px;line-height:1.66;color:#55564A;margin:13px 0 0;max-width:440px;" data-t="g.s4.body">Plants bloom on the bench and are hand-graded — flower count, spike length, stem, leaf and root health — before a single one is boxed.</p>
+            <div style="margin-top:14px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;color:#8A8474;" data-t="g.s4.fact">Graded by five criteria</div>
+            <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-style:italic;font-size:15px;line-height:1.5;color:#7c8271;margin-top:10px;max-width:440px;" data-t="g.s4.note">— five checks by hand before any plant earns its box.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GRADE STANDARD -->
+      <div data-reveal style="opacity:0;transform:translateY(26px);transition:opacity 1s ease,transform 1s ease;margin-top:clamp(46px,6vw,82px);background:#FBF9F3;border:1px solid rgba(26,30,23,.14);border-radius:24px;padding:clamp(22px,3.5vw,42px);">
+        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px;">
+          <div>
+            <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#B0552F;" data-t="gr.eyebrow">Export quality standard · 蝴蝶兰分级标准</span>
+            <h3 style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(24px,3.4vw,40px);margin:9px 0 0;color:#1A1E17;letter-spacing:-.02em;" data-t="gr.h3">Graded like gemstones.</h3>
+          </div>
+          <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;color:#8A8474;" data-t="gr.side">All four grades, side by side · 四个等级一览</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:clamp(12px,1.8vw,20px);margin-top:clamp(22px,3.5vw,38px);">
+          <div style="background:rgba(47,93,58,.07);border:1.5px solid rgba(47,93,58,.55);border-radius:22px;padding:20px 20px 18px;">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;"><span style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:22px;color:#2F5D3A;" data-t-html="gr.c1.name">Special</span><span style="font-family:'Hanken Grotesk','Noto Sans',sans-serif;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#2F5D3A;" data-t="gr.c1.badge">export favourite</span></div>
+            <div style="height:1px;background:rgba(47,93,58,.25);margin:13px 0 12px;"></div>
+            <div style="display:flex;flex-direction:column;gap:9px;font-size:13.5px;line-height:1.5;color:#3d4438;">
+              <div><b style="font-family:'Fraunces','Playfair Display',serif;font-weight:600;font-size:19px;color:#1A1E17;">10+</b> <span data-t="gr.row.f">flowers &amp; buds · 花朵</span></div>
+              <div><b style="font-family:'Fraunces','Playfair Display',serif;font-weight:600;font-size:19px;color:#1A1E17;">≥35cm</b> <span data-t="gr.row.s">spike · 花梗</span></div>
+              <div data-t="gr.stem.a">Stem intact, never pruned</div>
+              <div data-t="gr.leaf.a">Leaf without spots, cracks or cuts</div>
+              <div data-t="gr.roots.a">Roots healthy — no rot</div>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid rgba(26,30,23,.12);border-radius:22px;padding:20px 20px 18px;">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;"><span style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:22px;color:#6f6b2a;" data-t-html="gr.c2.name">A 级 <i style="font-style:italic;font-weight:400;">Grade A</i></span></div>
+            <div style="height:1px;background:rgba(26,30,23,.1);margin:13px 0 12px;"></div>
+            <div style="display:flex;flex-direction:column;gap:9px;font-size:13.5px;line-height:1.5;color:#55564A;">
+              <div><b style="font-family:'Fraunces','Playfair Display',serif;font-weight:600;font-size:19px;color:#1A1E17;">8–9</b> <span data-t="gr.row.f">flowers &amp; buds · 花朵</span></div>
+              <div><b style="font-family:'Fraunces','Playfair Display',serif;font-weight:600;font-size:19px;color:#1A1E17;">≥30cm</b> <span data-t="gr.row.s">spike · 花梗</span></div>
+              <div data-t="gr.stem.a">Stem intact, never pruned</div>
+              <div data-t="gr.leaf.a">Leaf without spots, cracks or cuts</div>
+              <div data-t="gr.roots.a">Roots healthy — no rot</div>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid rgba(26,30,23,.12);border-radius:22px;padding:20px 20px 18px;">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;"><span style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:22px;color:#8a6420;" data-t-html="gr.c3.name">B 级 <i style="font-style:italic;font-weight:400;">Grade B</i></span></div>
+            <div style="height:1px;background:rgba(26,30,23,.1);margin:13px 0 12px;"></div>
+            <div style="display:flex;flex-direction:column;gap:9px;font-size:13.5px;line-height:1.5;color:#55564A;">
+              <div><b style="font-family:'Fraunces','Playfair Display',serif;font-weight:600;font-size:19px;color:#1A1E17;">7+</b> <span data-t="gr.row.f">flowers &amp; buds · 花朵</span></div>
+              <div><b style="font-family:'Fraunces','Playfair Display',serif;font-weight:600;font-size:19px;color:#1A1E17;">≥25cm</b> <span data-t="gr.row.s">spike · 花梗</span></div>
+              <div data-t="gr.c3.stem">Stem clean; pruning allowed</div>
+              <div data-t="gr.c3.leaf">Minor leaf wounds allowed</div>
+              <div data-t="gr.c3.roots">1–2 roots degraded, rest healthy</div>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid rgba(26,30,23,.12);border-radius:22px;padding:20px 20px 18px;">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;"><span style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:22px;color:#B0552F;" data-t-html="gr.c4.name">C 级 <i style="font-style:italic;font-weight:400;">Grade C</i></span></div>
+            <div style="height:1px;background:rgba(26,30,23,.1);margin:13px 0 12px;"></div>
+            <div style="display:flex;flex-direction:column;gap:9px;font-size:13.5px;line-height:1.5;color:#55564A;">
+              <div><b style="font-family:'Fraunces','Playfair Display',serif;font-weight:600;font-size:19px;color:#1A1E17;">6+</b> <span data-t="gr.row.f">flowers &amp; buds · 花朵</span></div>
+              <div><b style="font-family:'Fraunces','Playfair Display',serif;font-weight:600;font-size:19px;color:#1A1E17;">≥20cm</b> <span data-t="gr.row.s">spike · 花梗</span></div>
+              <div data-t="gr.c4.stem">Stem spots or scars allowed</div>
+              <div data-t="gr.c4.leaf">Leaf spots or cracks allowed</div>
+              <div data-t="gr.c4.roots">Few active roots</div>
+            </div>
+          </div>
+        </div>
+        <p style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11.5px;line-height:1.7;color:#8A8474;margin:24px 0 0;max-width:660px;" data-t-html="gr.note">Grading runs top-down — a plant must meet <em>every</em> criterion of a grade to earn it. Nine flowers on a pruned spike is a B, not an A. Your invoice always states exactly what's in the box.</p>
+      </div>
+
+      <div data-reveal style="opacity:0;transform:translateY(18px);transition:opacity 1s ease,transform 1s ease;display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:30px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11.5px;color:#55564A;justify-content:center;">
+        <span>25°05′N, 102°40′E</span><span style="color:#B0552F;">/</span><span data-t="g.co2">≈1,900 m elevation</span><span style="color:#B0552F;">/</span><span data-t="g.co3">17°C average</span><span style="color:#B0552F;">/</span><span data-t="g.co4">2,446 sun-hours/yr</span><span style="color:#B0552F;">/</span><span>ISO 9001</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PANORAMA -->
+  <section data-screen-label="Panorama" style="position:relative;overflow:hidden;background:#12100c;">
+    <img src="images/panorama.jpg" alt="A field of white and lavender orchids in bloom" style="width:100%;height:clamp(200px,30vw,380px);object-fit:cover;display:block;"/>
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(18,16,12,.14),rgba(18,16,12,0) 40%,rgba(18,16,12,.36) 100%);"></div>
+    <div style="position:absolute;left:0;right:0;bottom:16px;text-align:center;">
+      <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:clamp(11px,1.4vw,13px);letter-spacing:.08em;color:rgba(247,243,234,.9);text-shadow:0 2px 12px rgba(18,16,12,.7);" data-t="pano.lb">ONE BENCH OF MANY — SONGMING, FEBRUARY</span>
+    </div>
+  </section>
+
+  <!-- 03 PRODUCTS -->
+  <section id="products" data-screen-label="03 Products" style="position:relative;overflow:clip;background-color:#FBF8F1;background-image:radial-gradient(circle at 8% 94%,rgba(47,93,58,.06),transparent 42%);padding:clamp(70px,9vw,124px) 0;">
+    <div data-fabric aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;z-index:0;"></div>
+    
+    <img src="images/blooms/bloom-07.png" alt="" aria-hidden="true" style="position:absolute;right:16%;top:7%;width:clamp(180px,18vw,320px);opacity:.13;transform:rotate(18deg);pointer-events:none;filter:saturate(.85);z-index:0;"/>
+    <img src="images/blooms/bloom-15.png" alt="" aria-hidden="true" style="position:absolute;left:13%;top:50%;width:clamp(190px,18vw,330px);opacity:.13;transform:rotate(-12deg);pointer-events:none;filter:saturate(.85);z-index:0;"/>
+    <img src="images/blooms/bloom-02.png" alt="" aria-hidden="true" style="position:absolute;right:27%;top:64%;width:clamp(140px,13vw,240px);opacity:.10;transform:rotate(-22deg) scaleX(-1);pointer-events:none;filter:saturate(.85);z-index:0;"/>
+    <div style="position:relative;z-index:1;max-width:1300px;margin:0 auto;padding:0 clamp(18px,4vw,44px);">
+      <div data-reveal style="opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s ease;">
+        <div style="display:flex;align-items:center;gap:13px;">
+          <span style="display:block;height:2px;width:56px;border-radius:999px;background:linear-gradient(90deg,#4C8C57,#C6952F 55%,#D48CB0);opacity:.85;"></span>
+          <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#2F5D3A;" data-t="p.eyebrow">03 / Products · 产品系列</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:18px;margin-top:18px;">
+          <h2 style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:500;font-size:clamp(34px,4.8vw,64px);line-height:1.06;letter-spacing:-.008em;margin:0;color:#1A1E17;" data-t="p.h2">All your purchasing needs met.</h2>
+          <p style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;line-height:1.7;color:#8A8474;margin:0;max-width:260px;" data-t="p.note">One nursery, the whole life-cycle — from flask-grown seedling to fresh-cut stem.</p>
+        </div>
+      </div>
+
+      <!-- 3 category cards -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:clamp(16px,2vw,24px);margin-top:clamp(34px,4vw,52px);">
+        <article data-reveal data-tilt style="opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s ease;background:#fff;border:1px solid rgba(26,30,23,.1);border-radius:24px;overflow:hidden;display:flex;flex-direction:column;">
+          <div style="position:relative;aspect-ratio:5/4;overflow:hidden;background:#ffffff;">
+            <img src="images/seedling-white.png" alt="A virus-free Phalaenopsis seedling in a clear nursery pot" style="width:100%;height:100%;object-fit:contain;padding:5% 5% 0;transition:transform 1s cubic-bezier(.2,.7,.2,1);" style-hover="transform:scale(1.05);"/>
+            <span style="position:absolute;top:12px;left:12px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;letter-spacing:.1em;padding:5px 11px;border-radius:999px;background:rgba(251,249,243,.94);color:#1A1E17;" data-t="p.c1.tag">01 · Seedlings</span>
+          </div>
+          <div style="padding:22px 22px 24px;display:flex;flex-direction:column;flex:1;">
+            <h3 style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:700;font-size:26px;margin:0;color:#1A1E17;letter-spacing:-.01em;" data-t="p.c1.title">Seedlings</h3>
+            <p style="font-size:14.5px;line-height:1.58;color:#55564A;margin:10px 0 18px;flex:1;" data-t="p.c1.body">Virus-free young plants, propagated from PCR- and ELISA-screened stock and grown to your finishing schedule.</p>
+            <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#8A8474;padding-bottom:10px;border-bottom:1px solid rgba(26,30,23,.1);" data-t="p.slb">Available sizes</div>
+            <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;">
+              <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;padding:6px 11px;border-radius:999px;background:rgba(26,30,23,.05);color:#1A1E17;">1.7″</span>
+              <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;padding:6px 11px;border-radius:999px;background:rgba(26,30,23,.05);color:#1A1E17;">2.0″</span>
+              <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;padding:6px 11px;border-radius:999px;background:rgba(26,30,23,.05);color:#1A1E17;">2.5″</span>
+              <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;padding:6px 11px;border-radius:999px;background:rgba(26,30,23,.05);color:#1A1E17;">2.8″</span>
+              <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;padding:6px 11px;border-radius:999px;background:rgba(26,30,23,.05);color:#1A1E17;">3.5″</span>
+              <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;padding:6px 11px;border-radius:999px;background:rgba(26,30,23,.05);color:#1A1E17;" data-t="p.sz.spk28">2.8″ spiking</span>
+              <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;padding:6px 11px;border-radius:999px;background:rgba(26,30,23,.05);color:#1A1E17;" data-t="p.sz.spk30">3.0″ spiking</span>
+              <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;padding:6px 11px;border-radius:999px;background:rgba(26,30,23,.05);color:#1A1E17;" data-t="p.sz.spiking">3.5″ spiking</span>
+            </div>
+          </div>
+        </article>
+        <article data-reveal data-tilt style="opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s ease;background:#fff;border:1px solid rgba(26,30,23,.1);border-radius:24px;overflow:hidden;display:flex;flex-direction:column;">
+          <div style="position:relative;aspect-ratio:5/4;overflow:hidden;background:#ffffff;">
+            <img src="images/pot-roots.jpg" alt="Pot Flower — a blooming Phalaenopsis in a clear culture cup, healthy roots visible" style="width:100%;height:100%;object-fit:contain;padding:4% 4% 0;transition:transform 1s cubic-bezier(.2,.7,.2,1);" style-hover="transform:scale(1.05);"/>
+            <span style="position:absolute;top:12px;left:12px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;letter-spacing:.1em;padding:5px 11px;border-radius:999px;background:rgba(251,249,243,.94);color:#1A1E17;" data-t="p.c2.tag">02 · Pot flower</span>
+          </div>
+          <div style="padding:22px 22px 24px;display:flex;flex-direction:column;flex:1;">
+            <h3 style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:700;font-size:26px;margin:0;color:#1A1E17;letter-spacing:-.01em;" data-t="p.c2.title">Pot Flower</h3>
+            <p style="font-size:14.5px;line-height:1.58;color:#55564A;margin:10px 0 18px;flex:1;" data-t="p.c2.body">Finished, blooming plants — hand-graded Special to C and ready to retail or gift straight from the box.</p>
+            <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#8A8474;padding-bottom:10px;border-bottom:1px solid rgba(26,30,23,.1);" data-t="p.slb">Available sizes</div>
+            <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;">
+              <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;padding:6px 11px;border-radius:999px;background:rgba(26,30,23,.05);color:#1A1E17;" data-t="p.sz.flw28">2.8″ flowering</span>
+              <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;padding:6px 11px;border-radius:999px;background:rgba(26,30,23,.05);color:#1A1E17;" data-t="p.sz.flw30">3.0″ flowering</span>
+              <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;padding:6px 11px;border-radius:999px;background:rgba(26,30,23,.05);color:#1A1E17;" data-t="p.sz.flw35">3.5″ flowering</span>
+              <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;padding:6px 11px;border-radius:999px;background:rgba(26,30,23,.05);color:#1A1E17;" data-t="p.sz.flowering">3.8″ flowering</span>
+              <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;padding:6px 11px;border-radius:999px;background:rgba(26,30,23,.05);color:#1A1E17;" data-t="p.sz.large">Large flower</span>
+              <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;padding:6px 11px;border-radius:999px;background:rgba(26,30,23,.05);color:#1A1E17;" data-t="p.sz.small">Small flower</span>
+            </div>
+          </div>
+        </article>
+        <article data-reveal data-tilt style="opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s ease;background:#fff;border:1px solid rgba(26,30,23,.1);border-radius:24px;overflow:hidden;display:flex;flex-direction:column;">
+          <div style="position:relative;aspect-ratio:5/4;overflow:hidden;background:#e6dfd1;">
+            <img src="images/cut-flower.jpg" alt="Cut Flower" style="width:100%;height:100%;object-fit:cover;transition:transform 1s cubic-bezier(.2,.7,.2,1);" style-hover="transform:scale(1.05);"/>
+            <span style="position:absolute;top:12px;left:12px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;letter-spacing:.1em;padding:5px 11px;border-radius:999px;background:rgba(251,249,243,.94);color:#1A1E17;" data-t="p.c3.tag">03 · Cut flower</span>
+          </div>
+          <div style="padding:22px 22px 24px;display:flex;flex-direction:column;flex:1;">
+            <h3 style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:700;font-size:26px;margin:0;color:#1A1E17;letter-spacing:-.01em;" data-t="p.c3.title">Cut Flower</h3>
+            <p style="font-size:14.5px;line-height:1.58;color:#55564A;margin:10px 0 18px;flex:1;" data-t="p.c3.body">Fresh-cut spikes, sleeved in foam and packed cold for florists, events and wholesale arrangers.</p>
+            <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#8A8474;padding-bottom:10px;border-bottom:1px solid rgba(26,30,23,.1);" data-t="p.slb3">Per stem</div>
+            <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;">
+              <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;padding:6px 11px;border-radius:999px;background:rgba(26,30,23,.05);color:#1A1E17;" data-t="p.sz.stems">5–10 flowers / stem</span>
+            </div>
+          </div>
+        </article>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 03b THE COLLECTION -->
+  <section id="varieties" data-screen-label="The collection" style="position:relative;overflow:hidden;background:#141018;border-top:1px solid rgba(26,30,23,.1);">
+    <img src="images/rack-multicolor.jpg" aria-hidden="true" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(9px) brightness(.56) saturate(1.14);transform:scale(1.1);"/>
+    <div aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,15,24,.76),rgba(20,15,24,.52) 42%,rgba(20,15,24,.88));"></div>
+    <div style="position:relative;z-index:2;max-width:1300px;margin:0 auto;padding:clamp(58px,8vw,116px) clamp(18px,4vw,44px);">
+      <div data-reveal style="opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s ease;max-width:720px;">
+        <div style="display:flex;align-items:center;gap:13px;">
+          <span style="display:block;height:2px;width:56px;border-radius:999px;background:linear-gradient(90deg,#4C8C57,#C6952F 55%,#D48CB0);opacity:.85;"></span>
+          <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:rgba(243,238,228,.82);" data-t="v.eyebrow">The collection · 花色图鉴</span>
+        </div>
+        <h2 style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:500;font-size:clamp(32px,5vw,62px);line-height:1.06;letter-spacing:-.008em;margin:18px 0 0;color:#F7F3EA;" data-t-html="v.h2">Hundreds of varieties, <span data-colorword style="color:#E38BB0;transition:color .5s ease;font-style:italic;">and counting.</span></h2>
+        <p style="font-size:clamp(15px,1.7vw,17.5px);line-height:1.66;color:rgba(243,238,228,.82);margin:20px 0 0;font-weight:300;" data-t="v.lede">Six core colours are only the beginning. Across pot and cut flower we keep hundreds of varieties in production at once — snow whites and blush pinks, wine-reds and golds, speckled picotees and one-of-a-kind marbled novelties — with new crosses spiking every season. Every bloom below has flowered on our own benches.</p>
+      </div>
+
+      <!-- the wall: every cutout in the range -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(96px,14.5vw,174px),1fr));gap:clamp(10px,1.5vw,18px);margin-top:clamp(34px,4.5vw,58px);">
+        <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease;text-align:center;">
+          <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
+            <img src="images/blooms/bloom-19.png" alt="Snow" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+          </div>
+          <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b1.n">Snow</div>
+          <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b1.z">WHITE · 白</div>
+        </div>
+        <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .62s ease,transform .62s ease;text-align:center;">
+          <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
+            <img src="images/blooms/bloom-05.png" alt="Ivory" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+          </div>
+          <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b2.n">Ivory</div>
+          <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b2.z">CREAM · 象牙</div>
+        </div>
+        <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .64s ease,transform .64s ease;text-align:center;">
+          <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
+            <img src="images/blooms/bloom-15.png" alt="Buttercream" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+          </div>
+          <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b3.n">Buttercream</div>
+          <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b3.z">SOFT YELLOW · 奶油</div>
+        </div>
+        <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .66s ease,transform .66s ease;text-align:center;">
+          <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
+            <img src="images/blooms/bloom-06.png" alt="Blush" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+          </div>
+          <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b4.n">Blush</div>
+          <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b4.z">PALE PINK · 浅粉</div>
+        </div>
+        <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .68s ease,transform .68s ease;text-align:center;">
+          <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
+            <img src="images/blooms/bloom-03.png" alt="Pink" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+          </div>
+          <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b5.n">Pink</div>
+          <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b5.z">PINK · 粉</div>
+        </div>
+        <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease;text-align:center;">
+          <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
+            <img src="images/blooms/bloom-01.png" alt="Peach" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+          </div>
+          <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b6.n">Peach</div>
+          <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b6.z">CORAL-PINK · 蜜桃</div>
+        </div>
+        <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .72s ease,transform .72s ease;text-align:center;">
+          <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
+            <img src="images/blooms/bloom-16.png" alt="Coral" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+          </div>
+          <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b7.n">Coral</div>
+          <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b7.z">CORAL · 珊瑚</div>
+        </div>
+        <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .74s ease,transform .74s ease;text-align:center;">
+          <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
+            <img src="images/blooms/bloom-07.png" alt="Rose Bicolor" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+          </div>
+          <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b8.n">Rose Bicolor</div>
+          <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b8.z">TWO-TONE · 双色粉</div>
+        </div>
+        <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .76s ease,transform .76s ease;text-align:center;">
+          <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
+            <img src="images/blooms/bloom-09.png" alt="Bicolor" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+          </div>
+          <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b9.n">Bicolor</div>
+          <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b9.z">TWO-TONE · 双色</div>
+        </div>
+        <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .78s ease,transform .78s ease;text-align:center;">
+          <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
+            <img src="images/blooms/bloom-08.png" alt="Fuchsia" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+          </div>
+          <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b10.n">Fuchsia</div>
+          <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b10.z">MAGENTA · 桃红</div>
+        </div>
+        <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .8s ease,transform .8s ease;text-align:center;">
+          <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
+            <img src="images/blooms/bloom-04.png" alt="Magenta" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+          </div>
+          <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b11.n">Magenta</div>
+          <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b11.z">VIVID · 洋红</div>
+        </div>
+        <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .82s ease,transform .82s ease;text-align:center;">
+          <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
+            <img src="images/blooms/bloom-11.png" alt="Orchid Purple" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+          </div>
+          <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b12.n">Orchid Purple</div>
+          <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b12.z">PURPLE-RED · 紫红</div>
+        </div>
+        <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .84s ease,transform .84s ease;text-align:center;">
+          <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
+            <img src="images/blooms/bloom-10.png" alt="Lavender" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+          </div>
+          <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b13.n">Lavender</div>
+          <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b13.z">LILAC · 淡紫</div>
+        </div>
+        <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .86s ease,transform .86s ease;text-align:center;">
+          <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
+            <img src="images/blooms/bloom-02.png" alt="Amethyst" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+          </div>
+          <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b14.n">Amethyst</div>
+          <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b14.z">DEEP LILAC · 紫晶</div>
+        </div>
+        <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .88s ease,transform .88s ease;text-align:center;">
+          <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
+            <img src="images/blooms/bloom-13.png" alt="Velvet Burgundy" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+          </div>
+          <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b15.n">Velvet Burgundy</div>
+          <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b15.z">WINE-RED · 酒红</div>
+        </div>
+        <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .9s ease,transform .9s ease;text-align:center;">
+          <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
+            <img src="images/blooms/bloom-18.png" alt="Gold" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+          </div>
+          <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b16.n">Gold</div>
+          <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b16.z">YELLOW · 金黄</div>
+        </div>
+        <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .92s ease,transform .92s ease;text-align:center;">
+          <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
+            <img src="images/blooms/bloom-12.png" alt="Starlight" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+          </div>
+          <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b17.n">Starlight</div>
+          <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b17.z">SPECKLED · 星点</div>
+        </div>
+        <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .94s ease,transform .94s ease;text-align:center;">
+          <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
+            <img src="images/blooms/bloom-17.png" alt="Picotee" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+          </div>
+          <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b18.n">Picotee</div>
+          <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b18.z">EDGED · 镶边</div>
+        </div>
+      </div>
+
+      <div data-reveal style="opacity:0;transform:translateY(18px);transition:opacity .8s ease,transform .8s ease;display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;margin-top:clamp(30px,4vw,48px);border-top:1px solid rgba(243,238,228,.16);padding-top:22px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;letter-spacing:.02em;color:rgba(243,238,228,.72);">
+        <span data-t="v.f1">6 core colours</span><span style="color:#E38BB0;opacity:.7;">/</span><span data-t="v.f2">dozens of patterns</span><span style="color:#E38BB0;opacity:.7;">/</span><span data-t="v.f3">200+ varieties in production</span><span style="color:#E38BB0;opacity:.7;">/</span><span data-t="v.f4">new crosses each season</span>
+        <a href="#contact" style="margin-left:auto;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;color:#F7F3EA;text-decoration:none;border-bottom:1.5px solid #E0388B;padding-bottom:3px;" data-t="v.link">Tell us the colour, we'll match it →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03b ART ORCHID -->
+  <section id="art" data-screen-label="Art Orchid" style="position:relative;background:#141018;padding:clamp(56px,8vw,110px) 0;border-top:1px solid rgba(26,22,18,.16);overflow:clip;">
+    <img src="images/constellation-pot.jpg" aria-hidden="true" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(3px) brightness(.6) saturate(1.06);transform:scale(1.06);"/>
+    <div aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,12,18,.6),rgba(15,12,18,.44) 45%,rgba(15,12,18,.8));"></div>
+    <div style="max-width:1120px;margin:0 auto;padding:0 clamp(18px,4vw,44px);position:relative;z-index:1;">
+      <div data-reveal style="opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s ease;max-width:820px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span style="display:block;height:2px;width:54px;border-radius:999px;background:linear-gradient(90deg,#4C8C57,#C6952F 55%,#D48CB0);opacity:.85;"></span>
+          <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:rgba(243,238,228,.82);" data-t="a.eyebrow">Signature series · 星空</span>
+        </div>
+        <h2 style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:480;font-size:clamp(40px,6.2vw,84px);line-height:1.03;letter-spacing:-.01em;margin:18px 0 0;color:#F7F3EA;text-wrap:balance;" data-t="a.h2">The Constellation</h2>
+        <p style="font-size:clamp(15px,1.8vw,18.5px);line-height:1.62;color:rgba(243,238,228,.86);margin:20px 0 0;max-width:620px;font-weight:300;" data-t-html="a.lede">A whole night sky scattered across living petals — marbled greens, ambers and violets that never fall the same way twice. The ‘星空 · Constellation’ series was developed <strong style="font-weight:600;color:#F7F3EA;">completely in-house</strong> at our Songming greenhouses and is <strong style="font-weight:600;color:#F7F3EA;">patent-pending</strong> — every plant a numbered one-of-one you can order here, and nowhere else.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:22px;">
+          <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;letter-spacing:.06em;padding:7px 12px;border:1px solid rgba(243,238,228,.28);border-radius:100px;color:rgba(243,238,228,.9);" data-t="a.t1">星空 · CONSTELLATION</span>
+          <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;letter-spacing:.06em;padding:7px 12px;border:1px solid rgba(224,120,90,.5);border-radius:100px;color:#F0B79A;" data-t="a.t2">PATENT PENDING</span>
+          <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;letter-spacing:.06em;padding:7px 12px;border:1px solid rgba(243,238,228,.28);border-radius:100px;color:rgba(243,238,228,.9);" data-t="a.t3">BRED IN-HOUSE</span>
+          <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;letter-spacing:.06em;padding:7px 12px;border:1px solid rgba(243,238,228,.28);border-radius:100px;color:rgba(243,238,228,.9);" data-t="a.t4">ONE OF ONE</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:clamp(28px,3.6vw,42px);">
+          <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(243,238,228,.66);" data-t="a.plants">The plants · 同系列</span>
+          <span style="flex:1;height:1px;background:rgba(243,238,228,.18);"></span>
+        </div>
+      </div>
+    </div>
+    <div data-scroll data-drag style="position:relative;z-index:1;display:flex;gap:20px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:none;padding:clamp(30px,4vw,48px) clamp(18px,4vw,44px) 12px;cursor:grab;">
+      <div data-tilt style="scroll-snap-align:start;flex:0 0 auto;width:min(74vw,318px);transition:transform .5s cubic-bezier(.2,.7,.2,1);">
+        <div style="position:relative;aspect-ratio:3/4;border-radius:18px;overflow:hidden;background:#0f0d13;box-shadow:0 20px 48px rgba(26,30,23,.16);">
+          <img src="images/constellation-wall.png" alt="A potted orange-and-green Constellation orchid in raking window light" draggable="false" style="width:100%;height:100%;object-fit:cover;object-position:center 42%;user-select:none;"/>
+          <span style="position:absolute;top:11px;right:11px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.92);font-size:10.5px;font-weight:500;letter-spacing:.06em;color:#B23A76;">Nº 01</span>
+          <span style="position:absolute;top:11px;left:11px;font-family:'Hanken Grotesk','Noto Sans',sans-serif;font-size:8.5px;letter-spacing:.08em;background:#C86B3E;color:#fff;padding:3px 8px;border-radius:100px;" data-t="a.t2">PATENT PENDING</span>
+        </div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-top:14px;">
+          <h3 style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:20px;margin:0;color:#F7F3EA;" data-t="a.c1.n">Citrus Marble</h3>
+          <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:rgba(243,238,228,.58);white-space:nowrap;" data-t="a.c1.t">Potted · 星空</span>
+        </div>
+        <p style="font-size:13.5px;line-height:1.5;color:rgba(243,238,228,.74);margin:7px 0 0;" data-t="a.c1.b">Orange and green poured across white — the newest plant off the Constellation bench, grown and finished in-house.</p>
+      </div>
+      <div data-tilt style="scroll-snap-align:start;flex:0 0 auto;width:min(74vw,318px);transition:transform .5s cubic-bezier(.2,.7,.2,1);">
+        <div style="position:relative;aspect-ratio:3/4;border-radius:18px;overflow:hidden;background:#F0EDE4;box-shadow:0 20px 48px rgba(26,30,23,.16);">
+          <img src="images/art-02-yellow.png" alt="Saffron & Sky" draggable="false" style="width:100%;height:100%;object-fit:cover;user-select:none;"/>
+          <span style="position:absolute;top:11px;right:11px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.92);font-size:10.5px;font-weight:500;letter-spacing:.06em;color:#B23A76;">Nº 02</span>
+        </div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-top:14px;">
+          <h3 style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:20px;margin:0;color:#F7F3EA;" data-t="a.c2.n">Saffron &amp; Sky</h3>
+          <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:rgba(243,238,228,.56);white-space:nowrap;" data-t="a.c2.t">Contemporary Zen</span>
+        </div>
+        <p style="font-size:13.5px;line-height:1.5;color:rgba(243,238,228,.74);margin:7px 0 0;" data-t="a.c2.b">Warm amber marbled through soft blue — a calm, sunlit statement.</p>
+      </div>
+      <div data-tilt style="scroll-snap-align:start;flex:0 0 auto;width:min(74vw,318px);transition:transform .5s cubic-bezier(.2,.7,.2,1);">
+        <div style="position:relative;aspect-ratio:3/4;border-radius:18px;overflow:hidden;background:#F0EDE4;box-shadow:0 20px 48px rgba(26,30,23,.16);">
+          <img src="images/art-03-blue.png" alt="Porcelain Indigo" draggable="false" style="width:100%;height:100%;object-fit:cover;user-select:none;"/>
+          <span style="position:absolute;top:11px;right:11px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.92);font-size:10.5px;font-weight:500;letter-spacing:.06em;color:#B23A76;">Nº 03</span>
+        </div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-top:14px;">
+          <h3 style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:20px;margin:0;color:#F7F3EA;" data-t="a.c3.n">Porcelain Indigo</h3>
+          <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:rgba(243,238,228,.56);white-space:nowrap;" data-t="a.c3.t">Modern Botanical</span>
+        </div>
+        <p style="font-size:13.5px;line-height:1.5;color:rgba(243,238,228,.74);margin:7px 0 0;" data-t="a.c3.b">Cobalt swirls on bright white, like brushed ink on porcelain.</p>
+      </div>
+      <div data-tilt style="scroll-snap-align:start;flex:0 0 auto;width:min(74vw,318px);transition:transform .5s cubic-bezier(.2,.7,.2,1);">
+        <div style="position:relative;aspect-ratio:3/4;border-radius:18px;overflow:hidden;background:#F0EDE4;box-shadow:0 20px 48px rgba(26,30,23,.16);">
+          <img src="images/art-04-pink.png" alt="Rose Jade" draggable="false" style="width:100%;height:100%;object-fit:cover;user-select:none;"/>
+          <span style="position:absolute;top:11px;right:11px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.92);font-size:10.5px;font-weight:500;letter-spacing:.06em;color:#B23A76;">Nº 04</span>
+        </div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-top:14px;">
+          <h3 style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:20px;margin:0;color:#F7F3EA;" data-t="a.c4.n">Rose Jade</h3>
+          <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:rgba(243,238,228,.56);white-space:nowrap;" data-t="a.c4.t">Artisan Botanical</span>
+        </div>
+        <p style="font-size:13.5px;line-height:1.5;color:rgba(243,238,228,.74);margin:7px 0 0;" data-t="a.c4.b">Blush pink and jade green folded together, no two petals alike.</p>
+      </div>
+      <div data-tilt style="scroll-snap-align:start;flex:0 0 auto;width:min(74vw,318px);transition:transform .5s cubic-bezier(.2,.7,.2,1);">
+        <div style="position:relative;aspect-ratio:3/4;border-radius:18px;overflow:hidden;background:#F0EDE4;box-shadow:0 20px 48px rgba(26,30,23,.16);">
+          <img src="images/art-05-white.png" alt="Chartreuse Mist" draggable="false" style="width:100%;height:100%;object-fit:cover;user-select:none;"/>
+          <span style="position:absolute;top:11px;right:11px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.92);font-size:10.5px;font-weight:500;letter-spacing:.06em;color:#B23A76;">Nº 05</span>
+        </div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-top:14px;">
+          <h3 style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:20px;margin:0;color:#F7F3EA;" data-t="a.c5.n">Chartreuse Mist</h3>
+          <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:rgba(243,238,228,.56);white-space:nowrap;" data-t="a.c5.t">Botanical Minimalist</span>
+        </div>
+        <p style="font-size:13.5px;line-height:1.5;color:rgba(243,238,228,.74);margin:7px 0 0;" data-t="a.c5.b">Pale lime drifting over cream — quiet, contemporary, refined.</p>
+      </div>
+      <div data-tilt style="scroll-snap-align:start;flex:0 0 auto;width:min(74vw,318px);transition:transform .5s cubic-bezier(.2,.7,.2,1);">
+        <div style="position:relative;aspect-ratio:3/4;border-radius:18px;overflow:hidden;background:#F0EDE4;box-shadow:0 20px 48px rgba(26,30,23,.16);">
+          <img src="images/art-06-peach.jpg" alt="Peach Sorbet" draggable="false" style="width:100%;height:100%;object-fit:cover;user-select:none;"/>
+          <span style="position:absolute;top:11px;right:11px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.92);font-size:10.5px;font-weight:500;letter-spacing:.06em;color:#B23A76;">Nº 06</span>
+        </div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-top:14px;">
+          <h3 style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:20px;margin:0;color:#F7F3EA;" data-t="a.c6.n">Peach Sorbet</h3>
+          <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:rgba(243,238,228,.56);white-space:nowrap;" data-t="a.c6.t">Pastel Minimalism</span>
+        </div>
+        <p style="font-size:13.5px;line-height:1.5;color:rgba(243,238,228,.74);margin:7px 0 0;" data-t="a.c6.b">Soft peach and butter-yellow bleeding into blush pink — a warm, gentle marble finished in-house.</p>
+      </div>
+      <div data-tilt style="scroll-snap-align:start;flex:0 0 auto;width:min(74vw,318px);transition:transform .5s cubic-bezier(.2,.7,.2,1);">
+        <div style="position:relative;aspect-ratio:3/4;border-radius:18px;overflow:hidden;background:#0f0d13;box-shadow:0 20px 48px rgba(26,30,23,.16);">
+          <img src="images/art-07-aurora.jpg" alt="Aurora" draggable="false" style="width:100%;height:100%;object-fit:cover;user-select:none;"/>
+          <span style="position:absolute;top:11px;right:11px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.92);font-size:10.5px;font-weight:500;letter-spacing:.06em;color:#B23A76;">Nº 07</span>
+        </div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-top:14px;">
+          <h3 style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:20px;margin:0;color:#F7F3EA;" data-t="a.c7.n">Aurora</h3>
+          <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:rgba(243,238,228,.56);white-space:nowrap;" data-t="a.c7.t">Ethereal Botanical</span>
+        </div>
+        <p style="font-size:13.5px;line-height:1.5;color:rgba(243,238,228,.74);margin:7px 0 0;" data-t="a.c7.b">Iridescent ribbons of mint, lilac and coral shifting across every petal — no two lit the same way.</p>
+      </div>
+      <div style="flex:0 0 auto;width:min(74vw,318px);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:14px;border:1.5px dashed rgba(178,58,118,.4);border-radius:18px;aspect-ratio:3/4;">
+        <span style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:500;font-size:22px;color:#B23A76;text-align:center;line-height:1.2;" data-t-html="a.g.t">Your palette,<br>your pattern</span>
+        <a href="#contact" style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;color:#F7F3EA;text-decoration:none;border-bottom:1.5px solid #E38BB0;padding-bottom:3px;" data-t="a.g.link">Commission a series →</a>
+      </div>
+    </div>
+    <div style="position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:10px;margin-top:14px;">
+      <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:rgba(243,238,228,.72);" data-t="a.drag">◄ drag to browse ►</span>
+    </div>
+  </section>
+
+  <!-- 04 HOW IT SHIPS -->
+  <section id="shipping" data-screen-label="04 How it ships" style="position:relative;overflow:clip;background-color:#FBF8F1;padding:clamp(70px,9vw,124px) 0;border-top:1px solid rgba(26,30,23,.08);">
+    <div data-fabric aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;z-index:0;"></div>
+    
+    <img src="images/blooms/bloom-01.png" alt="" aria-hidden="true" style="position:absolute;left:-4%;top:7%;width:clamp(180px,17vw,310px);opacity:.13;transform:rotate(-16deg);pointer-events:none;filter:saturate(.85);z-index:0;"/>
+    <img src="images/blooms/bloom-17.png" alt="" aria-hidden="true" style="position:absolute;left:2%;top:62%;width:clamp(150px,14vw,260px);opacity:.10;transform:rotate(12deg);pointer-events:none;filter:saturate(.85);z-index:0;"/>
+    <img src="images/blooms/bloom-04.png" alt="" aria-hidden="true" style="position:absolute;right:-6%;top:-2%;width:clamp(200px,19vw,340px);opacity:.12;transform:rotate(20deg);pointer-events:none;filter:saturate(.85);z-index:0;"/>
+    <img src="images/blooms/bloom-06.png" alt="" aria-hidden="true" style="position:absolute;right:1%;top:82%;width:clamp(130px,12vw,220px);opacity:.10;transform:rotate(-18deg) scaleX(-1);pointer-events:none;filter:saturate(.85);z-index:0;"/>
+    <div style="position:relative;z-index:1;max-width:1300px;margin:0 auto;padding:0 clamp(18px,4vw,44px);">
+      <div data-reveal style="opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s ease;">
+        <div style="display:flex;align-items:center;gap:13px;">
+          <span style="display:block;height:2px;width:56px;border-radius:999px;background:linear-gradient(90deg,#4C8C57,#C6952F 55%,#D48CB0);opacity:.85;"></span>
+          <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#2F5D3A;" data-t="sh.eyebrow">04 / How it ships · 如何发货</span>
+        </div>
+        <h2 style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:500;font-size:clamp(32px,4.4vw,56px);line-height:1.08;letter-spacing:-.008em;margin:18px 0 0;color:#1A1E17;" data-t-html="sh.h2">Packed by hand, <span style="color:#B0552F;font-style:italic;">shipped cold.</span></h2>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:clamp(26px,4vw,52px);margin-top:clamp(30px,4vw,48px);">
+        <div data-reveal style="opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s ease;flex:1 1 340px;min-width:280px;">
+          <p style="font-size:15.5px;line-height:1.64;color:#55564A;margin:0 0 22px;max-width:440px;" data-t="sh.para">Every spike is sleeved in foam, every bloom bedded in batting, every carton loaded into a reefer at the door. From our bench to yours — Beijing or Bangkok — the cold chain never breaks.</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <figure data-clip style="margin:0;border-radius:16px;overflow:hidden;aspect-ratio:4/5;box-shadow:0 16px 40px rgba(26,30,23,.14);"><img src="images/pack-sleeves.jpg" alt="Orchid spikes in foam sleeves" style="width:100%;height:100%;object-fit:cover;clip-path:inset(0 0 100% 0);transition:clip-path 1.1s cubic-bezier(.7,0,.2,1);"/></figure>
+            <figure data-clip style="margin:22px 0 0;border-radius:16px;overflow:hidden;aspect-ratio:4/5;box-shadow:0 16px 40px rgba(26,30,23,.14);"><img src="images/pack-pink.jpg" alt="Hands packing cut orchids into an export box" style="width:100%;height:100%;object-fit:cover;clip-path:inset(0 0 100% 0);transition:clip-path 1.1s cubic-bezier(.7,0,.2,1);"/></figure>
+          </div>
+        </div>
+        <div data-reveal style="opacity:0;transform:translateY(26px);transition:opacity .9s ease,transform .9s ease;flex:1.1 1 400px;min-width:300px;">
+          <div style="background:#FFFFFF;border:1px solid rgba(26,30,23,.14);border-radius:24px;padding:clamp(18px,3vw,30px);">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:15px;border-bottom:2px solid #1A1E17;">
+              <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#1A1E17;" data-t="sh.hd">Shipping spec · 发货规格</span>
+              <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;font-weight:500;padding:4px 9px;border-radius:999px;background:rgba(47,93,58,.12);color:#2F5D3A;letter-spacing:.06em;">REEFER</span>
+            </div>
+            <div style="padding:14px 0 13px;border-bottom:1px solid rgba(26,30,23,.1);">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px 10px;flex-wrap:wrap;">
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><span style="width:10px;height:10px;border-radius:999px;background:#2F5D3A;flex:none;"></span><span style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:15px;color:#1A1E17;" data-t="sh.r1.n">3.8″ Flowering · 开花</span><span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10px;letter-spacing:.04em;padding:3px 9px;border-radius:100px;border:1px solid rgba(26,30,23,.18);color:#55564A;" data-t="sh.r1.c">cup 杯径 3.8″ · 9.7 cm</span></div>
+                <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:700;font-size:19px;color:#1A1E17;">40 <span style="font-size:11px;font-weight:500;color:#8A8474;" data-t="sh.ppc">plants / carton</span></div>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px 18px;margin-top:7px;padding-left:20px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;color:#8A8474;">
+                <span data-t="sh.r1.d1">master 120×52×49 cm · 0.306 m³</span><span data-t="sh.r1.d2">2 inner trays × 20 · 118×49.5×22 cm · 0.129 m³</span>
+              </div>
+            </div>
+            <div style="padding:14px 0 13px;border-bottom:1px solid rgba(26,30,23,.1);">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px 10px;flex-wrap:wrap;">
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><span style="width:10px;height:10px;border-radius:999px;background:#8A8636;flex:none;"></span><span style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:15px;color:#1A1E17;" data-t="sh.r2.n">Large Flower · 大花</span><span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10px;letter-spacing:.04em;padding:3px 9px;border-radius:100px;border:1px solid rgba(26,30,23,.18);color:#55564A;" data-t="sh.r2.c">cup 杯径 4.7″ · 12 cm</span></div>
+                <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:700;font-size:19px;color:#1A1E17;">60 <span style="font-size:11px;font-weight:500;color:#8A8474;" data-t="sh.ppc">plants / carton</span></div>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px 18px;margin-top:7px;padding-left:20px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;color:#8A8474;">
+                <span data-t="sh.r2.d1">master 110×45×60 cm · 0.297 m³</span><span data-t="sh.r2.d2">3 inner trays × 20 · 108×43×18 cm · 0.084 m³</span>
+              </div>
+            </div>
+            <div style="padding:14px 0 13px;border-bottom:1px solid rgba(26,30,23,.1);">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px 10px;flex-wrap:wrap;">
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><span style="width:10px;height:10px;border-radius:999px;background:#C6952F;flex:none;"></span><span style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:15px;color:#1A1E17;" data-t="sh.r3.n">Small Flower · 小花</span><span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10px;letter-spacing:.04em;padding:3px 9px;border-radius:100px;border:1px solid rgba(26,30,23,.18);color:#55564A;" data-t="sh.r3.c">cup 杯径 3.5″ · 9 cm</span></div>
+                <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:700;font-size:19px;color:#1A1E17;">72 <span style="font-size:11px;font-weight:500;color:#8A8474;" data-t="sh.ppc">plants / carton</span></div>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px 18px;margin-top:7px;padding-left:20px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;color:#8A8474;">
+                <span data-t="sh.r3.d1">master 83×43×61 cm · 0.218 m³</span><span data-t="sh.r3.d2">3 inner trays × 24 · 81×41×19 cm · 0.063 m³</span>
+              </div>
+            </div>
+            <div style="padding:14px 0 4px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px 10px;flex-wrap:wrap;">
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><span style="width:10px;height:10px;border-radius:999px;background:#B0552F;flex:none;"></span><span style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:15px;color:#1A1E17;" data-t="sh.r4.n">Seedlings · 苗</span><span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10px;letter-spacing:.04em;padding:3px 9px;border-radius:100px;border:1px solid rgba(26,30,23,.18);color:#55564A;" data-t="sh.r4.c">packed by cup size 按杯径</span></div>
+                <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:700;font-size:19px;color:#1A1E17;">32–280 <span style="font-size:11px;font-weight:500;color:#8A8474;" data-t="sh.ppc">plants / carton</span></div>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;padding-left:20px;">
+                <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10px;padding:4px 9px;border-radius:999px;background:rgba(26,30,23,.05);color:#1A1E17;" data-t="sh.r4.c1">1.7″ / 2.0″ cup — 280</span>
+                <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10px;padding:4px 9px;border-radius:999px;background:rgba(26,30,23,.05);color:#1A1E17;" data-t="sh.r4.c2">2.5″ / 2.8″ cup — 120</span>
+                <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10px;padding:4px 9px;border-radius:999px;background:rgba(26,30,23,.05);color:#1A1E17;" data-t="sh.r4.c3">3.5″ cup — 42</span>
+                <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10px;padding:4px 9px;border-radius:999px;background:rgba(26,30,23,.05);color:#1A1E17;" data-t="sh.r4.c4">3.5″ spiking — 32</span>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px 18px;margin-top:8px;padding-left:20px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;color:#8A8474;">
+                <span data-t="sh.r4.d1">uniform carton 61×49×30 cm · 0.090 m³</span>
+              </div>
+            </div>
+            <p style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10px;line-height:1.6;color:#8A8474;margin:14px 0 0;" data-t="sh.fine">Dimensions are empty-carton outer sizes (cm); packed cartons bulge ≈1–2 cm per side. Volumes are freight-estimate values.</p>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;">
+            <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;padding:7px 12px;border-radius:999px;background:rgba(26,30,23,.06);font-size:11px;color:#1A1E17;" data-t="sh.ch1">All major Chinese cities</span>
+            <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;padding:7px 12px;border-radius:999px;background:rgba(26,30,23,.06);font-size:11px;color:#1A1E17;" data-t="sh.ch2">10+ countries</span>
+            <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;padding:7px 12px;border-radius:999px;background:rgba(26,30,23,.06);font-size:11px;color:#1A1E17;" data-t="sh.ch3">Longer shelf-life vs market</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact" data-screen-label="Contact" style="background-color:#23412C;padding:clamp(74px,9vw,136px) 0;position:relative;overflow:clip;">
+    <img src="images/blooms/bloom-01.png" alt="" style="position:absolute;left:-30px;bottom:-26px;width:clamp(120px,15vw,220px);transform:rotate(-12deg);opacity:.9;z-index:1;pointer-events:none;filter:drop-shadow(0 16px 30px rgba(0,0,0,.4));"/>
+    <img src="images/blooms/bloom-18.png" alt="" aria-hidden="true" style="position:absolute;left:4%;top:7%;width:clamp(90px,10vw,160px);transform:rotate(-20deg);opacity:.75;z-index:1;pointer-events:none;filter:drop-shadow(0 10px 22px rgba(0,0,0,.35));"/>
+    <img src="images/blooms/bloom-16.png" alt="" aria-hidden="true" style="position:absolute;right:6%;bottom:9%;width:clamp(85px,9vw,150px);transform:rotate(14deg) scaleX(-1);opacity:.7;z-index:1;pointer-events:none;filter:drop-shadow(0 10px 22px rgba(0,0,0,.35));"/>
+    <img src="images/blooms/bloom-08.png" alt="" style="position:absolute;right:-26px;top:-14px;width:clamp(100px,12vw,180px);transform:rotate(14deg);opacity:.85;z-index:1;pointer-events:none;filter:drop-shadow(0 14px 26px rgba(0,0,0,.4));"/>
+      <div style="max-width:960px;margin:0 auto;padding:0 clamp(18px,4vw,44px);text-align:center;position:relative;z-index:2;">
+      <div data-reveal style="opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s ease;">
+        <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:#E7B7CF;" data-t="c.kick">Wholesale · Export · Commissions</span>
+        <h2 style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:480;font-size:clamp(38px,6vw,80px);line-height:1.03;letter-spacing:-.01em;color:#F7F3EA;margin:16px 0 0;" data-t-html="c.h2">Let's grow something<br><span style="color:#E7B7CF;font-style:italic;">beautiful</span> together.</h2>
+        <p style="font-size:16px;line-height:1.6;color:rgba(243,238,228,.76);margin:20px auto 0;max-width:460px;font-weight:300;" data-t="c.sub">Request the current wholesale catalog — varieties, grades, carton counts and lead times for your market.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:520px;margin:30px auto 0;">
+          <input type="email" placeholder="Your work email" data-t-ph="c.ph" style="flex:1 1 240px;min-width:0;padding:16px 20px;border-radius:999px;border:1px solid rgba(243,238,228,.3);background:rgba(243,238,228,.07);color:#F3EEE4;font-size:15px;font-family:inherit;outline:none;"/>
+          <button style="padding:16px 28px;border-radius:999px;border:none;background:#B0552F;color:#F3EEE4;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:14px;font-weight:500;cursor:pointer;" data-t="nav.cta">Request catalog</button>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px 22px;margin-top:26px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12.5px;color:rgba(243,238,228,.62);">
+          <span data-t="c.addr">Xiaojie, Songming County, Kunming</span><span style="color:#E7B7CF;">·</span><span>kmtyorchid.com</span><span style="color:#E7B7CF;">·</span><span data-t="c.langs">EN / 中文</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer style="background:#12140f;color:rgba(243,238,228,.6);padding:clamp(40px,6vw,60px) 0 34px;">
+    <div style="max-width:1300px;margin:0 auto;padding:0 clamp(18px,4vw,44px);">
+      <div style="height:2px;width:100%;border-radius:999px;background:linear-gradient(90deg,#2F5D3A,#C6952F 50%,#D48CB0);opacity:.7;margin-bottom:30px;"></div>
+      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:28px;padding-bottom:28px;border-bottom:1px solid rgba(243,238,228,.12);">
+        <div style="max-width:320px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <img src="images/logo.png" alt="KMTY" style="height:28px;width:auto;"/>
+            <span style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:700;font-size:21px;color:#F3EEE4;">KMTY</span>
+          </div>
+          <p style="font-size:13px;line-height:1.6;margin:13px 0 0;" data-t="f.about">Kunming Tong Yi Biotechnology Co., Ltd. Premium Phalaenopsis, grown in Yunnan since 2000.</p>
+        </div>
+        <div style="display:flex;gap:clamp(38px,7vw,84px);flex-wrap:wrap;">
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:rgba(243,238,228,.4);" data-t="f.secs">Sections</span>
+            <a href="#story" style="font-size:14px;color:rgba(243,238,228,.72);text-decoration:none;" data-t="m.story">Our story</a>
+            <a href="#grow" style="font-size:14px;color:rgba(243,238,228,.72);text-decoration:none;" data-t="m.grow">How we grow</a>
+            <a href="#products" style="font-size:14px;color:rgba(243,238,228,.72);text-decoration:none;" data-t="m.products">Products</a>
+            <a href="#shipping" style="font-size:14px;color:rgba(243,238,228,.72);text-decoration:none;" data-t="m.ship">How it ships</a>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <span style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:rgba(243,238,228,.4);" data-t="f.lang">Language</span>
+            <a href="#top" data-lang="en" style="font-size:14px;color:#F3EEE4;text-decoration:none;">English</a>
+            <a href="#top" data-lang="zh" lang="zh" style="font-size:14px;color:rgba(243,238,228,.72);text-decoration:none;">中文</a>
+            <a href="#top" data-lang="ru" lang="ru" style="font-size:14px;color:rgba(243,238,228,.72);text-decoration:none;">Русский</a>
+            <a href="#top" data-lang="vi" lang="vi" style="font-size:14px;color:rgba(243,238,228,.72);text-decoration:none;">Tiếng Việt</a>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-top:22px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11.5px;color:rgba(243,238,228,.42);">
+        <span data-t="f.c1">© 2000–2026 Kunming Tong Yi Biotechnology · 昆明统一生物科技有限公司</span>
+        <span data-t="f.c2">China's Nº 1 flowering-Phalaenopsis exporter</span>
+      </div>
+    </div>
+  </footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { terroir: null };
+
+  renderVals() {
+    const T = this.state.terroir;
+    // labels, pins, base cards AND all veil behaviour are handled with direct DOM
+    // (post-render mutations must never trigger another React pass — see i18n.js)
+    const L = (window.KMTY_I18N && window.KMTY_I18N.dcStrings()) || {
+      rail: ['Our story', 'How we grow', 'Products', 'Art Orchid', 'How it ships'],
+      veilOn: 'Reveal full photo · 全图', veilOff: 'Restore cut-out · 镂空'
+    };
+    return {
+      trRegions: T ? T.regions : [],
+      trYnPath: T ? T.ynPath : '',
+      railItems: [
+        { id: 'story', href: '#story', label: L.rail[0] },
+        { id: 'grow', href: '#grow', label: L.rail[1] },
+        { id: 'products', href: '#products', label: L.rail[2] },
+        { id: 'art', href: '#art', label: L.rail[3] },
+        { id: 'shipping', href: '#shipping', label: L.rail[4] }
+      ],
+      products: [
+        { no: '01', cn: '种苗', name: 'Seedlings', img: 'images/greenhouse-1.jpg', desc: 'Virus-free young plants, propagated from PCR- and ELISA-screened stock and grown to your finishing schedule.', specLabel: 'Available sizes', sizes: ['1.7″', '2.0″', '2.5″', '2.8″', '3.5″', '3.5″ spiking'] },
+        { no: '02', cn: '盆花', name: 'Pot Flower', img: 'images/bicolor.jpg', desc: 'Finished, blooming plants — hand-graded Special to C and ready to retail or gift straight from the box.', specLabel: 'Available sizes', sizes: ['3.8″ flowering', 'Large flower', 'Small flower'] },
+        { no: '03', cn: '切花', name: 'Cut Flower', img: 'images/pack-sleeves.jpg', desc: 'Fresh-cut spikes, sleeved in foam and packed cold for florists, events and wholesale arrangers.', specLabel: 'Per stem', sizes: ['5–10 flowers / stem', 'Reefer cold-chain'] }
+      ],
+      artCards: [
+        { img: 'images/art-02-yellow.png', no: 'Nº 02', tag: 'Contemporary Zen', name: 'Saffron & Sky', palette: 'Warm amber marbled through soft blue — a calm, sunlit statement.' },
+        { img: 'images/art-03-blue.png', no: 'Nº 03', tag: 'Modern Botanical', name: 'Porcelain Indigo', palette: 'Cobalt swirls on bright white, like brushed ink on porcelain.' },
+        { img: 'images/art-04-pink.png', no: 'Nº 04', tag: 'Artisan Botanical', name: 'Rose Jade', palette: 'Blush pink and jade green folded together, no two petals alike.' },
+        { img: 'images/art-05-white.png', no: 'Nº 05', tag: 'Botanical Minimalist', name: 'Chartreuse Mist', palette: 'Pale lime drifting over cream — quiet, contemporary, refined.' }
+      ]
+    };
+  }
+
+  componentDidMount() {
+    this._loadTerroir();
+    // let i18n re-apply after the runtime has built the DOM
+    window.dispatchEvent(new CustomEvent('kmty:mounted'));
+    // language changes update rail + veil labels via direct DOM (no re-render)
+    this._onLang = () => {
+      if (!window.KMTY_I18N) return;
+      const L = window.KMTY_I18N.dcStrings();
+      const txs = document.querySelectorAll('[data-railtx]');
+      txs.forEach((el, i) => { if (L.rail[i]) el.textContent = L.rail[i]; });
+      if (this._applyVeil) this._applyVeil();
+    };
+    window.addEventListener('kmty:lang', this._onLang);
+    this._veilOn = true;
+    this._terroirIn = false;
+    window.__kmtyVeil = () => this._veilOn;
+    const applyVeil = () => {
+      const von = this._veilOn, tin = this._terroirIn;
+      const set = (sel, v) => { const el = document.querySelector(sel); if (el) el.setAttribute('opacity', v); };
+      set('[data-veil]', tin ? (von ? 1 : 0.12) : 0);
+      set('[data-halo]', tin ? (von ? 0.75 : 0.4) : 0);
+      set('[data-rim]', tin ? 1 : 0);
+      const btn = document.querySelector('[data-veilbtn]');
+      if (btn) btn.setAttribute('aria-pressed', String(!von));
+      const dot = document.querySelector('[data-veildot]');
+      if (dot) { dot.style.background = von ? '#f27cb2' : '#7a9a8a'; dot.style.boxShadow = von ? '0 0 7px #f27cb2' : 'none'; }
+      const lbl = document.querySelector('[data-veillbl]');
+      if (lbl && window.KMTY_I18N) { const L = window.KMTY_I18N.dcStrings(); lbl.textContent = von ? L.veilOn : L.veilOff; }
+    };
+    this._applyVeil = applyVeil;
+    window.__kmtyApplyVeil = applyVeil;
+    const vbtn = document.querySelector('[data-veilbtn]');
+    if (vbtn) vbtn.addEventListener('click', () => { this._veilOn = !this._veilOn; applyVeil(); });
+    const terroirEl = document.querySelector('[data-terroir]');
+    if (terroirEl && 'IntersectionObserver' in window) {
+      const tio = new IntersectionObserver((entries) => {
+        entries.forEach((en) => {
+          if (!en.isIntersecting) return;
+          tio.disconnect();
+          this._terroirIn = true;
+          applyVeil();
+          this._drawYnBorder();
+          window.dispatchEvent(new CustomEvent('kmty:terroirin'));
+        });
+      }, { threshold: 0.22 });
+      tio.observe(terroirEl);
+    }
+    const $ = (s) => document.querySelector(s);
+    const $$ = (s) => Array.from(document.querySelectorAll(s));
+
+    /* nav + progress */
+    const nav = $('[data-nav]');
+    const progress = $('[data-progress]');
+    const setNav = () => {
+      const scrolled = window.scrollY > 40;
+      if (nav) {
+        nav.style.background = scrolled ? 'rgba(243,238,228,.93)' : 'transparent';
+        nav.style.backdropFilter = scrolled ? 'saturate(1.3) blur(16px)' : 'none';
+        nav.style.webkitBackdropFilter = scrolled ? 'saturate(1.3) blur(16px)' : 'none';
+        nav.style.borderBottomColor = scrolled ? 'rgba(26,30,23,.1)' : 'transparent';
+        nav.style.boxShadow = scrolled ? '0 6px 30px rgba(26,30,23,.06)' : 'none';
+        const wm = nav.querySelector('[data-wordmark]');
+        if (wm) wm.style.color = scrolled ? '#1A1E17' : '#F3EEE4';
+        nav.querySelectorAll('[data-navlink]').forEach(a => { a.style.color = scrolled ? '#55564A' : 'rgba(243,238,228,.82)'; });
+        const sw = nav.querySelector('[data-langsw]');
+        if (sw) {
+          sw.style.borderColor = scrolled ? 'rgba(26,30,23,.22)' : 'rgba(243,238,228,.28)';
+          sw.querySelectorAll('button').forEach(b => {
+            const on = b.classList.contains('on');
+            b.style.background = on ? (scrolled ? '#1A1E17' : '#F3EEE4') : 'transparent';
+            b.style.color = on ? (scrolled ? '#F3EEE4' : '#1A1E17') : (scrolled ? '#55564A' : 'rgba(243,238,228,.78)');
+          });
+        }
+      }
+      if (progress) {
+        const h = document.documentElement.scrollHeight - window.innerHeight;
+        progress.style.width = (h > 0 ? (window.scrollY / h) * 100 : 0) + '%';
+      }
+    };
+    setNav();
+    window.addEventListener('scroll', setNav, { passive: true });
+    this._setNav = setNav;
+
+    /* background video — force muted autoplay across engines */
+    $$('[data-bgvideo]').forEach(v => {
+      v.muted = true; v.defaultMuted = true; v.loop = true;
+      const tryPlay = () => { try { const p = v.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} };
+      tryPlay();
+      v.addEventListener('canplay', tryPlay, { once: true });
+      v.addEventListener('loadeddata', tryPlay, { once: true });
+    });
+
+    /* reveal + clip + count */
+    const els = $$('[data-reveal]');
+    const revealClip = (el) => { el.querySelectorAll('img[style*="clip-path"]').forEach(img => { img.style.clipPath = 'inset(0 0 0 0)'; }); };
+    const io = ('IntersectionObserver' in window) ? new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.style.opacity = '1';
+          e.target.style.transform = 'none';
+          revealClip(e.target);
+          e.target.querySelectorAll('[data-count]').forEach(c => this._countUp(c));
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' }) : null;
+    if (io) { els.forEach(el => io.observe(el)); this._io = io; }
+    else els.forEach(el => { el.style.opacity = '1'; el.style.transform = 'none'; revealClip(el); });
+    const clipIo = ('IntersectionObserver' in window) ? new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.querySelectorAll('img').forEach(img => { img.style.clipPath = 'inset(0 0 0 0)'; }); clipIo.unobserve(e.target); } });
+    }, { threshold: 0.2 }) : null;
+    if (clipIo) $$('figure[data-clip]').forEach(f => clipIo.observe(f));
+    this._clipIo = clipIo;
+
+    /* mobile menu */
+    const menu = $('[data-mobilemenu]');
+    $$('[data-burger]').forEach(b => b.addEventListener('click', () => {
+      if (!menu) return;
+      const open = menu.style.transform === 'translateX(0%)';
+      menu.style.transform = open ? 'translateX(100%)' : 'translateX(0%)';
+    }));
+    if (menu) menu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => { menu.style.transform = 'translateX(100%)'; }));
+
+    /* rail active */
+    const railItems = $$('[data-railitem]');
+    const railIo = ('IntersectionObserver' in window) ? new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          railItems.forEach(it => {
+            const on = it.getAttribute('data-target') === e.target.id;
+            const dot = it.querySelector('[data-raildot]');
+            const tx = it.querySelector('[data-railtx]');
+            if (dot) { dot.style.background = on ? '#B0552F' : 'rgba(26,30,23,.25)'; dot.style.transform = on ? 'scale(1.5)' : 'scale(1)'; }
+            if (tx) tx.style.opacity = on ? '1' : '0';
+          });
+        }
+      });
+    }, { threshold: 0.4 }) : null;
+    if (railIo) ['story', 'grow', 'products', 'art', 'shipping'].forEach(id => { const el = document.getElementById(id); if (el) railIo.observe(el); });
+    this._railIo = railIo;
+
+    /* color assortment */
+    const COLORS = [
+      { name: 'Snow', latin: 'WHITE · 白', tag: 'HIGH VOLUME', dot: '#C0368B', img: 'images/blooms/bloom-19.png', desc: 'Crisp whites with a golden heart — the classic gift and hotel-lobby orchid, and our highest-volume line.' },
+      { name: 'Rose Bicolor', latin: 'WHITE-PINK · 双色', tag: 'BESTSELLER', dot: '#D06CA8', img: 'images/blooms/bloom-07.png', desc: 'White petals blushing rose at the lip — a two-tone favourite for Lunar New Year gifting.' },
+      { name: 'Fuchsia', latin: 'MAGENTA · 桃红', tag: 'SIGNATURE', dot: '#C0368B', img: 'images/blooms/bloom-08.png', desc: 'Saturated magenta with a white eye, grown by the bench-load — our most photographed house.' },
+      { name: 'Velvet Burgundy', latin: 'WINE-RED · 酒红', tag: 'PREMIUM', dot: '#7A1F4D', img: 'images/blooms/bloom-13.png', desc: 'Deep wine-red blooms with a velvet finish, prized for premium arrangements and events.' },
+      { name: 'Gold', latin: 'YELLOW · 金黄', tag: 'FESTIVE', dot: '#B8912B', img: 'images/blooms/bloom-18.png', desc: 'Sun-yellow petals with a fuchsia lip — the prosperity orchid, and a spring-festival favourite.' },
+      { name: 'Buttercream', latin: 'CREAM · 奶油', tag: 'QUIET LUXURY', dot: '#A89B3E', img: 'images/blooms/bloom-15.png', desc: 'Soft chartreuse-cream with a coral heart — quiet luxury for contemporary interiors.' }
+    ];
+    const swatches = $$('[data-swatch]');
+    const cImg = $('[data-colorimg]'), cName = $('[data-colorname]'), cLatin = $('[data-colorlatin]'), cTag = $('[data-colortag]'), cDesc = $('[data-colordesc]'), cWord = $('[data-colorword]');
+    COLORS.forEach(c => { const i = new Image(); i.src = c.img; });
+    const pickColor = (idx) => {
+      const c = COLORS[idx];
+      swatches.forEach((b, i) => { b.style.background = i === idx ? 'rgba(26,30,23,.05)' : 'transparent'; });
+      if (cImg) { cImg.style.opacity = '0'; setTimeout(() => { cImg.src = c.img; cImg.onload = () => { cImg.style.opacity = '1'; }; }, 200); }
+      if (cName) cName.textContent = c.name;
+      if (cLatin) cLatin.textContent = c.latin;
+      if (cTag) cTag.textContent = c.tag;
+      if (cDesc) cDesc.textContent = c.desc;
+      if (cWord) cWord.style.color = c.dot;
+    };
+    swatches.forEach((b, i) => b.addEventListener('click', () => pickColor(i)));
+
+    /* the growing season — a hand-drawn marker trail through the four stages.
+       Spine is rebuilt from the real photo positions (always connected), wobbles like
+       a hand stroke, varies in thickness, and draws on through an animated mask. */
+    const vineWrap = $('[data-vinewrap]');
+    const vineSvg = $('[data-vinesvg]');
+    const vineFill = $('[data-vinefill]');
+    const vineMask = $('[data-vinemask]');
+    if (vineWrap && vineSvg && vineFill && vineMask && vineMask.getTotalLength) {
+      const NODE_COLS = ['#4C8C57', '#8A8636', '#C6952F', '#D48CB0'];
+      let dots = [], drawn = false;
+      const catmull = (pts, seg) => {
+        const out = [], P = [pts[0]].concat(pts, [pts[pts.length - 1]]);
+        for (let i = 1; i < P.length - 2; i++) {
+          for (let t = 0; t < seg; t++) {
+            const u = t / seg, u2 = u * u, u3 = u2 * u;
+            const a = P[i - 1], b = P[i], c = P[i + 1], e = P[i + 2];
+            out.push({
+              x: .5 * ((2 * b.x) + (-a.x + c.x) * u + (2 * a.x - 5 * b.x + 4 * c.x - e.x) * u2 + (-a.x + 3 * b.x - 3 * c.x + e.x) * u3),
+              y: .5 * ((2 * b.y) + (-a.y + c.y) * u + (2 * a.y - 5 * b.y + 4 * c.y - e.y) * u2 + (-a.y + 3 * b.y - 3 * c.y + e.y) * u3)
+            });
+          }
+        }
+        out.push(pts[pts.length - 1]);
+        return out;
+      };
+      const build = () => {
+        const wr = vineWrap.getBoundingClientRect();
+        if (!wr.width || !wr.height) return;
+        const stages = Array.from(vineWrap.querySelectorAll('[data-vinestage]'));
+        const anchors = stages.map((st) => {
+          const ph = st.querySelector('[data-clip] > div') || st;
+          const r = ph.getBoundingClientRect();
+          return { x: r.left + r.width / 2 - wr.left, y: r.top + r.height / 2 - wr.top };
+        });
+        if (anchors.length < 2) return;
+        const pts = [{ x: anchors[0].x, y: -30 }].concat(anchors, [{ x: anchors[anchors.length - 1].x, y: wr.height + 24 }]);
+        const spine = catmull(pts, 26);
+        const N = spine.length, L = [], R = [];
+        let dpath = '';
+        for (let i = 0; i < N; i++) {
+          const p0 = spine[Math.max(0, i - 1)], p1 = spine[Math.min(N - 1, i + 1)];
+          let dx = p1.x - p0.x, dy = p1.y - p0.y;
+          const len = Math.hypot(dx, dy) || 1; dx /= len; dy /= len;
+          const t = i / (N - 1);
+          const wob = 7 * Math.sin(t * 17.3 + 1.7) + 4 * Math.sin(t * 39.1 + 4.2);
+          const X = spine[i].x - dy * wob, Y = spine[i].y + dx * wob;
+          const w = Math.max(1.8, 3.6 + 2.4 * Math.sin(t * 23.7 + .9) + 1.6 * Math.sin(t * 53.3 + 2.6));
+          L.push({ x: X - dy * w / 2, y: Y + dx * w / 2 });
+          R.push({ x: X + dy * w / 2, y: Y - dx * w / 2 });
+          dpath += (i ? 'L' : 'M') + X.toFixed(1) + ' ' + Y.toFixed(1);
+        }
+        let fill = '';
+        L.forEach((q, i) => { fill += (i ? 'L' : 'M') + q.x.toFixed(1) + ' ' + q.y.toFixed(1); });
+        for (let i = R.length - 1; i >= 0; i--) fill += 'L' + R[i].x.toFixed(1) + ' ' + R[i].y.toFixed(1);
+        fill += 'Z';
+        vineSvg.setAttribute('viewBox', '0 0 ' + Math.round(wr.width) + ' ' + Math.round(wr.height));
+        vineFill.setAttribute('d', fill);
+        vineMask.setAttribute('d', dpath);
+        try {
+          const vl = vineMask.getTotalLength();
+          vineMask.style.strokeDasharray = vl;
+          vineMask.style.strokeDashoffset = drawn ? 0 : vl;
+        } catch (e) {}
+        dots.forEach((d) => d.remove()); dots = [];
+        anchors.forEach((a, i) => {
+          const d = document.createElement('span');
+          d.style.cssText = 'position:absolute;left:' + (a.x / wr.width * 100) + '%;top:' + (a.y / wr.height * 100) + '%;width:13px;height:13px;margin:-6.5px 0 0 -6.5px;border-radius:50%;background:' + NODE_COLS[i % 4] + ';box-shadow:0 0 0 3.5px rgba(246,240,228,.95),0 0 0 5px rgba(47,93,58,.25);opacity:' + (drawn ? 1 : 0) + ';transition:opacity .6s ease ' + (0.4 + 2.6 * (i / Math.max(1, anchors.length - 1))) + 's;pointer-events:none;z-index:1;';
+          vineWrap.appendChild(d); dots.push(d);
+        });
+      };
+      build();
+      setTimeout(build, 700);
+      let rto;
+      window.addEventListener('resize', () => { clearTimeout(rto); rto = setTimeout(build, 180); });
+      const reduceV = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+      const vio = new IntersectionObserver((ents) => {
+        ents.forEach((en) => {
+          if (!en.isIntersecting) return;
+          vio.disconnect();
+          drawn = true;
+          if (reduceV) { vineMask.style.strokeDashoffset = 0; dots.forEach((d) => { d.style.opacity = 1; }); return; }
+          vineMask.getBoundingClientRect();
+          vineMask.style.transition = 'stroke-dashoffset 3.4s cubic-bezier(.4,.12,.25,1) .2s';
+          vineMask.style.strokeDashoffset = 0;
+          dots.forEach((d) => { d.style.opacity = 1; });
+        });
+      }, { threshold: 0.06 });
+      vio.observe(vineWrap);
+      this._vio = vio;
+    }
+
+    /* drag gallery + tilt */
+    const drag = $('[data-drag]');
+    if (drag) {
+      let down = false, startX = 0, startL = 0, moved = 0;
+      drag.addEventListener('pointerdown', (e) => { down = true; moved = 0; startX = e.clientX; startL = drag.scrollLeft; drag.style.cursor = 'grabbing'; });
+      window.addEventListener('pointermove', (e) => { if (!down) return; const dx = e.clientX - startX; moved = Math.max(moved, Math.abs(dx)); drag.scrollLeft = startL - dx; }, { passive: true });
+      window.addEventListener('pointerup', () => { down = false; drag.style.cursor = 'grab'; });
+      drag.addEventListener('click', (e) => { if (moved > 6) { e.preventDefault(); e.stopPropagation(); } }, true);
+    }
+    $$('[data-tilt]').forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const r = card.getBoundingClientRect();
+        const rx = ((e.clientY - r.top) / r.height - 0.5) * -5;
+        const ry = ((e.clientX - r.left) / r.width - 0.5) * 7;
+        card.style.transform = 'perspective(760px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg) translateY(-4px)';
+      });
+      card.addEventListener('mouseleave', () => { card.style.transform = 'none'; });
+    });
+
+    /* compare — paint the bloom */
+    const box = $('[data-compare]');
+    if (box) {
+      const baseImg = box.querySelector('[data-cmp-base]');
+      const colorImg = box.querySelector('[data-cmp-color]');
+      const divider = box.querySelector('[data-cmp-divider]');
+      const label = box.querySelector('[data-cmp-label]');
+      const hexA = (hex, a) => { const n = parseInt(hex.slice(1), 16); return 'rgba(' + (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',' + a + ')'; };
+      const TINTS = {
+        fuchsia: { name: 'FUCHSIA', hex: '#C0368B', img: 'images/compare/flower-fuchsia.png' },
+        gold: { name: 'GOLD', hex: '#D9A72E', img: 'images/compare/flower-gold.png' },
+        sky: { name: 'SKY', hex: '#5E92C9', img: 'images/compare/flower-sky.png' },
+        lavender: { name: 'LAVENDER', hex: '#B18BD0', img: 'images/compare/flower-lavender.png' },
+        burgundy: { name: 'BURGUNDY', hex: '#8C2B55', img: 'images/compare/flower-burgundy.png' }
+      };
+      Object.values(TINTS).forEach(t => { const i = new Image(); i.src = t.img; });
+      let pct = 50, auto = true, raf = null, t0 = 0;
+      const setPct = (p) => { pct = Math.max(0, Math.min(100, p)); if (colorImg) colorImg.style.clipPath = 'inset(0 0 0 ' + pct + '%)'; if (divider) divider.style.left = pct + '%'; };
+      setPct(50);
+      const stopAuto = () => { auto = false; if (raf) { cancelAnimationFrame(raf); raf = null; } };
+      const move = (clientX) => { const r = box.getBoundingClientRect(); setPct(((clientX - r.left) / r.width) * 100); };
+      box.addEventListener('pointermove', (e) => { stopAuto(); move(e.clientX); });
+      box.addEventListener('pointerdown', (e) => { stopAuto(); move(e.clientX); });
+      const tintBtns = $$('[data-cmptint]');
+      const pickTint = (key) => {
+        const t = TINTS[key];
+        if (!t) return;
+        if (colorImg) colorImg.src = t.img;
+        if (label) { label.textContent = t.name; label.style.background = hexA(t.hex, 0.62); }
+        tintBtns.forEach(b => { const on = b.getAttribute('data-cmptint') === key; b.style.background = on ? hexA(t.hex, 0.14) : 'transparent'; b.style.borderColor = on ? t.hex : 'rgba(26,30,23,.18)'; });
+      };
+      tintBtns.forEach(b => b.addEventListener('click', () => pickTint(b.getAttribute('data-cmptint'))));
+      pickTint('fuchsia');
+      const demo = (t) => { if (!auto) return; if (!t0) t0 = t; const e = (t - t0) / 1000; setPct(50 + Math.sin(e * 1.15) * 27); raf = requestAnimationFrame(demo); };
+      if ('IntersectionObserver' in window) {
+        const cio = new IntersectionObserver((ents) => { ents.forEach(en => { if (en.isIntersecting && auto) { t0 = 0; if (!raf) raf = requestAnimationFrame(demo); } else if (raf) { cancelAnimationFrame(raf); raf = null; } }); }, { threshold: 0.35 });
+        cio.observe(box); this._cio = cio;
+      }
+    }
+
+    /* availability rolling window */
+    this._buildAvailability();
+  }
+
+  async _loadTerroir() {
+    try {
+      const r = await fetch('terroir-geo.json');
+      const data = await r.json();
+      window.dispatchEvent(new CustomEvent('kmty:terroirdata', { detail: data }));
+      this.setState({ terroir: data }, () => {
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          const p = document.querySelector('[data-yn-border]');
+          if (!p || !p.getTotalLength) return;
+          try {
+            this._ynLen = p.getTotalLength();
+            if (this._terroirIn) { this._drawYnBorder(); return; }
+            p.style.strokeDasharray = this._ynLen;
+            p.style.strokeDashoffset = this._ynLen;
+          } catch (e) {}
+        }));
+      });
+    } catch (e) { /* data missing — scene stays photographic */ }
+  }
+
+  _drawYnBorder() {
+    const p = document.querySelector('[data-yn-border]');
+    if (!p || !this._ynLen) return;
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+    p.style.strokeDasharray = this._ynLen;
+    if (reduce) { p.style.strokeDashoffset = 0; return; }
+    p.style.strokeDashoffset = this._ynLen;
+    p.getBoundingClientRect();
+    p.style.transition = 'stroke-dashoffset 2.1s cubic-bezier(.5,.15,.25,1) .5s';
+    p.style.strokeDashoffset = 0;
+  }
+
+  _buildAvailability() {
+    const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const LONG = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const ROWS = [
+      { name: 'Snow', dot: '#F2EFE7', edge: 'rgba(0,0,0,.18)', av: [1,1,1,0.5,0.5,1,1,1,1,1,1,1] },
+      { name: 'Rose Bicolor', dot: '#E19CC0', edge: 'transparent', av: [1,1,0.5,0.5,0,0,0.5,1,1,1,1,1] },
+      { name: 'Fuchsia', dot: '#C0368B', edge: 'transparent', av: [1,1,1,1,0.5,0.5,1,1,1,1,1,1] },
+      { name: 'Velvet Burgundy', dot: '#7A1F4D', edge: 'transparent', av: [1,1,0.5,0,0,0,0,0.5,1,1,1,1] },
+      { name: 'Gold', dot: '#E8D96B', edge: 'transparent', av: [0.5,1,1,1,0.5,0,0,0,0.5,1,1,0.5] },
+      { name: 'Buttercream', dot: '#EEE6BE', edge: 'rgba(0,0,0,.12)', av: [0,0.5,1,1,1,0.5,0,0,0,0.5,1,1] }
+    ];
+    const WINDOW = 6;
+    const now = new Date();
+    let cursor = now.getMonth();
+    const nowMonth = now.getMonth();
+    const inquiry = [];
+
+    const toolbar = document.querySelector('[data-availtoolbar]');
+    const grid = document.querySelector('[data-availgrid]');
+    const scrubber = document.querySelector('[data-scrubber]');
+    const inqList = document.querySelector('[data-inqlist]');
+    const inqCount = document.querySelector('[data-inqcount]');
+    const inqSend = document.querySelector('[data-inqsend]');
+    if (!grid) return;
+
+    const mono = "'Hanken Grotesk','Noto Sans',sans-serif";
+    const el = (tag, style, txt) => { const n = document.createElement(tag); if (style) n.style.cssText = style; if (txt != null) n.textContent = txt; return n; };
+
+    const visibleMonths = () => { const a = []; for (let i = 0; i < WINDOW; i++) a.push((cursor + i) % 12); return a; };
+
+    const renderToolbar = () => {
+      toolbar.innerHTML = '';
+      const vm = visibleMonths();
+      const range = el('div', 'display:flex;align-items:center;gap:8px;flex-wrap:wrap;');
+      range.appendChild(el('span', 'width:8px;height:8px;border-radius:50%;background:#2F5D3A;'));
+      range.appendChild(el('strong', "font-family:'Fraunces','Playfair Display',serif;font-size:21px;font-weight:500;letter-spacing:-.01em;color:#1A1E17;", LONG[vm[0]]));
+      range.appendChild(el('span', 'color:#B0552F;', '→'));
+      range.appendChild(el('strong', "font-family:'Fraunces','Playfair Display',serif;font-size:21px;font-weight:500;letter-spacing:-.01em;color:#1A1E17;", LONG[vm[vm.length - 1]]));
+      range.appendChild(el('span', mono + ';font-size:11px;color:#8A8474;', '· 2026'));
+      const nav = el('div', 'display:flex;gap:6px;');
+      const mk = (txt, d) => { const b = el('button', 'width:40px;height:40px;border:1px solid rgba(26,30,23,.2);border-radius:50%;background:#fff;cursor:pointer;font-size:17px;color:#1A1E17;transition:all .25s ease;', txt); b.addEventListener('click', () => { cursor = ((cursor + d) % 12 + 12) % 12; renderAll(); }); return b; };
+      nav.appendChild(mk('‹', -1)); nav.appendChild(mk('›', 1));
+      toolbar.appendChild(range); toolbar.appendChild(nav);
+    };
+
+    const cellColor = (v) => v === 1 ? '#2F5D3A' : v === 0.5 ? '#E7C36B' : 'rgba(26,30,23,.05)';
+    const renderGrid = () => {
+      grid.innerHTML = '';
+      const vm = visibleMonths();
+      const table = el('div', 'min-width:520px;');
+      // header
+      const head = el('div', 'display:grid;grid-template-columns:140px repeat(' + WINDOW + ',1fr);gap:6px;align-items:end;padding-bottom:12px;border-bottom:1px solid rgba(26,30,23,.16);margin-bottom:6px;');
+      head.appendChild(el('div', mono + ';font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#8A8474;', 'Color'));
+      vm.forEach(m => {
+        const isNow = m === nowMonth;
+        const c = el('div', 'text-align:center;');
+        c.appendChild(el('div', "font-family:'Fraunces','Playfair Display',serif;font-weight:600;font-size:13px;color:" + (isNow ? '#B0552F' : '#1A1E17') + ';', MONTHS[m]));
+        if (isNow) c.appendChild(el('div', mono + ';font-size:8.5px;letter-spacing:.06em;color:#B0552F;margin-top:2px;', 'THIS MONTH'));
+        head.appendChild(c);
+      });
+      table.appendChild(head);
+      // rows
+      ROWS.forEach(row => {
+        const r = el('div', 'display:grid;grid-template-columns:140px repeat(' + WINDOW + ',1fr);gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid rgba(26,30,23,.06);');
+        const label = el('div', 'display:flex;align-items:center;gap:8px;');
+        label.appendChild(el('span', 'width:14px;height:14px;border-radius:50%;background:' + row.dot + ';border:1px solid ' + row.edge + ';flex:none;'));
+        label.appendChild(el('span', "font-family:'Fraunces','Playfair Display',serif;font-weight:600;font-size:12.5px;color:#1A1E17;line-height:1.1;", row.name));
+        r.appendChild(label);
+        vm.forEach(m => {
+          const v = row.av[m];
+          const cell = el('button', 'height:46px;border:1px solid ' + (v > 0 ? 'rgba(255,255,255,.18)' : 'rgba(26,30,23,.06)') + ';border-radius:16px;background:' + cellColor(v) + ';box-shadow:' + (v > 0 ? '0 1px 3px rgba(26,30,23,.14)' : 'none') + ';cursor:' + (v > 0 ? 'pointer' : 'default') + ';display:flex;align-items:center;justify-content:center;transition:transform .15s ease,filter .15s ease;');
+          if (v === 1) cell.appendChild(el('span', mono + ';font-size:10px;color:rgba(243,238,228,.9);', 'add +'));
+          if (v === 0.5) cell.appendChild(el('span', mono + ';font-size:9px;color:#6b531a;', 'limited'));
+          if (v > 0) {
+            cell.addEventListener('mouseenter', () => { cell.style.filter = 'brightness(1.08)'; cell.style.transform = 'translateY(-1px)'; });
+            cell.addEventListener('mouseleave', () => { cell.style.filter = 'none'; cell.style.transform = 'none'; });
+            cell.addEventListener('click', () => addInquiry(row, m));
+          }
+          r.appendChild(cell);
+        });
+        table.appendChild(r);
+      });
+      // legend
+      const legend = el('div', 'display:flex;flex-wrap:wrap;gap:16px;margin-top:16px;');
+      const lg = (col, txt) => { const w = el('span', 'display:flex;align-items:center;gap:6px;' + mono + ';font-size:11px;color:#55564A;'); w.appendChild(el('span', 'width:12px;height:12px;border-radius:999px;background:' + col + ';')); w.appendChild(el('span', '', txt)); return w; };
+      legend.appendChild(lg('#2F5D3A', 'In finishing'));
+      legend.appendChild(lg('#E7C36B', 'Limited'));
+      legend.appendChild(lg('rgba(26,30,23,.08)', 'Not in season'));
+      table.appendChild(legend);
+      grid.appendChild(table);
+    };
+
+    const renderScrubber = () => {
+      scrubber.innerHTML = '';
+      const vm = visibleMonths();
+      MONTHS.forEach((m, i) => {
+        const inWin = vm.includes(i);
+        const t = el('button', 'flex:1;padding:9px 2px;border:none;border-radius:16px;cursor:pointer;background:' + (inWin ? 'rgba(47,93,58,.16)' : 'rgba(26,30,23,.05)') + ';' + mono + ';font-size:9.5px;color:' + (i === cursor ? '#B0552F' : inWin ? '#2F5D3A' : '#8A8474') + ';font-weight:' + (i === cursor ? '600' : '400') + ';', m[0]);
+        t.addEventListener('click', () => { cursor = i; renderAll(); });
+        scrubber.appendChild(t);
+      });
+    };
+
+    const renderInquiry = () => {
+      inqList.innerHTML = '';
+      if (inquiry.length === 0) {
+        const empty = el('div', 'flex:1;display:flex;flex-direction:column;justify-content:center;gap:6px;padding:8px 0;');
+        empty.appendChild(el('div', "font-family:'Fraunces','Playfair Display',serif;font-size:15px;color:rgba(243,238,228,.8);", 'No lines yet.'));
+        empty.appendChild(el('p', mono + ';font-size:11px;line-height:1.5;color:rgba(243,238,228,.45);margin:0;', 'Click any block in the window to stage a color and month.'));
+        inqList.appendChild(empty);
+      } else {
+        inquiry.forEach((it, idx) => {
+          const chip = el('div', 'display:flex;align-items:center;gap:9px;padding:9px 10px;background:rgba(243,238,228,.06);border-radius:999px;');
+          chip.appendChild(el('span', 'width:11px;height:11px;border-radius:50%;background:' + it.dot + ';flex:none;'));
+          const tx = el('div', 'flex:1;min-width:0;');
+          tx.appendChild(el('div', "font-family:'Fraunces','Playfair Display',serif;font-weight:600;font-size:13px;color:#F7F3EA;", it.name));
+          tx.appendChild(el('div', mono + ';font-size:10px;color:rgba(243,238,228,.5);', it.status + ' · ' + it.monthLong));
+          chip.appendChild(tx);
+          const x = el('button', 'border:none;background:transparent;color:rgba(243,238,228,.5);font-size:16px;cursor:pointer;flex:none;line-height:1;', '×');
+          x.addEventListener('click', () => { inquiry.splice(idx, 1); renderInquiry(); });
+          chip.appendChild(x);
+          inqList.appendChild(chip);
+        });
+      }
+      inqCount.textContent = inquiry.length + (inquiry.length === 1 ? ' item' : ' items');
+      inqSend.style.opacity = inquiry.length ? '1' : '.5';
+    };
+
+    const addInquiry = (row, m) => {
+      if (inquiry.some(x => x.name === row.name && x.month === m)) return;
+      inquiry.push({ name: row.name, dot: row.dot, month: m, monthLong: LONG[m], status: row.av[m] === 1 ? 'In finishing' : 'Limited' });
+      renderInquiry();
+    };
+
+    const renderAll = () => { renderToolbar(); renderGrid(); renderScrubber(); };
+    renderAll();
+    renderInquiry();
+    if (inqSend) inqSend.addEventListener('click', () => { if (inquiry.length) { inqSend.textContent = '✓ Sent — we\u2019ll reply within 1 business day'; setTimeout(() => { inqSend.textContent = 'Send inquiry →'; }, 3000); } });
+  }
+
+  _countUp(el) {
+    if (el.__done) return;
+    el.__done = true;
+    const to = parseFloat(el.getAttribute('data-count-to') || '0');
+    const suffix = el.getAttribute('data-count-suffix') || '';
+    const dur = 1400;
+    const t0 = performance.now();
+    const tick = (t) => {
+      const p = Math.min(1, (t - t0) / dur);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(to * eased).toLocaleString('en-US') + suffix;
+      if (p < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+
+  componentWillUnmount() {
+    if (this._setNav) window.removeEventListener('scroll', this._setNav);
+    if (this._io) this._io.disconnect();
+    if (this._clipIo) this._clipIo.disconnect();
+    if (this._railIo) this._railIo.disconnect();
+    if (this._vio) this._vio.disconnect();
+    if (this._cio) this._cio.disconnect();
+  }
+}
+</script>
+</body>
+</html>
