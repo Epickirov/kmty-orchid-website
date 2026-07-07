@@ -1616,66 +1616,91 @@ class Component extends DCLogic {
       mix.querySelector('[data-mix-again]').addEventListener('click', () => {
         seed = (Math.random() * 1e9) >>> 0; queueRender();
       });
-      // save the mix as a branded recipe card (flower + swatches + exact shares)
+      // save the mix: a specimen-sheet card in the site's letterbox language
       mix.querySelector('[data-mix-save]').addEventListener('click', () => {
         if (!bloom.complete || !bloom.naturalWidth) return;
-        const W = 1080, H = 1350;
+        const W = 1080, H = 1350, MX = 120;
         const card = document.createElement('canvas'); card.width = W; card.height = H;
         const g = card.getContext('2d');
         const SANS = '"Hanken Grotesk","Noto Sans","Noto Sans SC",sans-serif';
         const SERIF = '"Fraunces","Playfair Display","Noto Serif SC",serif';
         const tracked = (txt, x, y, track, alignRight) => {
           const ws = [...txt].map(ch => g.measureText(ch).width);
-          let total = ws.reduce((a, b) => a + b, 0) + track * (txt.length - 1);
+          const total = ws.reduce((a, b) => a + b, 0) + track * (txt.length - 1);
           let px = alignRight ? x - total : x;
           [...txt].forEach((ch, i2) => { g.fillText(ch, px, y); px += ws[i2] + track; });
         };
+        // mat + museum keyline
         g.fillStyle = '#F5F4F2'; g.fillRect(0, 0, W, H);
+        g.strokeStyle = 'rgba(26,30,23,.07)'; g.lineWidth = 2;
+        g.strokeRect(36, 36, W - 72, H - 72);
         g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
-        g.drawImage(canvas, 140, 78, 800, 800);
-        const capEl = mix.querySelector('[data-t="mix.caption"]');
-        const noEl = mix.querySelector('[data-mix-no]');
-        g.fillStyle = '#98989b'; g.font = '500 23px ' + SANS;
-        tracked(((capEl ? capEl.textContent : 'Your one-of-one') + ' · ' + (noEl ? noEl.textContent : '')).toUpperCase(), 140, 936, 5);
+        // header: mark + wordmark left, series tag right
         const logo = mix.querySelector('img[src*="logo"]');
         if (logo && logo.complete) {
-          const lw = 66, lh = logo.naturalHeight * lw / logo.naturalWidth;
-          g.drawImage(logo, W - 140 - lw, 936 - lh + 8, lw, lh);
+          const lh = 46, lw = logo.naturalWidth * lh / logo.naturalHeight;
+          g.drawImage(logo, MX, 72, lw, lh);
+          g.fillStyle = '#1A1E17'; g.font = '700 34px ' + SERIF;
+          g.fillText('KMTY', MX + lw + 18, 108);
+        } else {
+          g.fillStyle = '#1A1E17'; g.font = '700 34px ' + SERIF;
+          g.fillText('KMTY', MX, 108);
         }
-        g.strokeStyle = 'rgba(26,30,23,.1)'; g.lineWidth = 2;
-        g.beginPath(); g.moveTo(140, 985); g.lineTo(W - 140, 985); g.stroke();
-        // shares normalised to a clean 100
+        g.fillStyle = '#98989b'; g.font = '500 19px ' + SANS;
+        tracked('星空 · CONSTELLATION', W - MX, 102, 5, true);
+        // the flower plate, floating on the mat
+        g.drawImage(canvas, 180, 156, 720, 720);
+        // title line: the one-of-one number, with the localized caption opposite
+        const noEl = mix.querySelector('[data-mix-no]');
+        const capEl = mix.querySelector('[data-t="mix.caption"]');
+        g.fillStyle = '#1A1E17'; g.font = '600 52px ' + SERIF;
+        g.fillText(noEl ? noEl.textContent : '№', MX, 968);
+        g.fillStyle = '#98989b'; g.font = '500 19px ' + SANS;
+        tracked((capEl ? capEl.textContent : 'Your one-of-one').toUpperCase(), W - MX, 960, 5, true);
+        // brand gradient hairline
+        const grad = g.createLinearGradient(MX, 0, W - MX, 0);
+        grad.addColorStop(0, 'rgba(47,93,58,.45)'); grad.addColorStop(.5, 'rgba(198,149,47,.45)'); grad.addColorStop(1, 'rgba(212,140,176,.45)');
+        g.fillStyle = grad; g.fillRect(MX, 1002, W - 2 * MX, 2);
+        // recipe rows: swatch — name ···· share
         const total = sel.reduce((t, k) => t + (weights[k] || 1), 0);
         const shares = sel.map(k => Math.round((weights[k] || 1) / total * 100));
-        const drift = 100 - shares.reduce((a, b) => a + b, 0);
-        shares[shares.indexOf(Math.max(...shares))] += drift;
+        shares[shares.indexOf(Math.max(...shares))] += 100 - shares.reduce((a, b) => a + b, 0);
         sel.forEach((k, r) => {
-          const y = 1064 + r * 84;
+          const y = 1064 + r * 58;
           g.fillStyle = PAL[k][1];
-          g.beginPath(); g.arc(163, y - 11, 19, 0, 7); g.fill();
+          g.beginPath(); g.arc(MX + 15, y - 10, 15, 0, 7); g.fill();
           g.strokeStyle = 'rgba(26,30,23,.18)'; g.lineWidth = 2; g.stroke();
-          g.fillStyle = '#1A1E17'; g.font = '600 31px ' + SANS;
-          g.fillText(PAL[k][0], 208, y);
-          g.font = '500 38px ' + SERIF;
+          g.fillStyle = '#2A2D26'; g.font = '600 27px ' + SANS;
+          g.fillText(PAL[k][0], MX + 52, y);
+          const nameEnd = MX + 52 + g.measureText(PAL[k][0]).width;
+          g.font = '500 34px ' + SERIF;
           const pct = shares[r] + '%';
-          g.fillText(pct, W - 140 - g.measureText(pct).width, y + 2);
+          const pctX = W - MX - g.measureText(pct).width;
+          g.fillStyle = '#1A1E17'; g.fillText(pct, pctX, y + 1);
+          g.fillStyle = 'rgba(26,30,23,.22)';
+          for (let dx = nameEnd + 22; dx < pctX - 22; dx += 10) {
+            g.beginPath(); g.arc(dx, y - 8, 1.3, 0, 7); g.fill();
+          }
         });
+        // reference-only disclaimer, wrapped to the grid
         const discEl = mix.querySelector('[data-t="mix.disc"]');
         const disc = discEl ? discEl.textContent : 'For reference only. Every Constellation orchid is made by hand — the actual plant may vary from this preview.';
-        g.fillStyle = '#a7a39b'; g.font = '400 17px ' + SANS;
-        const maxW = W - 280;
-        let line = '', ly = H - 116;
+        g.fillStyle = '#a7a39b'; g.font = '400 16px ' + SANS;
+        const maxW = W - 2 * MX;
+        let line = '', ly = 1256;
         for (const ch of disc) {
           if (g.measureText(line + ch).width > maxW && line) {
             const cut = ch === ' ' ? -1 : line.lastIndexOf(' ');
-            if (cut > maxW / 34) { g.fillText(line.slice(0, cut), 140, ly); line = line.slice(cut + 1) + (ch === ' ' ? '' : ch); }
-            else { g.fillText(line, 140, ly); line = ch === ' ' ? '' : ch; }
-            ly += 26;
+            if (cut > 8) { g.fillText(line.slice(0, cut), MX, ly); line = line.slice(cut + 1) + (ch === ' ' ? '' : ch); }
+            else { g.fillText(line, MX, ly); line = ch === ' ' ? '' : ch; }
+            ly += 25;
           } else line += ch;
         }
-        if (line) g.fillText(line, 140, ly);
-        g.fillStyle = '#b0aca4'; g.font = '500 19px ' + SANS;
-        tracked('KMTY · 星空 CONSTELLATION · KMTYORCHID.COM', 140, H - 40, 4);
+        if (line) g.fillText(line, MX, ly);
+        // footer
+        g.fillStyle = '#b0aca4'; g.font = '500 17px ' + SANS;
+        tracked('KMTYORCHID.COM', MX, H - 40, 4);
+        tracked('HAND-FINISHED · SONGMING, YUNNAN', W - MX, H - 40, 4, true);
         const no = (noEl ? noEl.textContent.replace(/\D/g, '') : 'mix') || 'mix';
         card.toBlob((blob) => {
           const a = document.createElement('a');
