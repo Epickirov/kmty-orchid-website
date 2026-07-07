@@ -1489,7 +1489,10 @@ class Component extends DCLogic {
     if (mix) {
       const canvas = mix.querySelector('[data-mix-canvas]');
       const mctx = canvas.getContext('2d');
-      const SIZE = 560, FIELD = 560;
+      const SIZE = 560, FIELD = 320;   // the colour field is bilinear-sampled up
+                                       // to the canvas, so it can run coarser —
+                                       // the cuts (and their crisp borders) stay
+                                       // at full canvas resolution
       const PAL = [
         ['Porcelain', '#F2EFE6'], ['Blush', '#F2C4CF'], ['Saffron', '#E8A33D'],
         ['Flame', '#CE4A2D'], ['Wine', '#8E2F44'], ['Fuchsia', '#C0368B'],
@@ -1505,6 +1508,7 @@ class Component extends DCLogic {
       // so its mask comes from the bloom's naturally coloured heart (chroma),
       // which follows the true anatomy and self-feathers at the rim
       const pistil = new Float32Array(SIZE * SIZE);
+      let pbx0 = 0, pbx1 = SIZE - 1, pby0 = 0, pby1 = SIZE - 1;  // pistil bounds
       const bloom = new Image();
       bloom.src = 'images/blooms/bloom-19.webp';
       bloom.onload = () => {
@@ -1513,11 +1517,19 @@ class Component extends DCLogic {
         const w = bloom.naturalWidth * sc, h = bloom.naturalHeight * sc;
         bctx.drawImage(bloom, (SIZE - w) / 2, (SIZE - h) / 2, w, h);
         const sd = bctx.getImageData(0, 0, SIZE, SIZE).data;
+        pbx0 = SIZE; pby0 = SIZE; pbx1 = 0; pby1 = 0;
         for (let j = 0, p2 = 0; j < sd.length; j += 4, p2++) {
           const ch = Math.max(sd[j], sd[j + 1], sd[j + 2]) - Math.min(sd[j], sd[j + 1], sd[j + 2]);
           let t = (ch - 26) / 36; t = t < 0 ? 0 : t > 1 ? 1 : t;
-          pistil[p2] = sd[j + 3] > 60 ? t * t * (3 - 2 * t) : 0;
+          const pv = sd[j + 3] > 60 ? t * t * (3 - 2 * t) : 0;
+          pistil[p2] = pv;
+          if (pv > .003) {
+            const x = p2 % SIZE, y = (p2 / SIZE) | 0;
+            if (x < pbx0) pbx0 = x; if (x > pbx1) pbx1 = x;
+            if (y < pby0) pby0 = y; if (y > pby1) pby1 = y;
+          }
         }
+        if (pbx1 < pbx0) { pbx0 = 0; pby0 = 0; pbx1 = SIZE - 1; pby1 = SIZE - 1; }
         render();
       };
       const hex2rgb = (h) => { const n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
@@ -1552,14 +1564,16 @@ class Component extends DCLogic {
           field[i] = fbm(n1, px + 1.6 * qx, py + 1.6 * qy);
         }
         lastField = field;                          // the re-swirl reveal follows these veins
-        // the pistil's own pour: independent pattern at a finer scale
+        // the pistil's own pour: independent pattern at a finer scale, computed
+        // only inside the pistil's bounds — the rest of the frame never reads it
         const fieldB = new Float32Array(FIELD * FIELD);
-        const s2 = s * 2.2;
-        i = 0;
-        for (let y = 0; y < FIELD; y++) for (let x = 0; x < FIELD; x++, i++) {
+        const s2 = s * 2.2, Rm = (FIELD - 1) / (SIZE - 1);
+        const fbx0 = Math.max(0, ((pbx0 * Rm) | 0) - 3), fbx1 = Math.min(FIELD - 1, ((pbx1 * Rm) | 0) + 3);
+        const fby0 = Math.max(0, ((pby0 * Rm) | 0) - 3), fby1 = Math.min(FIELD - 1, ((pby1 * Rm) | 0) + 3);
+        for (let y = fby0; y <= fby1; y++) for (let x = fbx0; x <= fbx1; x++) {
           const px = x * s2, py = y * s2;
           const qx = fbm(n4, px + 2.2, py + 6.3), qy = fbm(n4, px + 7.4, py + 1.9);
-          fieldB[i] = fbm(n3, px + 1.6 * qx, py + 1.6 * qy);
+          fieldB[y * FIELD + x] = fbm(n3, px + 1.6 * qx, py + 1.6 * qy);
         }
         // per-colour area follows the sliders: thresholds from the field's own percentiles
         const sorted = field.slice().sort();
@@ -1571,12 +1585,15 @@ class Component extends DCLogic {
           cuts.push(sorted[Math.min(sorted.length - 1, (acc * sorted.length) | 0)]);
         }
         const bVals = [];
-        for (let p2 = 0; p2 < fieldB.length; p2++) if (pistil[p2] > .5) bVals.push(fieldB[p2]);
+        for (let y = 0; y < SIZE; y += 2) for (let x = 0; x < SIZE; x += 2) {
+          if (pistil[y * SIZE + x] > .5)
+            bVals.push(fieldB[Math.round(y * Rm) * FIELD + Math.round(x * Rm)]);
+        }
         bVals.sort((a, b) => a - b);
         const cutsB = []; acc = 0;
         for (let c = 0; c < sel.length - 1; c++) {
           acc += (weights[sel[c]] || 1) / total;
-          cutsB.push(bVals.length > 400 ? bVals[Math.min(bVals.length - 1, (acc * bVals.length) | 0)] : cuts[c]);
+          cutsB.push(bVals.length > 100 ? bVals[Math.min(bVals.length - 1, (acc * bVals.length) | 0)] : cuts[c]);
         }
         // colourise at full canvas resolution: bilinear-sample the field and cut
         // hard at the thresholds — clean, distinct borders between the paints
@@ -1591,9 +1608,14 @@ class Component extends DCLogic {
             const c2 = field[y1 * FIELD + x0], d2 = field[y1 * FIELD + x1];
             const v = a + (b2 - a) * tx + (c2 - a) * ty + (a - b2 - c2 + d2) * tx * ty;
             let band = 0; while (band < cuts.length && v > cuts[band]) band++;
-            const vb = (() => { const a2 = fieldB[y0 * FIELD + x0], b3 = fieldB[y0 * FIELD + x1], c3 = fieldB[y1 * FIELD + x0], d3 = fieldB[y1 * FIELD + x1]; return a2 + (b3 - a2) * tx + (c3 - a2) * ty + (a2 - b3 - c3 + d3) * tx * ty; })();
-            let bandB = 0; while (bandB < cutsB.length && vb > cutsB[bandB]) bandB++;
-            const m = pistil[y * SIZE + x], cA = cols[band], cB = cols[bandB];
+            const m = pistil[y * SIZE + x], cA = cols[band];
+            let cB = cA;
+            if (m > .004) {
+              const a2 = fieldB[y0 * FIELD + x0], b3 = fieldB[y0 * FIELD + x1], c3 = fieldB[y1 * FIELD + x0], d3 = fieldB[y1 * FIELD + x1];
+              const vb = a2 + (b3 - a2) * tx + (c3 - a2) * ty + (a2 - b3 - c3 + d3) * tx * ty;
+              let bandB = 0; while (bandB < cutsB.length && vb > cutsB[bandB]) bandB++;
+              cB = cols[bandB];
+            }
             d[i] = cA[0] + (cB[0] - cA[0]) * m;
             d[i + 1] = cA[1] + (cB[1] - cA[1]) * m;
             d[i + 2] = cA[2] + (cB[2] - cA[2]) * m;
@@ -1623,24 +1645,36 @@ class Component extends DCLogic {
       const tmpCv = document.createElement('canvas'); tmpCv.width = tmpCv.height = SIZE;
       const maskCv = document.createElement('canvas'); maskCv.width = maskCv.height = SIZE;
       const maskImg = maskCv.getContext('2d').createImageData(SIZE, SIZE);
-      const easeIO = (t) => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
       const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
       const swirlTransition = () => {
         const pc = prevCv.getContext('2d');
         pc.clearRect(0, 0, SIZE, SIZE); pc.drawImage(canvas, 0, 0);
         render();                                   // synchronous: canvas now holds the new pour
-        const f = lastField;
-        if (!f) return;
+        const f0 = lastField;
+        if (!f0) return;
         const nc = nextCv.getContext('2d');
         nc.clearRect(0, 0, SIZE, SIZE); nc.drawImage(canvas, 0, 0);
+        // the reveal mask reads per canvas pixel: upsample the field once
+        const f = new Float32Array(SIZE * SIZE);
+        const R2 = (FIELD - 1) / (SIZE - 1);
+        for (let y = 0, i2 = 0; y < SIZE; y++) {
+          const fy = y * R2, y0 = fy | 0, y1 = Math.min(FIELD - 1, y0 + 1), ty = fy - y0;
+          for (let x = 0; x < SIZE; x++, i2++) {
+            const fx = x * R2, x0 = fx | 0, x1 = Math.min(FIELD - 1, x0 + 1), tx = fx - x0;
+            const a = f0[y0 * FIELD + x0], b2 = f0[y0 * FIELD + x1];
+            const c2 = f0[y1 * FIELD + x0], d2 = f0[y1 * FIELD + x1];
+            f[i2] = a + (b2 - a) * tx + (c2 - a) * ty + (a - b2 - c2 + d2) * tx * ty;
+          }
+        }
         const qs = [];
         for (let j = 0; j < f.length; j += 7) qs.push(f[j]);
         qs.sort((a, b) => a - b);
         const band = (qs[qs.length - 1] - qs[0]) * .06 + 1e-6;
         const mk = maskCv.getContext('2d'), tc = tmpCv.getContext('2d'), md = maskImg.data;
-        const T = 850, t0 = performance.now();
+        const T = 700, t0 = performance.now();
         const step = (now) => {
-          const e = easeIO(Math.min(1, (now - t0) / T));
+          const t = Math.min(1, (now - t0) / T);
+          const e = 1 - Math.pow(1 - t, 3);          // fast start: the pour answers the click
           const thr = qs[Math.min(qs.length - 1, (e * qs.length) | 0)] + (e * 2 - 1) * band;
           for (let j = 0, k = 3; j < f.length; j++, k += 4) {
             const a = (thr - f[j]) / (2 * band) + .5;
