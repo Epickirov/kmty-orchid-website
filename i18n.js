@@ -470,22 +470,27 @@ var MAP = {
     var enOf = { myanmar: 'MYANMAR', laos: 'LAOS', vietnam: 'VIETNAM', sichuan: 'SICHUAN', guizhou: 'GUIZHOU', guangxi: 'GUANGXI' };
     els.back.innerHTML = ''; els.front.innerHTML = ''; els.pins.innerHTML = '';
     var self = this;
+    // on phones the map renders as a small in-flow plate (~390px wide for a 1900-unit
+    // viewBox), so labels drawn at desktop sizes come out microscopic — scale them up
+    var K = 1;
+    try { if (els.sec.getBoundingClientRect().width < 700) K = 2.05; } catch (e) {}
     (this.data.labels || []).forEach(function (l) {
       var key = l.en.toLowerCase();
       var co = l.tag === 'country';
-      var target = co ? els.front : els.back;
+      // small screens: the front overlay svg is hidden, so countries join the plate
+      var target = (co && K === 1) ? els.front : els.back;
       var primary = d[key] || l.en.toUpperCase();
       var secondary = (LANG === 'zh') ? enOf[key] : zhOf[key];
-      self.text(target, primary, l.x, l.y, { fill: co ? '#C7E7D3' : 'rgba(238,243,238,.8)', fs: co ? 25 : 23, fw: co ? 600 : 500, op: co ? 1 : .6, sws: co ? 3.6 : 3 });
-      if (secondary) self.text(target, secondary, l.x, l.zhY, { fill: co ? '#C7E7D3' : 'rgba(238,243,238,.75)', fs: co ? 19 : 18, fw: 400, lsp: '.08em', op: co ? .9 : .5, sws: co ? 3.4 : 3, ff: "'Noto Sans SC','Hanken Grotesk','Noto Sans',sans-serif" });
+      self.text(target, primary, l.x, l.y, { fill: co ? '#C7E7D3' : 'rgba(238,243,238,.8)', fs: (co ? 25 : 23) * K, fw: co ? 600 : 500, op: co ? 1 : .6, sws: (co ? 3.6 : 3) * K });
+      if (secondary) self.text(target, secondary, l.x, l.y + (l.zhY - l.y) * K, { fill: co ? '#C7E7D3' : 'rgba(238,243,238,.75)', fs: (co ? 19 : 18) * K, fw: 400, lsp: '.08em', op: co ? .9 : .5, sws: (co ? 3.4 : 3) * K, ff: "'Noto Sans SC','Hanken Grotesk','Noto Sans',sans-serif" });
     });
     // Yunnan centre label
-    this.text(els.back, d.yunnanBig, 690, 556, { fill: '#fff', fs: 58, fw: 700, st: 'rgba(6,16,10,.55)', sws: 5, ff: "'Noto Serif SC','Playfair Display',serif" });
-    this.text(els.back, d.yunnanSub, 690, 592, { fill: '#fff', fs: 22, fw: 500, lsp: '.5em', st: 'rgba(6,16,10,.5)', sws: 4 });
+    this.text(els.back, d.yunnanBig, 690, 556, { fill: '#fff', fs: 58 * K, fw: 700, st: 'rgba(6,16,10,.55)', sws: 5 * K, ff: "'Noto Serif SC','Playfair Display',serif" });
+    this.text(els.back, d.yunnanSub, 690, 556 + 36 * K, { fill: '#fff', fs: 22 * K, fw: 500, lsp: '.5em', st: 'rgba(6,16,10,.5)', sws: 4 * K });
     // pins: pulse rings + dot (names live on the cards)
     (this.data.pins || []).forEach(function (p) {
       var g = document.createElementNS(SVGNS, 'g');
-      g.setAttribute('transform', 'translate(' + p.x + ',' + p.y + ')');
+      g.setAttribute('transform', 'translate(' + p.x + ',' + p.y + ')' + (K > 1 ? ' scale(' + K + ')' : ''));
       [0, 1.4].forEach(function (delay) {
         var c = document.createElementNS(SVGNS, 'circle');
         c.setAttribute('cx', 0); c.setAttribute('cy', 0); c.setAttribute('r', 4);
@@ -521,12 +526,24 @@ var MAP = {
     // each tied back to its pin with a leader line (keeps the Vietnam label uncovered)
     var lead = els.sec.querySelector('[data-leaders]');
     if (lead) lead.innerHTML = '';
+    // remember each card's authored width so the desktop branch can restore it
+    [els.cardK, els.cardW].forEach(function (c) {
+      if (c && c.dataset.kmtyW == null) c.dataset.kmtyW = c.style.width;
+    });
     if (small) {
-      if (els.cardK) els.cardK.style.display = 'none';
-      if (els.cardW) els.cardW.style.display = 'none';
+      // phones: the pin layer is a static column (see the max-width:700px CSS),
+      // so the base cards flow in-page instead of floating over the map
+      [els.cardK, els.cardW].forEach(function (c) {
+        if (!c) return;
+        c.style.display = 'block';
+        c.style.position = 'relative';
+        c.style.left = 'auto'; c.style.top = 'auto';
+        c.style.width = '100%'; c.style.maxWidth = '460px';
+        c.style.margin = '0 auto';
+      });
     } else {
       var gap = Math.round(Math.max(16, h * 0.028));
-      [els.cardK, els.cardW].forEach(function (c) { if (c) { c.style.display = 'block'; c.style.transform = 'none'; } });
+      [els.cardK, els.cardW].forEach(function (c) { if (c) { c.style.display = 'block'; c.style.transform = 'none'; c.style.position = 'absolute'; c.style.width = c.dataset.kmtyW || ''; c.style.maxWidth = ''; c.style.margin = ''; } });
       var kH = els.cardK ? els.cardK.offsetHeight : 300;
       var wH = els.cardW ? els.cardW.offsetHeight : 300;
       var cW = els.cardK ? els.cardK.offsetWidth : 420;
