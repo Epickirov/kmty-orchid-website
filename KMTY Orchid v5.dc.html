@@ -6,6 +6,39 @@
 
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+(function () {
+  // Self-heal dropped images. CDN endpoints (e.g. githack) throttle multi-image
+  // bursts — a large desktop viewport prefetches many at once and a few can fail,
+  // and a failed edge fetch may be cached. Retry with backoff and a cache-busting
+  // param so the retry cannot be served the cached failure.
+  var MAX = 3;
+  function retry(img) {
+    var n = +(img.dataset.kmtyRetry || 0);
+    if (n >= MAX) return;
+    var base = (img.dataset.kmtySrc || img.getAttribute('src') || '').split(/[?#]/)[0];
+    if (!base || base.indexOf('data:') === 0) return;
+    img.dataset.kmtyRetry = n + 1;
+    img.dataset.kmtySrc = base;
+    setTimeout(function () { img.src = base + '?r=' + (n + 1); }, 600 * Math.pow(3, n));
+  }
+  window.addEventListener('error', function (e) {
+    var t = e.target;
+    if (t && t.tagName === 'IMG') retry(t);
+  }, true);
+  // sweep for failures that happened before listeners could catch them
+  window.addEventListener('load', function () {
+    var tries = 0;
+    var iv = setInterval(function () {
+      tries++;
+      document.querySelectorAll('img').forEach(function (im) {
+        if (im.complete && im.naturalWidth === 0 && im.getAttribute('src')) retry(im);
+      });
+      if (tries >= 6) clearInterval(iv);
+    }, 3500);
+  });
+})();
+</script>
 <title>KMTY Orchid — Kunming Tong Yi · Phalaenopsis from Yunnan</title>
 <meta name="description" content="China's largest exporter of flowering Phalaenopsis — bred, raised and shipped cold from the Yunnan highlands. Seedlings, pot flower and cut flower in four export grades.">
 <link rel="icon" type="image/png" href="images/favicon.png">
