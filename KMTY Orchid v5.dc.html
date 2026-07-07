@@ -65,6 +65,7 @@
   body{margin:0;background:#F3EEE4;}
   ::selection{background:#B0552F;color:#F3EEE4;}
   [data-scroll]::-webkit-scrollbar{height:0;width:0;display:none;}
+  [data-drag]{overscroll-behavior-x:contain;}
   [data-availgrid]::-webkit-scrollbar{height:8px;}
   [data-availgrid]::-webkit-scrollbar-thumb{background:rgba(26,30,23,.2);border-radius:18px;}
   @keyframes kmtyKen{from{transform:scale(1.05);}to{transform:scale(1.14) translateY(-2%);}}
@@ -1390,10 +1391,49 @@ class Component extends DCLogic {
     /* drag gallery + tilt */
     const drag = $('[data-drag]');
     if (drag) {
-      let down = false, startX = 0, startL = 0, moved = 0;
-      drag.addEventListener('pointerdown', (e) => { down = true; moved = 0; startX = e.clientX; startL = drag.scrollLeft; drag.style.cursor = 'grabbing'; });
-      window.addEventListener('pointermove', (e) => { if (!down) return; const dx = e.clientX - startX; moved = Math.max(moved, Math.abs(dx)); drag.scrollLeft = startL - dx; }, { passive: true });
-      window.addEventListener('pointerup', () => { down = false; drag.style.cursor = 'grab'; });
+      // Mouse drag with momentum; wheel/trackpad browse; touch stays fully native.
+      // Snap is suspended while we drive scrollLeft (it fights and reads as judder)
+      // and restored once the glide settles so proximity snap can ease a card in.
+      let down = false, startX = 0, startL = 0, moved = 0, vel = 0, lastX = 0, lastT = 0, raf = 0;
+      const stopGlide = () => { if (raf) { cancelAnimationFrame(raf); raf = 0; } };
+      const glide = () => {
+        vel *= 0.93;
+        if (Math.abs(vel) < 0.4) { drag.style.scrollSnapType = ''; raf = 0; return; }
+        drag.scrollLeft += vel;
+        raf = requestAnimationFrame(glide);
+      };
+      drag.addEventListener('pointerdown', (e) => {
+        if (e.pointerType !== 'mouse') return;
+        down = true; moved = 0; vel = 0;
+        startX = lastX = e.clientX; startL = drag.scrollLeft; lastT = performance.now();
+        stopGlide();
+        drag.style.scrollSnapType = 'none';
+        drag.style.cursor = 'grabbing';
+      });
+      window.addEventListener('pointermove', (e) => {
+        if (!down) return;
+        const dx = e.clientX - startX;
+        moved = Math.max(moved, Math.abs(dx));
+        drag.scrollLeft = startL - dx;
+        const t = performance.now();
+        if (t > lastT) vel = (lastX - e.clientX) / (t - lastT) * 16;
+        lastX = e.clientX; lastT = t;
+      }, { passive: true });
+      window.addEventListener('pointerup', () => {
+        if (!down) return;
+        down = false; drag.style.cursor = 'grab';
+        raf = requestAnimationFrame(glide);
+      });
+      drag.addEventListener('wheel', (e) => {
+        const d = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+        const atStart = drag.scrollLeft <= 0 && d < 0;
+        const atEnd = drag.scrollLeft >= drag.scrollWidth - drag.clientWidth - 1 && d > 0;
+        if (atStart || atEnd) return;   // hand back to the page at the rail's edges
+        e.preventDefault();
+        drag.style.scrollSnapType = 'none';
+        vel = Math.max(-90, Math.min(90, vel + d * (e.deltaMode === 1 ? 12 : 0.5)));
+        if (!raf) raf = requestAnimationFrame(glide);
+      }, { passive: false });
       drag.addEventListener('click', (e) => { if (moved > 6) { e.preventDefault(); e.stopPropagation(); } }, true);
     }
     $$('[data-tilt]').forEach(card => {
