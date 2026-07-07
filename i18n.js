@@ -588,7 +588,25 @@ var MAP = {
       var wH = els.cardW ? els.cardW.offsetHeight : 300;
       var cW = els.cardK ? els.cardK.offsetWidth : 420;
       var totalH = kH + gap + wH;
+      var pad = Math.max(16, Math.round(h * 0.02));
       var startY = Math.max(Math.round(py(64)), Math.round((h - totalH) / 2));
+      // short windows: the whole stack — captions included — stays above the fold;
+      // pull it up to the header line first, and if it still can't fit, shrink the
+      // cards (the 16/10 photos scale with width, the caption blocks don't)
+      if (startY + totalH > h - pad) {
+        startY = Math.max(88, h - pad - totalH);
+        if (startY + totalH > h - pad) {
+          var capK = kH - cW / 1.6, capW2 = wH - cW / 1.6;
+          var nW = Math.floor((h - pad - startY - gap - capK - capW2) / 2 * 1.6);
+          nW = Math.max(272, Math.min(cW, nW));
+          [els.cardK, els.cardW].forEach(function (c) { if (c) c.style.width = nW + 'px'; });
+          kH = els.cardK ? els.cardK.offsetHeight : kH;
+          wH = els.cardW ? els.cardW.offsetHeight : wH;
+          cW = els.cardK ? els.cardK.offsetWidth : nW;
+          totalH = kH + gap + wH;
+          startY = Math.max(88, h - pad - totalH);
+        }
+      }
       var ax = Math.min(Math.round(px(1180)), Math.round(w - cW - Math.max(22, w * 0.02)));
       if (els.cardK) { els.cardK.style.left = ax + 'px'; els.cardK.style.top = startY + 'px'; }
       if (els.cardW) { els.cardW.style.left = ax + 'px'; els.cardW.style.top = (startY + kH + gap) + 'px'; }
