@@ -1,11 +1,21 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <style data-omelette-injected>html,body{background:transparent}</style><script data-omelette-injected>(()=>{{const Y=new URLSearchParams(location.search).get("theme");if(Y==="light"||Y==="dark"){document.documentElement.dataset.theme=Y}}{const Y=()=>{try{if(document.querySelector('meta[name="color-scheme"]'))return;const k=getComputedStyle(document.documentElement).getPropertyValue("color-scheme").trim();if(k&&k!=="normal")return;const w=(X)=>{if(!X)return null;const F=getComputedStyle(X).backgroundColor.match(/^rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)(?:[,\s/]+([\d.]+%?))?\s*\)$/);if(!F)return null;const K=F[4]==null?1:parseFloat(F[4])/(F[4].endsWith("%")?100:1);if(K<0.99)return null;return[+F[1],+F[2],+F[3]]};const U=w(document.body)||w(document.documentElement);if(!U)return;const x=(X)=>{const F=X/255;return F<=0.04045?F/12.92:((F+0.055)/1.055)**2.4};const D=0.2126*x(U[0])+0.7152*x(U[1])+0.0722*x(U[2]);document.documentElement.style.setProperty("color-scheme",D<0.4?"dark":"light")}catch{}};if(document.readyState==="complete")Y();else window.addEventListener("load",Y)}var _=[];var v=false;var P=30000;var h=3000;document.addEventListener("DOMContentLoaded",()=>{const Y=window.Babel;const k="om-src-id";if(Y&&Y.registerPlugin&&!(Y.availablePlugins&&Y.availablePlugins[k])){Y.registerPlugin(k,({types:D})=>({visitor:{JSXOpeningElement(X,F){const K=X.node;if(K.name&&K.name.type==="JSXMemberExpression")return;for(let z=0;z<K.attributes.length;z++){const V=K.attributes[z];if(V.type==="JSXAttribute"&&V.name&&V.name.name==="data-om-id")return}const B=F.file&&F.file.opts&&F.file.opts.filename||"?";const A=K.loc&&K.loc.start;const J=`jsx:${B}:${K.start??0}:${A?A.line:0}:${A?A.column+1:0}`;K.attributes.push(D.jsxAttribute(D.jsxIdentifier("data-om-id"),D.stringLiteral(J)))}}}))}const w="om-text-extract";let U=false;if(v&&Y&&Y.registerPlugin&&!(Y.availablePlugins&&Y.availablePlugins[w])){const D=window.React;if(D&&D.useSyncExternalStore&&D.createElement){U=true;const X={};const F=new Set;let K=0;window.__omTextO=X;window.__omTextSet=(J)=>{for(const z in J){const V=J[z];if(V==null)delete X[z];else X[z]=V}K++;F.forEach((z)=>z())};const B=(J)=>{F.add(J);return()=>F.delete(J)};const A=()=>K;window.__OmT=function J(z){D.useSyncExternalStore(B,A,A);return D.createElement("span",{"data-om-text":z.i,className:"__om-t"},z.i in X?X[z.i]:z.children)};Y.registerPlugin(w,({types:J})=>{const z={style:1,script:1,noscript:1,textarea:1,title:1,option:1,text:1,tspan:1,textPath:1};const V={placeholder:1,alt:1,title:1,label:1,"aria-label":1,"aria-description":1,"aria-placeholder":1};const W=(Z,H)=>J.logicalExpression("??",J.memberExpression(J.logicalExpression("||",J.memberExpression(J.identifier("window"),J.identifier("__omTextO")),J.objectExpression([])),J.stringLiteral(Z),true),H);const Q=(Z)=>Z.file&&Z.file.opts&&Z.file.opts.filename||"?";const j=(Z)=>Z.file&&Z.file.code||"";const G=(Z,H)=>{const N=($)=>$&&$.start!=null&&$.end!=null&&($.type==="StringLiteral"||$.type==="TemplateLiteral"&&$.expressions.length===0)?[$.start,$.end]:null;const L=N(H);if(L)return L;if(H&&H.type==="Identifier"){const $=Z.scope.getBinding(H.name);if($&&$.constant&&$.path.node.type==="VariableDeclarator"){return N($.path.node.init)}}return null};const R=(Z,H,N)=>{const L=Z.node;let $=false;const M=(q,E)=>{$=true;return J.jsxElement(J.jsxOpeningElement(J.jsxIdentifier("__OmT"),[J.jsxAttribute(J.jsxIdentifier("i"),J.stringLiteral(q))],false),J.jsxClosingElement(J.jsxIdentifier("__OmT")),[E],false)};const C=L.children.map((q)=>{if(q.type==="JSXText"){if(q.start==null||q.end==null)return q;const E=N.slice(q.start,q.end);const f=E.length-E.trimStart().length;const I=E.length-E.trimEnd().length;if(f+I>=E.length)return q;return M(`txt:${H}:${q.start+f}:${q.end-I}`,q)}if(q.type==="JSXExpressionContainer"){const E=G(Z,q.expression);if(E)return M(`str:${H}:${E[0]}:${E[1]}`,q)}return q});if($)L.children=C};return{visitor:{JSXOpeningElement(Z,H){const N=Z.node;const L=Q(H);const $={};for(let M=0;M<N.attributes.length;M++){const C=N.attributes[M];if(C.type!=="JSXAttribute"||!C.name)continue;const q=C.name.name;if(!V[q])continue;if(!C.value||C.value.type!=="StringLiteral")continue;if(C.value.start==null||C.value.end==null)continue;const E=`txt:${L}:${C.value.start}:${C.value.end}`;$[q]=E;C.value=J.jsxExpressionContainer(W(E,J.stringLiteral(C.value.value)))}if(Object.keys($).length){N.attributes.push(J.jsxAttribute(J.jsxIdentifier("data-om-text-attrs"),J.stringLiteral(JSON.stringify($))))}},JSXElement(Z,H){const N=Z.node.openingElement;const L=N&&N.name&&N.name.name;if(L==="__OmT")return;if(typeof L==="string"&&z[L])return;R(Z,Q(H),j(H))},JSXFragment(Z,H){R(Z,Q(H),j(H))}}}})}}const x=U?["transform-react-jsx-source",k,w]:["transform-react-jsx-source",k];document.querySelectorAll('script[type="text/babel"],script[type="text/jsx"]').forEach((D,X)=>{const F=D.getAttribute("data-plugins")||"";const K=x.filter((B)=>F.indexOf(B)<0);if(K.length){D.setAttribute("data-plugins",F?`${F},${K.join(",")}`:K.join(","))}if(!D.hasAttribute("data-filename")){D.setAttribute("data-filename",D.getAttribute("src")||`inline-${X}`)}})});var S=window.parent;if(S&&S!==window){const Y=(J,z)=>{try{S.postMessage({__omelette_log:true,type:J,data:z},"*")}catch{}};["log","warn","error"].forEach((J)=>{const z=console[J];console[J]=(...V)=>{const W=V.map((Q)=>{try{return typeof Q==="object"?JSON.stringify(Q):String(Q)}catch{try{return String(Q)}catch{return"[unstringifiable]"}}}).join(" ");Y(J,W);z.apply(console,V)}});window.addEventListener("error",(J)=>{const z=J.target;if(z&&z!==window&&z.tagName){const V=z.src||z.href||"";Y("resource_error",`${z.tagName} failed to load: ${V}`)}else{Y("error",`${J.message||"Unknown error"} at ${J.filename||"?"}:${J.lineno||0}:${J.colno||0}`)}},true);window.addEventListener("unhandledrejection",(J)=>{const z=J.reason;const V=z instanceof Error?`${z.message} ${z.stack}`:String(z);Y("error",`Unhandled rejection: ${V}`)});const k=()=>{try{S.postMessage({type:"omelette:height",height:document.documentElement.scrollHeight},"*")}catch{}};if(window.ResizeObserver)new ResizeObserver(k).observe(document.documentElement);const w=()=>{k();if(!document.querySelector('script[type="text/babel"],script[type="text/jsx"]'))return;const J=()=>document.getElementById("root")||document.querySelector("body > div[id]");const z=J()?.firstElementChild??null;let V=0;const W=()=>{const Q=J();if(Q&&Q.firstElementChild!==z||++V>30){k();return}setTimeout(W,100)};setTimeout(W,100)};if(document.readyState==="complete")w();else window.addEventListener("load",w);const U={};let x=0;const D=(J)=>new Promise((z,V)=>{if(!_.length){V(new Error("claude.complete: no parent origin"));return}const W=`c${++x}`;const Q=()=>setTimeout(()=>{delete U[W];V(new Error(`claude.complete: no data for ${P/1000}s`))},P);const j=Q();U[W]={resolve:z,reject:V,text:"",t:j,arm:Q};try{for(const G of _){S.postMessage({__om_api:true,id:W,body:J},G)}}catch(G){clearTimeout(j);delete U[W];V(G)}});const X=8;const F=async(J,z)=>{if(!Array.isArray(J.messages)){throw new Error("claude.complete: tools require a messages array")}const V=J.messages.slice();const W={...J,tools:J.tools.map((G)=>{if(G===null||typeof G!=="object")return G;const R={};for(const Z of Object.keys(G)){if(typeof G[Z]!=="function")R[Z]=G[Z]}return R})};const Q=W.tool_choice;const j=Q!=null&&(Q.type==="any"||Q.type==="tool")?{...W,tool_choice:Q.disable_parallel_tool_use!==undefined?{type:"auto",disable_parallel_tool_use:Q.disable_parallel_tool_use}:{type:"auto"}}:W;for(let G=0;G<X;G++){const R=await D({...G===0?W:j,messages:V});const Z=R.message;const H=Z&&Array.isArray(Z.content)?Z.content:null;const N=H?H.filter(($)=>$?.type==="tool_use"):[];if(Z?.stop_reason!=="tool_use"||N.length===0){return R.text}const L=[];for(const $ of N){const M=z.get($.name);if(!M){L.push({type:"tool_result",tool_use_id:$.id,content:`no handler for tool "${$.name}"`,is_error:true});continue}try{const C=await M($.input);const q=typeof C==="string"?C:A(C)??"";L.push({type:"tool_result",tool_use_id:$.id,content:q})}catch(C){L.push({type:"tool_result",tool_use_id:$.id,content:String(C?.message??C??"tool handler failed"),is_error:true})}}V.push({role:"assistant",content:H},{role:"user",content:L})}throw new Error(`claude.complete: exceeded ${X} tool turns`)};window.claude={complete(J){const z=J;if(z!==null&&typeof z==="object"&&Array.isArray(z.tools)&&z.tools.some((V)=>V!==null&&typeof V==="object"&&typeof V.run==="function")){const V=new Map;for(const W of z.tools){if(W!==null&&typeof W==="object"&&typeof W.run==="function"){V.set(String(W.name),W.run)}}return F(z,V)}return D(J).then((V)=>V.text)}};const K={};let B=0;window.omelette={writeFile:(J,z)=>new Promise((V,W)=>{if(!_.length){V();return}const Q=`f${++B}`;const j=setTimeout(()=>{delete K[Q];V()},h);K[Q]={resolve:V,reject:W,t:j};try{for(const G of _){S.postMessage({__om_file:true,id:Q,op:"write",path:J,content:z},G)}}catch{clearTimeout(j);delete K[Q];V()}})};const A=(J)=>{try{return JSON.stringify(J)}catch{return JSON.stringify(String(J))}};window.addEventListener("message",(J)=>{if(_.indexOf(J.origin)<0)return;if(J.source!==S)return;const z=J.data;if(!z)return;if(z.type==="omelette-preview-refresh"){if(typeof z.token!=="string"||!/^[0-9a-f.-]+(\.(rc|pr-[0-9]+))?(\.[0-9]+\.[0-9a-f]{16})?$/.test(z.token))return;const Q=Math.max(1,Math.floor((z.expiresAt||0)-Date.now()/1000));document.cookie="__Host-omelette-preview="+z.token+"; Path=/; Secure; SameSite=None; Partitioned; Max-Age="+Q;return}if(z.__om_file_r){const Q=K[z.id];if(!Q)return;clearTimeout(Q.t);delete K[z.id];if(z.ok)Q.resolve();else Q.reject(new Error(z.error||"write failed"));return}if(z.__om_api_r){const Q=U[z.id];if(!Q)return;if(z.error!=null){clearTimeout(Q.t);delete U[z.id];Q.reject(new Error(z.error));return}if(z.chunk!=null){clearTimeout(Q.t);Q.t=Q.arm();Q.text+=z.chunk;return}if(z.done){clearTimeout(Q.t);delete U[z.id];Q.resolve({text:z.text!=null?z.text:Q.text,message:z.message});return}return}if(!z.__om_eval)return;const V=z;const W=(Q)=>{J.source.postMessage({...Q,__om_eval_r:1,id:V.id},J.origin)};try{const Q=(0,eval)(V.code);if(Q&&typeof Q.then==="function"){Q.then((j)=>W({ok:1,v:A(j)}),(j)=>W({ok:0,e:String(j)}))}else{W({ok:1,v:A(Q)})}}catch(Q){W({ok:0,e:String(Q)})}})}})();
 </script>
 
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KMTY Orchid — Kunming Tong Yi · Phalaenopsis from Yunnan</title>
+<meta name="description" content="China's largest exporter of flowering Phalaenopsis — bred, raised and shipped cold from the Yunnan highlands. Seedlings, pot flower and cut flower in four export grades.">
+<link rel="icon" type="image/png" href="images/favicon.png">
+<!-- Social-card URLs point at the current preview host; swap for the production domain when one exists -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="KMTY Orchid">
+<meta property="og:title" content="KMTY Orchid — Kunming Tong Yi · Phalaenopsis from Yunnan">
+<meta property="og:description" content="China's largest exporter of flowering Phalaenopsis — from tissue-culture flask to blooming plant, all in one place in Yunnan.">
+<meta property="og:image" content="https://rawcdn.githack.com/Epickirov/kmty-orchid-website/main/images/og-card.jpg">
+<meta name="twitter:card" content="summary_large_image">
 <script src="./support.js?v=2"></script>
 </head>
 <body>
@@ -14,7 +24,7 @@
 <!-- Self-hosted fonts (no external CDN — loads even where fonts.googleapis.com is blocked, e.g. mainland China). Generated by build_fonts.py -->
 <link rel="stylesheet" href="fonts/fonts.css?v=4">
 <script src="image-slot.js"></script>
-<script src="i18n.js?v=20" defer></script>
+<script src="i18n.js?v=21" defer></script>
 <meta name="ext-resource-dependency" content="terroir-geo.json">
 <style>
   *{box-sizing:border-box;}
@@ -52,7 +62,6 @@
     [data-heroscrim]{background:linear-gradient(178deg,rgba(18,16,12,.74) 0%,rgba(18,16,12,.44) 36%,rgba(18,16,12,.56) 66%,rgba(18,16,12,.92) 100%) !important;}
     [data-ctameta]{flex-direction:column;gap:7px;align-items:center;}
     [data-ctameta] [data-dot]{display:none;}
-    #contact > img:nth-of-type(2),#contact > img:nth-of-type(3){display:none;}
     /* hero: export markets become a one-line swipe strip instead of a three-row wrap */
     [data-mktchips]{flex-wrap:nowrap !important;overflow-x:auto;scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,#000 86%,transparent);mask-image:linear-gradient(90deg,#000 86%,transparent);}
     [data-mktchips]::-webkit-scrollbar{display:none;}
@@ -80,9 +89,16 @@
     [data-desktopnav]{display:none !important;}
     [data-navcta]{display:none !important;}
     [data-burger]{display:inline-flex !important;}
-    #contact input[type=email]{border-color:rgba(243,238,228,.55) !important;background:rgba(243,238,228,.12) !important;}
-    #contact input[type=email]::placeholder{color:rgba(243,238,228,.78);}
   }
+  /* two corner blooms are enough — four crowded the sign-off at every width */
+  #contact > img:nth-of-type(2),#contact > img:nth-of-type(3){display:none;}
+  /* the catalog form input sat near the AA contrast floor on the green panel */
+  #contact input[type=email]{border-color:rgba(243,238,228,.55) !important;background:rgba(243,238,228,.12) !important;}
+  #contact input[type=email]::placeholder{color:rgba(243,238,228,.78);}
+  /* non-Chinese locales drop the terroir sub-line (it repeated the headline) */
+  [data-t="t.zhsub"]:empty{display:none;}
+  /* the ticker directly below the hero lists the same markets — chips are mobile-only */
+  @media(min-width:701px){[data-mktchips]{display:none !important;}}
 </style>
 </helmet>
 <div style="font-family:'Hanken Grotesk','Noto Sans SC',system-ui,sans-serif;color:#1A1E17;background:#F3EEE4;overflow-x:clip;position:relative;">
@@ -146,7 +162,7 @@
   <!-- HERO -->
   <section id="top" data-screen-label="Hero" style="position:relative;min-height:100svh;display:flex;flex-direction:column;justify-content:center;overflow:hidden;background:#12100c;">
     <img src="images/hero-field.jpg" alt="A sea of magenta Phalaenopsis in the KMTY greenhouse" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;animation:kmtyKen 24s ease-in-out infinite alternate;"/>
-    <div data-heroscrim style="position:absolute;inset:0;background:linear-gradient(174deg,rgba(18,16,12,.68) 0%,rgba(18,16,12,.22) 34%,rgba(18,16,12,.4) 68%,rgba(18,16,12,.9) 100%);"></div>
+    <div data-heroscrim style="position:absolute;inset:0;background:linear-gradient(174deg,rgba(18,16,12,.7) 0%,rgba(18,16,12,.32) 34%,rgba(18,16,12,.5) 68%,rgba(18,16,12,.9) 100%);"></div>
     <div style="position:relative;width:100%;max-width:1300px;margin:0 auto;padding:104px clamp(18px,4vw,44px) 0;z-index:3;">
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;">
         <span style="display:block;height:2px;width:60px;border-radius:999px;background:linear-gradient(90deg,#4C8C57,#C6952F 55%,#D48CB0);opacity:.85;"></span>
@@ -306,7 +322,7 @@
       <div data-pincard="kunming" style="position:absolute;left:0;top:0;opacity:0;transition:opacity .9s ease 1.3s;width:clamp(296px,29vw,460px);z-index:1;">
         <div style="border-radius:20px;overflow:hidden;background:rgba(7,16,11,.74);border:1px solid rgba(166,199,182,.42);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 24px 58px rgba(0,0,0,.5);">
           <div style="position:relative;">
-            <img loading="lazy" src="images/web/kunming-hq.jpg" alt="Kunming Tong Yi headquarters, Songming" style="width:100%;aspect-ratio:16/10;object-fit:cover;object-position:center 42%;display:block;"/>
+            <img loading="lazy" src="images/hq-gate.jpg" alt="The company gate at the Songming headquarters" style="width:100%;aspect-ratio:16/10;object-fit:cover;object-position:center 42%;display:block;"/>
             <span style="position:absolute;left:14px;top:13px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:#eef3ee;background:rgba(7,16,11,.5);padding:4px 12px;border-radius:999px;backdrop-filter:blur(4px);" data-t="map.hq">HQ</span>
           </div>
           <div style="padding:13px 20px 16px;border-top:1px solid rgba(166,199,182,.22);">
@@ -356,14 +372,14 @@
       </div>
 
       <div data-reveal style="opacity:0;transform:translateY(26px);transition:opacity 1s ease,transform 1s ease;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;margin-top:clamp(44px,6vw,68px);background:rgba(26,30,23,.14);border:1px solid rgba(26,30,23,.14);border-radius:18px;overflow:hidden;">
-        <div style="background:#F3EEE4;padding:22px 20px;"><div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:700;font-size:clamp(30px,3.4vw,44px);color:#1A1E17;line-height:1;">Nº 1</div><div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;color:#8A8474;margin-top:9px;line-height:1.4;" data-t-html="st.b1">exporter of flowering<br>Phalaenopsis in China</div></div>
-        <div style="background:#F3EEE4;padding:22px 20px;"><div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:700;font-size:clamp(30px,3.4vw,44px);color:#1A1E17;line-height:1;"><span data-count data-count-to="50" data-count-suffix="%+">0</span></div><div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;color:#8A8474;margin-top:9px;line-height:1.4;" data-t-html="st.b2">national export<br>share, since 2020</div></div>
-        <div style="background:#F3EEE4;padding:22px 20px;"><div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:700;font-size:clamp(30px,3.4vw,44px);color:#1A1E17;line-height:1;"><span data-count data-count-to="24" data-count-suffix="">0</span></div><div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;color:#8A8474;margin-top:9px;line-height:1.4;" data-t-html="st.b3">years of breeding<br>&amp; cultivation</div></div>
+        <div style="background:#F3EEE4;padding:22px 20px;"><div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:700;font-size:clamp(30px,3.4vw,44px);color:#1A1E17;line-height:1;"><span data-count data-count-to="26" data-count-suffix="">0</span></div><div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;color:#8A8474;margin-top:9px;line-height:1.4;" data-t-html="st.b1">exporter of flowering<br>Phalaenopsis in China</div></div>
+        <div style="background:#F3EEE4;padding:22px 20px;"><div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:700;font-size:clamp(30px,3.4vw,44px);color:#1A1E17;line-height:1;"><span data-count data-count-to="3" data-count-suffix="">0</span></div><div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;color:#8A8474;margin-top:9px;line-height:1.4;" data-t-html="st.b2">national export<br>share, since 2020</div></div>
+        <div style="background:#F3EEE4;padding:22px 20px;"><div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:700;font-size:clamp(30px,3.4vw,44px);color:#1A1E17;line-height:1;"><span data-count data-count-to="200" data-count-suffix="+">0</span></div><div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;color:#8A8474;margin-top:9px;line-height:1.4;" data-t-html="st.b3">years of breeding<br>&amp; cultivation</div></div>
         <div style="background:#F3EEE4;padding:22px 20px;"><div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:700;font-size:clamp(30px,3.4vw,44px);color:#1A1E17;line-height:1;"><span data-count data-count-to="10" data-count-suffix="+">0</span></div><div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;color:#8A8474;margin-top:9px;line-height:1.4;" data-t-html="st.b4">export markets across<br>Asia &amp; the Gulf</div></div>
       </div>
 
       <figure data-reveal data-clip style="opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s ease;margin:clamp(20px,3vw,26px) 0 0;">
-        <div style="position:relative;overflow:hidden;border-radius:28px;aspect-ratio:16/7;background:#e6dfd1;box-shadow:0 26px 60px rgba(26,30,23,.16);"><img loading="lazy" src="images/team.jpg" alt="The Kunming Tong Yi team gathered in front of the Songming headquarters" style="width:100%;height:100%;object-fit:cover;object-position:center 62%;clip-path:inset(0 100% 0 0);transition:clip-path 1.25s cubic-bezier(.7,0,.2,1);"/></div>
+        <div style="position:relative;overflow:hidden;border-radius:28px;aspect-ratio:16/7;background:#e6dfd1;box-shadow:0 26px 60px rgba(26,30,23,.16);"><img loading="lazy" src="images/field-cream.jpg" alt="A bench of cream Phalaenopsis at the Songming growing houses" style="width:100%;height:100%;object-fit:cover;object-position:center 62%;clip-path:inset(0 100% 0 0);transition:clip-path 1.25s cubic-bezier(.7,0,.2,1);"/></div>
         <figcaption style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11px;color:#8A8474;margin-top:10px;" data-t="st.f0">FIG. 01 — The Kunming Tong Yi family, Spring Festival at Songming HQ</figcaption>
       </figure>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:clamp(14px,2vw,22px);margin-top:clamp(20px,3vw,26px);">
@@ -533,7 +549,7 @@
       </div>
 
       <div data-reveal style="opacity:0;transform:translateY(18px);transition:opacity 1s ease,transform 1s ease;display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:30px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11.5px;color:#55564A;justify-content:center;">
-        <span>25°05′N, 102°40′E</span><span style="color:#B0552F;">/</span><span data-t="g.co2">≈1,900 m elevation</span><span style="color:#B0552F;">/</span><span data-t="g.co3">17°C average</span><span style="color:#B0552F;">/</span><span data-t="g.co4">2,446 sun-hours/yr</span><span style="color:#B0552F;">/</span><span>ISO 9001</span>
+        <span>25°02′N, 102°43′E</span><span style="color:#B0552F;">/</span><span data-t="g.co2">≈1,900 m elevation</span><span style="color:#B0552F;">/</span><span data-t="g.co3">17°C average</span><span style="color:#B0552F;">/</span><span data-t="g.co4">2,446 sun-hours/yr</span><span style="color:#B0552F;">/</span><span>ISO 9001</span>
       </div>
     </div>
   </section>
@@ -645,126 +661,126 @@
       <div data-bloomwall style="display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(96px,14.5vw,174px),1fr));gap:clamp(10px,1.5vw,18px);margin-top:clamp(34px,4.5vw,58px);">
         <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease;text-align:center;">
           <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
-            <img src="images/blooms/bloom-19.webp" alt="Snow" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+            <img src="images/blooms/wall-19.webp" alt="Snow" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
           </div>
           <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b1.n">Snow</div>
           <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b1.z">WHITE · 白</div>
         </div>
         <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .62s ease,transform .62s ease;text-align:center;">
           <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
-            <img src="images/blooms/bloom-05.webp" alt="Ivory" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+            <img src="images/blooms/wall-05.webp" alt="Ivory" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
           </div>
           <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b2.n">Ivory</div>
           <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b2.z">CREAM · 象牙</div>
         </div>
         <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .64s ease,transform .64s ease;text-align:center;">
           <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
-            <img src="images/blooms/bloom-15.webp" alt="Buttercream" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+            <img src="images/blooms/wall-15.webp" alt="Buttercream" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
           </div>
           <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b3.n">Buttercream</div>
           <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b3.z">SOFT YELLOW · 奶油</div>
         </div>
         <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .66s ease,transform .66s ease;text-align:center;">
           <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
-            <img src="images/blooms/bloom-06.webp" alt="Blush" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+            <img src="images/blooms/wall-06.webp" alt="Blush" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
           </div>
           <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b4.n">Blush</div>
           <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b4.z">PALE PINK · 浅粉</div>
         </div>
         <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .68s ease,transform .68s ease;text-align:center;">
           <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
-            <img src="images/blooms/bloom-03.webp" alt="Pink" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+            <img src="images/blooms/wall-03.webp" alt="Pink" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
           </div>
           <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b5.n">Pink</div>
           <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b5.z">PINK · 粉</div>
         </div>
         <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease;text-align:center;">
           <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
-            <img src="images/blooms/bloom-01.webp" alt="Peach" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+            <img src="images/blooms/wall-01.webp" alt="Peach" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
           </div>
           <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b6.n">Peach</div>
           <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b6.z">CORAL-PINK · 蜜桃</div>
         </div>
         <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .72s ease,transform .72s ease;text-align:center;">
           <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
-            <img src="images/blooms/bloom-16.webp" alt="Coral" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+            <img src="images/blooms/wall-16.webp" alt="Coral" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
           </div>
           <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b7.n">Coral</div>
           <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b7.z">CORAL · 珊瑚</div>
         </div>
         <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .74s ease,transform .74s ease;text-align:center;">
           <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
-            <img src="images/blooms/bloom-07.webp" alt="Rose Bicolor" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+            <img src="images/blooms/wall-07.webp" alt="Rose Bicolor" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
           </div>
           <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b8.n">Rose Bicolor</div>
           <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b8.z">TWO-TONE · 双色粉</div>
         </div>
         <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .76s ease,transform .76s ease;text-align:center;">
           <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
-            <img src="images/blooms/bloom-09.webp" alt="Bicolor" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+            <img src="images/blooms/wall-09.webp" alt="Bicolor" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
           </div>
           <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b9.n">Bicolor</div>
           <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b9.z">TWO-TONE · 双色</div>
         </div>
         <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .78s ease,transform .78s ease;text-align:center;">
           <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
-            <img src="images/blooms/bloom-08.webp" alt="Fuchsia" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+            <img src="images/blooms/wall-08.webp" alt="Fuchsia" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
           </div>
           <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b10.n">Fuchsia</div>
           <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b10.z">MAGENTA · 桃红</div>
         </div>
         <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .8s ease,transform .8s ease;text-align:center;">
           <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
-            <img src="images/blooms/bloom-04.webp" alt="Magenta" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+            <img src="images/blooms/wall-04.webp" alt="Magenta" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
           </div>
           <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b11.n">Magenta</div>
           <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b11.z">VIVID · 洋红</div>
         </div>
         <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .82s ease,transform .82s ease;text-align:center;">
           <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
-            <img src="images/blooms/bloom-11.webp" alt="Orchid Purple" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+            <img src="images/blooms/wall-11.webp" alt="Orchid Purple" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
           </div>
           <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b12.n">Orchid Purple</div>
           <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b12.z">PURPLE-RED · 紫红</div>
         </div>
         <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .84s ease,transform .84s ease;text-align:center;">
           <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
-            <img src="images/blooms/bloom-10.webp" alt="Lavender" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+            <img src="images/blooms/wall-10.webp" alt="Lavender" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
           </div>
           <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b13.n">Lavender</div>
           <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b13.z">LILAC · 淡紫</div>
         </div>
         <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .86s ease,transform .86s ease;text-align:center;">
           <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
-            <img src="images/blooms/bloom-02.webp" alt="Amethyst" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+            <img src="images/blooms/wall-02.webp" alt="Amethyst" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
           </div>
           <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b14.n">Amethyst</div>
           <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b14.z">DEEP LILAC · 紫晶</div>
         </div>
         <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .88s ease,transform .88s ease;text-align:center;">
           <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
-            <img src="images/blooms/bloom-13.webp" alt="Velvet Burgundy" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+            <img src="images/blooms/wall-13.webp" alt="Velvet Burgundy" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
           </div>
           <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b15.n">Velvet Burgundy</div>
           <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b15.z">WINE-RED · 酒红</div>
         </div>
         <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .9s ease,transform .9s ease;text-align:center;">
           <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
-            <img src="images/blooms/bloom-18.webp" alt="Gold" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+            <img src="images/blooms/wall-18.webp" alt="Gold" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
           </div>
           <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b16.n">Gold</div>
           <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b16.z">YELLOW · 金黄</div>
         </div>
         <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .92s ease,transform .92s ease;text-align:center;">
           <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
-            <img src="images/blooms/bloom-12.webp" alt="Starlight" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+            <img src="images/blooms/wall-12.webp" alt="Starlight" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
           </div>
           <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b17.n">Starlight</div>
           <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b17.z">SPECKLED · 星点</div>
         </div>
         <div data-reveal data-tilt style="opacity:0;transform:translateY(18px);transition:opacity .94s ease,transform .94s ease;text-align:center;">
           <div style="position:relative;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.16),rgba(255,255,255,.045));border:1px solid rgba(255,255,255,.16);">
-            <img src="images/blooms/bloom-17.webp" alt="Picotee" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
+            <img src="images/blooms/wall-17.webp" alt="Picotee" loading="lazy" style="width:100%;height:100%;object-fit:contain;padding:12%;filter:drop-shadow(0 10px 15px rgba(0,0,0,.42));"/>
           </div>
           <div style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:600;font-size:clamp(12px,1.4vw,14px);color:#F3EEE4;margin-top:8px;" data-t="v.b18.n">Picotee</div>
           <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:8.5px;letter-spacing:.06em;color:rgba(243,238,228,.55);margin-top:2px;" data-t="v.b18.z">EDGED · 镶边</div>
@@ -912,7 +928,7 @@
           <p style="font-size:15.5px;line-height:1.64;color:#55564A;margin:0 0 22px;max-width:440px;" data-t="sh.para">Every spike is sleeved in foam, every bloom bedded in batting, every carton loaded into a reefer at the door. From our bench to yours — Beijing or Bangkok — the cold chain never breaks.</p>
           <div data-packshots style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
             <figure data-clip style="margin:0;border-radius:16px;overflow:hidden;aspect-ratio:4/5;box-shadow:0 16px 40px rgba(26,30,23,.14);"><img loading="lazy" src="images/pack-sleeves.jpg" alt="Orchid spikes in foam sleeves" style="width:100%;height:100%;object-fit:cover;clip-path:inset(0 0 100% 0);transition:clip-path 1.1s cubic-bezier(.7,0,.2,1);"/></figure>
-            <figure data-clip style="margin:22px 0 0;border-radius:16px;overflow:hidden;aspect-ratio:4/5;box-shadow:0 16px 40px rgba(26,30,23,.14);"><img loading="lazy" src="images/pack-pink.jpg" alt="Hands packing cut orchids into an export box" style="width:100%;height:100%;object-fit:cover;clip-path:inset(0 0 100% 0);transition:clip-path 1.1s cubic-bezier(.7,0,.2,1);"/></figure>
+            <figure data-clip style="margin:0;border-radius:16px;overflow:hidden;aspect-ratio:4/5;box-shadow:0 16px 40px rgba(26,30,23,.14);"><img loading="lazy" src="images/pack-pink.jpg" alt="Hands packing cut orchids into an export box" style="width:100%;height:100%;object-fit:cover;clip-path:inset(0 0 100% 0);transition:clip-path 1.1s cubic-bezier(.7,0,.2,1);"/></figure>
           </div>
         </div>
         <div data-reveal style="opacity:0;transform:translateY(26px);transition:opacity .9s ease,transform .9s ease;flex:1.1 1 400px;min-width:300px;">
@@ -1026,6 +1042,7 @@
           </div>
         </div>
       </div>
+      <div data-fabmount style="margin-top:20px;"></div>
       <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-top:22px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11.5px;color:rgba(243,238,228,.42);">
         <span data-t="f.c1">© 2000–2026 Kunming Tong Yi Biotechnology · 昆明统一生物科技有限公司</span>
         <span data-t="f.c2">China's Nº 1 flowering-Phalaenopsis exporter</span>

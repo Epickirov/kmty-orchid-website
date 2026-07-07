@@ -15,6 +15,11 @@ var ACC = {
   b: '<strong style="font-weight:600;color:#F7F3EA;">', bs: '</strong>',
   i: '<span style="font-style:italic;">', is: '</span>'
 };
+
+// CJK has no italic - slanting the glyphs is a faux-italic distortion, so the
+// Chinese dictionary uses upright accent spans (colour alone carries the emphasis)
+var ACCZ = {};
+Object.keys(ACC).forEach(function (k) { ACCZ[k] = String(ACC[k]).replace('font-style:italic;', ''); });
 var SEP = ' <span style="color:#C86B3E;">/</span> ';
 
 var I18N = {
@@ -30,7 +35,7 @@ en: {
   'hero.mkts':'Export markets',
   'mkt.kr':'South Korea','mkt.vn':'Vietnam','mkt.ph':'Philippines','mkt.th':'Thailand','mkt.sg':'Singapore','mkt.bn':'Brunei','mkt.db':'Dubai','mkt.om':'Oman','mkt.hk':'Hong Kong',
   'ticker':'SEEDLINGS'+SEP+'POT FLOWER'+SEP+'CUT FLOWER'+SEP+'VIRUS-FREE PROPAGATION'+SEP+'EUROPEAN-CERTIFIED GREENHOUSES'+SEP+'THE ART ORCHID'+SEP+'KOREA · VIETNAM · PHILIPPINES · THAILAND · SINGAPORE · DUBAI · OMAN · BRUNEI · HONG KONG'+SEP,
-  't.eyebrow':'Yunnan · 25°N plateau','t.h2':'Grown where the ' + ACC.t + 'clouds' + ACC.s + ' rest','t.zhsub':'Where the clouds rest, orchids grow',
+  't.eyebrow':'Yunnan · 25°N plateau','t.h2':'Grown where the ' + ACC.t + 'clouds' + ACC.s + ' rest','t.zhsub':'',
   't.para':'Monsoon air climbs into mountain here — a cool, luminous plateau where mist feeds the canopy the year round. Kunming’s naturally wide day-to-night temperature swings and the stronger ultraviolet light of high altitude make this the finest natural environment on earth for flowering orchids — ' + ACC.i + 'Phalaenopsis' + ACC.is + ' answer with firmer spikes and deeper colour, on a fraction of the energy a lowland glasshouse burns.',
   't.st1':'Elevation','t.st2':'Mean temp','t.st3':'Day–night swing','t.st4':'Sunlight','t.st5':'Growing window',
   't.adv1.t':'A wide day–night swing','t.adv1.b':'Warm days build sugars, cold mountain nights lock them in — the natural trigger for firmer spikes and deeper, longer-holding colour.',
@@ -43,8 +48,8 @@ en: {
   'st.h2':'A Taiwanese-founded orchid house in the Yunnan highlands, breeding and raising Phalaenopsis from tissue-culture flask to blooming plant — ' + ACC.st + 'all in one place.' + ACC.s,
   'st.p1':'Since 2000, Kunming Tong Yi Biotechnology has specialised in Phalaenopsis breeding, superior-variety propagation, seedlings and industrial-scale flowering plants — from our bases at the Xiaojie Flower Park in Songming County, Yunnan.',
   'st.p2':'Since 2020, customs data has ranked us China’s largest exporter of flowering Phalaenopsis, holding more than half the national export share — with a portfolio of invention patents and New Plant Variety rights behind every plant.',
-  'st.b1':'exporter of flowering<br>Phalaenopsis in China','st.b2':'national export<br>share, since 2020','st.b3':'years of breeding<br>&amp; cultivation','st.b4':'export markets across<br>Asia &amp; the Gulf',
-  'st.f0':'FIG. 01 — The Kunming Tong Yi family, Spring Festival at Songming HQ','st.f1':'FIG. 02 — Automated growing house, Songming','st.f2':'FIG. 03 — Mixed varieties, fresh off the bench','st.f3':'FIG. 04 — Reefer loading, Kunming HQ',
+  'st.b1':'years of breeding<br>&amp; cultivation','st.b2':'growing bases —<br>flask to bloom','st.b3':'varieties<br>in production','st.b4':'export markets across<br>Asia &amp; the Gulf',
+  'st.f0':'FIG. 01 — A bench of cream Phalaenopsis, Songming','st.f1':'FIG. 02 — Automated growing house, Songming','st.f2':'FIG. 03 — Mixed varieties, fresh off the bench','st.f3':'FIG. 04 — Reefer loading, Kunming HQ',
   'g.eyebrow':'02 / How we grow','g.h2':'Eighteen months, ' + ACC.st + 'four seasons of care.' + ACC.s,
   'g.note':'One plant’s whole journey, laid out below — follow the stem from flask to bloom.',
   'g.s1.chip':'Months 0–5','g.s1.word':'one','g.s1.title':'Flask &amp; seedling','g.s1.body':'Only healthy, virus-free specimens enter propagation — every mother plant is screened with PCR and ELISA before a single flask is poured.','g.s1.fact':'Lab-certified virus-free stock','g.s1.note':'— sown in glass, in sterile air: a whole greenhouse inside a bottle.',
@@ -61,7 +66,7 @@ en: {
   'gr.c3.stem':'Stem clean; pruning allowed','gr.c3.leaf':'Minor leaf wounds allowed','gr.c3.roots':'1–2 roots degraded, rest healthy',
   'gr.c4.stem':'Stem spots or scars allowed','gr.c4.leaf':'Leaf spots or cracks allowed','gr.c4.roots':'Few active roots',
   'gr.note':'Grading runs top-down — a plant must meet <em>every</em> criterion of a grade to earn it. Nine flowers on a pruned spike is a B, not an A. Your invoice always states exactly what’s in the box.',
-  'g.co2':'≈1,900 m elevation','g.co3':'17°C average','g.co4':'2,446 sun-hours/yr',
+  'g.co2':'1,910 m elevation','g.co3':'15°C average','g.co4':'2,250 sun-hours/yr',
   'pano.lb':'ONE BENCH OF MANY — SONGMING, FEBRUARY',
   'p.eyebrow':'03 / Products','p.h2':'All your purchasing needs met.','p.note':'One nursery, the whole life-cycle — from flask-grown seedling to fresh-cut stem.',
   'p.c1.tag':'01 · Seedlings','p.c1.title':'Seedlings','p.c1.body':'Virus-free young plants, propagated from PCR- and ELISA-screened stock and grown to your finishing schedule.',
@@ -115,15 +120,15 @@ zh: {
   'nav.s1':'01 关于我们','nav.s2':'02 种植','nav.s3':'03 产品','nav.s4':'04 发货','nav.cta':'索取产品目录',
   'm.story':'关于我们','m.grow':'如何种植','m.products':'产品系列','m.ship':'如何发货','m.cta':'索取产品目录 →',
   'hero.kicker':'昆明统一生物 · 创立于 2000 年',
-  'hero.h1':'色彩万千的蝴蝶兰 — ' + ACC.h1 + '还有你想象不到的那几种。' + ACC.s,
+  'hero.h1':'色彩万千的<span style="white-space:nowrap;">蝴蝶兰</span> — ' + ACCZ.h1 + '还有你想象不到的那几种。' + ACCZ.s,
   'hero.lede':'中国最大的开花蝴蝶兰出口商。从组培瓶到盛放，全程在云南高原完成 — 这里也是独一无二的手工大理石纹「艺术兰」的故乡。',
   'hero.cta1':'阅读我们的故事','hero.cta2':'查看产品',
   'hero.s1':'中国开花蝴蝶兰出口商','hero.s2':'全国出口份额占比','hero.s3':'产品线 · 从种苗到切花','hero.s4':'年起扎根云南',
   'hero.mkts':'出口市场',
   'mkt.kr':'韩国','mkt.vn':'越南','mkt.ph':'菲律宾','mkt.th':'泰国','mkt.sg':'新加坡','mkt.bn':'文莱','mkt.db':'迪拜','mkt.om':'阿曼','mkt.hk':'香港',
   'ticker':'种苗'+SEP+'盆花'+SEP+'切花'+SEP+'无病毒组培'+SEP+'欧标温室'+SEP+'艺术兰'+SEP+'韩国 · 越南 · 菲律宾 · 泰国 · 新加坡 · 迪拜 · 阿曼 · 文莱 · 香港'+SEP,
-  't.eyebrow':'云南 · 北纬25°高原 · 云贵高原','t.h2':ACC.t + '云栖之地' + ACC.s + '，兰生其间','t.zhsub':'四季如春，云雾滋养',
-  't.para':'季风气流在此爬升入山 — 凉爽而明亮的高原上，云雾终年滋养林冠。昆明天然的昼夜温差与高原更强的紫外线，造就了开花兰花最理想的自然环境 — ' + ACC.i + '蝴蝶兰' + ACC.is + '以更挺的花梗、更艳的花色作答，而温控能耗仅为低地温室的一小部分。',
+  't.eyebrow':'云南 · 北纬25°高原 · 云贵高原','t.h2':ACCZ.t + '云栖之地' + ACCZ.s + '，兰生其间','t.zhsub':'四季如春，云雾滋养',
+  't.para':'季风气流在此爬升入山 — 凉爽而明亮的高原上，云雾终年滋养林冠。昆明天然的昼夜温差与高原更强的紫外线，造就了开花兰花最理想的自然环境 — ' + ACCZ.i + '蝴蝶兰' + ACCZ.is + '以更挺的花梗、更艳的花色作答，而温控能耗仅为低地温室的一小部分。',
   't.st1':'海拔','t.st2':'年均温','t.st3':'昼夜温差','t.st4':'年日照','t.st5':'无霜期',
   't.adv1.t':'显著的昼夜温差','t.adv1.b':'白昼积累糖分，高原冷夜将其锁住 —— 花梗更挺、花色更浓且更持久的天然开关。',
   't.adv2.t':'更强的高原紫外线','t.adv2.b':'稀薄的高原空气透入更多紫外线，加深花瓣色素，也让植株更健壮 —— 花色更浓、更耐运输。',
@@ -132,12 +137,12 @@ zh: {
   'map.wenshan.name':'文山基地','map.wenshan.sub':'种苗基地',
   'map.hq':'总部','map.base':'基地',
   'st.eyebrow':'01 / 关于我们',
-  'st.h2':'一家台商创办的兰花企业，扎根云南高原，从组培瓶到开花成株全程自育自养 — ' + ACC.st + '一站式完成。' + ACC.s,
+  'st.h2':'一家台商创办的兰花企业，扎根云南高原，从组培瓶到开花成株全程自育自养 — ' + ACCZ.st + '一站式完成。' + ACCZ.s,
   'st.p1':'自 2000 年起，昆明统一生物科技专注于蝴蝶兰育种、优良品种繁育、种苗与规模化开花植株生产 — 基地位于云南嵩明小街花卉园区。',
   'st.p2':'自 2020 年起，海关数据显示我们是中国最大的开花蝴蝶兰出口商，占全国出口份额一半以上 — 每一株植物背后都有发明专利与植物新品种权作支撑。',
-  'st.b1':'中国开花蝴蝶兰<br>出口商','st.b2':'全国出口份额<br>（2020 年至今）','st.b3':'年育种与<br>栽培经验','st.b4':'出口市场遍及<br>亚洲与海湾',
-  'st.f0':'图 01 — 昆明统一大家庭，新春合影于嵩明总部','st.f1':'图 02 — 自动化温室，嵩明','st.f2':'图 03 — 刚下苗床的混色品种','st.f3':'图 04 — 冷链装柜，昆明总部',
-  'g.eyebrow':'02 / 如何种植','g.h2':'十八个月，' + ACC.st + '四季呵护。' + ACC.s,
+  'st.b1':'年育种与<br>栽培经验','st.b2':'云南种植基地<br>组培瓶到盛放','st.b3':'在产品种','st.b4':'出口市场遍及<br>亚洲与海湾',
+  'st.f0':'图 01 — 奶油色蝴蝶兰苗床，嵩明','st.f1':'图 02 — 自动化温室，嵩明','st.f2':'图 03 — 刚下苗床的混色品种','st.f3':'图 04 — 冷链装柜，昆明总部',
+  'g.eyebrow':'02 / 如何种植','g.h2':'十八个月，' + ACCZ.st + '四季呵护。' + ACCZ.s,
   'g.note':'一株蝴蝶兰的完整旅程就铺陈在下面 — 顺着茎，从组培瓶读到开花。',
   'g.s1.chip':'第 0–5 月','g.s1.word':'一','g.s1.title':'组培与种苗','g.s1.body':'只有健康无病毒的植株才能进入繁育 — 每一株母本都经 PCR 与 ELISA 检测后，才会灌注第一瓶组培苗。','g.s1.fact':'实验室认证无病毒种源','g.s1.note':'— 播种于玻璃瓶中的无菌空气里：一瓶就是一座温室。',
   'g.s2.chip':'第 5–11 月','g.s2.word':'二','g.s2.title':'营养生长','g.s2.body':'种苗每个生长阶段至少经历四至六个月的气候调控，光照、湿度与灌溉全天候由传感数据调节。','g.s2.fact':'每阶段 4–6 个月 · 自动化管理','g.s2.note':'— 白日温暖、清晨喷雾，叶片一季季厚实起来。',
@@ -151,7 +156,7 @@ zh: {
   'gr.c3.stem':'花梗干净；允许修剪','gr.c3.leaf':'允许轻微叶伤','gr.c3.roots':'1–2 条根退化，其余健康',
   'gr.c4.stem':'花梗允许斑点或疤痕','gr.c4.leaf':'叶片允许斑点或裂纹','gr.c4.roots':'活根较少',
   'gr.note':'分级自上而下 — 植株须满足该等级的<em>每一项</em>标准才能获评。修剪过花梗的九朵花是 B 级，不是 A 级。发票上写的，永远与箱子里的一致。',
-  'g.co2':'海拔约 1,900 米','g.co3':'年均 17°C','g.co4':'年日照 2,446 小时',
+  'g.co2':'海拔 1,910 米','g.co3':'年均 15°C','g.co4':'年日照 2,250 小时',
   'pano.lb':'万千苗床之一 — 嵩明，二月',
   'p.eyebrow':'03 / 产品系列','p.h2':'满足您的一切采购需求。','p.note':'一座苗圃，覆盖全生命周期 — 从组培种苗到新鲜切花。',
   'p.c1.tag':'01 · 种苗','p.c1.title':'种苗','p.c1.body':'无病毒幼苗，源自经 PCR 与 ELISA 检测的种源，可按您的成品排期培育。',
@@ -160,7 +165,7 @@ zh: {
   'p.slb':'可选规格','p.slb3':'单枝规格',
   'p.sz.spiking':'3.5″ 抽梗苗','p.sz.flowering':'3.8″ 开花株','p.sz.large':'大花','p.sz.small':'小花','p.sz.stems':'每枝 5–10 朵','p.sz.reefer':'冷链运输',
   'p.sz.spk28':'2.8″ 抽梗苗','p.sz.spk30':'3.0″ 抽梗苗','p.sz.flw28':'2.8″ 开花株','p.sz.flw30':'3.0″ 开花株','p.sz.flw35':'3.5″ 开花株',
-  'v.eyebrow':'花色图鉴','v.h2':'数百个品种，' + ACC.v + '仍在增加。' + ACC.s,
+  'v.eyebrow':'花色图鉴','v.h2':'数百个品种，' + ACCZ.v + '仍在增加。' + ACCZ.s,
   'v.lede':'六大主色只是起点。在盆花与切花两条线中，我们同时保有数百个品种在产 — 雪白与绯粉、酒红与金黄、星点镶边与独一无二的大理石纹新贵 — 每季都有新杂交上梗。下方每一朵，都在我们自己的苗床上开过花。',
   'v.b1.n':'雪白','v.b1.z':'白','v.b2.n':'象牙','v.b2.z':'米白','v.b3.n':'奶油黄','v.b3.z':'浅黄','v.b4.n':'绯粉','v.b4.z':'浅粉',
   'v.b5.n':'粉红','v.b5.z':'粉','v.b6.n':'蜜桃','v.b6.z':'珊瑚粉','v.b7.n':'珊瑚','v.b7.z':'珊瑚','v.b8.n':'双色玫瑰','v.b8.z':'双色粉',
@@ -169,7 +174,7 @@ zh: {
   'v.b17.n':'星点','v.b17.z':'斑点','v.b18.n':'镶边','v.b18.z':'描边',
   'v.f1':'6 大主色','v.f2':'数十种花纹','v.f3':'200+ 品种在产','v.f4':'每季新杂交','v.link':'告诉我们颜色，我们来匹配 →',
   'a.eyebrow':'招牌系列 · 星空','a.h2':'星空系列',
-  'a.lede':'整片夜空散落在鲜活的花瓣上 — 大理石纹的绿、琥珀与紫罗兰，每一次晕染都不重样。「星空」系列由我们嵩明温室' + ACC.b + '全自主研发' + ACC.bs + '，' + ACC.b + '专利申请中' + ACC.bs + ' — 每株编号、独一无二，只在这里可以订购。',
+  'a.lede':'整片夜空散落在鲜活的花瓣上 — 大理石纹的绿、琥珀与紫罗兰，每一次晕染都不重样。「星空」系列由我们嵩明温室' + ACCZ.b + '全自主研发' + ACCZ.bs + '，' + ACCZ.b + '专利申请中' + ACCZ.bs + ' — 每株编号、独一无二，只在这里可以订购。',
   'a.t1':'星空 · CONSTELLATION','a.t2':'专利申请中','a.t3':'自主培育','a.t4':'独一无二','a.plants':'同系列植株',
   'a.c1.n':'柑香石纹','a.c1.t':'盆栽 · 星空','a.c1.b':'橙与绿泼洒在白瓣之上 — 星空苗床上最新的一株，全程自育自成。',
   'a.c2.n':'藏红花与天空','a.c2.t':'当代禅意','a.c2.b':'暖琥珀晕入柔蓝 — 一件安静而向阳的作品。',
@@ -179,7 +184,7 @@ zh: {
   'a.c6.n':'蜜桃冰沙','a.c6.t':'柔彩极简','a.c6.b':'柔和的蜜桃与奶油黄晕入粉色 — 温润的大理石纹，全程自有培育。',
   'a.c7.n':'极光','a.c7.t':'空灵植境','a.c7.b':'薄荷、丁香紫与珊瑚色的虹彩在花瓣间流转 — 每一朵的光泽都独一无二。',
   'a.g.t':'你的配色，<br>你的纹样','a.g.link':'定制一个系列 →','a.drag':'◄ 拖动浏览 ►',
-  'sh.eyebrow':'04 / 如何发货','sh.h2':'手工包装，' + ACC.sh + '全程冷链。' + ACC.s,
+  'sh.eyebrow':'04 / 如何发货','sh.h2':'手工包装，' + ACCZ.sh + '全程冷链。' + ACCZ.s,
   'sh.para':'每一枝花梗套上泡棉，每一朵花垫入衬棉，每一箱货物在门口装入冷藏柜。从我们的苗床到您的手中 — 无论北京还是曼谷 — 冷链从不间断。',
   'sh.hd':'发货规格','sh.r1.n':'3.8″ 开花株','sh.r2.n':'大花','sh.r3.n':'小花','sh.r4.n':'种苗',
   'sh.r1.c':'杯径 3.8″ · 9.7 cm','sh.r2.c':'杯径 4.7″ · 12 cm','sh.r3.c':'杯径 3.5″ · 9 cm','sh.r4.c':'按杯径装箱',
@@ -190,7 +195,7 @@ zh: {
   'sh.r4.c1':'1.7″ / 2.0″ 杯 — 280','sh.r4.c2':'2.5″ / 2.8″ 杯 — 120','sh.r4.c3':'3.5″ 杯 — 42','sh.r4.c4':'3.5″ 抽梗 — 32','sh.r4.d1':'统一纸箱 61×49×30 cm · 0.090 m³',
   'sh.fine':'尺寸为空箱外径（cm）；装箱后每边约外扩 1–2 cm。体积为运费估算值。',
   'sh.ch1':'覆盖全国主要城市','sh.ch2':'10+ 个国家','sh.ch3':'货架期长于市场平均',
-  'c.kick':'批发 · 出口 · 定制','c.h2':'让我们一起，种出<br>' + ACC.c + '美好' + ACC.s + '。',
+  'c.kick':'批发 · 出口 · 定制','c.h2':'让我们一起，种出<br>' + ACCZ.c + '美好' + ACCZ.s + '。',
   'c.sub':'索取最新批发目录 — 品种、等级、装箱数与您所在市场的交期。',
   'c.ph':'您的工作邮箱','c.addr':'云南省昆明市嵩明县小街','c.langs':'EN · 中文 · РУ · VI',
   'f.about':'昆明统一生物科技有限公司。优质蝴蝶兰，自 2000 年扎根云南。',
@@ -212,7 +217,7 @@ ru: {
   'hero.mkts':'Рынки экспорта',
   'mkt.kr':'Южная Корея','mkt.vn':'Вьетнам','mkt.ph':'Филиппины','mkt.th':'Таиланд','mkt.sg':'Сингапур','mkt.bn':'Бруней','mkt.db':'Дубай','mkt.om':'Оман','mkt.hk':'Гонконг',
   'ticker':'СЕЯНЦЫ'+SEP+'ГОРШЕЧНЫЕ'+SEP+'СРЕЗКА'+SEP+'БЕЗВИРУСНОЕ РАЗМНОЖЕНИЕ'+SEP+'ТЕПЛИЦЫ ЕВРОПЕЙСКОГО СТАНДАРТА'+SEP+'АРТ-ОРХИДЕЯ'+SEP+'КОРЕЯ · ВЬЕТНАМ · ФИЛИППИНЫ · ТАИЛАНД · СИНГАПУР · ДУБАЙ · ОМАН · БРУНЕЙ · ГОНКОНГ'+SEP,
-  't.eyebrow':'Юньнань · плато 25° с.ш.','t.h2':'Выращены там, где отдыхают ' + ACC.t + 'облака' + ACC.s,'t.zhsub':'Где облака — там растут орхидеи',
+  't.eyebrow':'Юньнань · плато 25° с.ш.','t.h2':'Выращены там, где отдыхают ' + ACC.t + 'облака' + ACC.s,'t.zhsub':'',
   't.para':'Муссонный воздух поднимается здесь в горы — на прохладное светлое плато, где туман круглый год питает лес. Естественно широкие суточные перепады температур Куньмина и более сильный высокогорный ультрафиолет создают лучшую на земле природную среду для цветущих орхидей — ' + ACC.i + 'фаленопсис' + ACC.is + ' отвечает крепкими цветоносами и глубоким цветом при доле энергии равнинной теплицы.',
   't.st1':'Высота','t.st2':'Средняя t°','t.st3':'Суточный перепад','t.st4':'Солнце в год','t.st5':'Вегетационный период',
   't.adv1.t':'Большой перепад день–ночь','t.adv1.b':'Тёплый день копит сахара, холодная горная ночь их закрепляет — залог крепких цветоносов и глубокого, стойкого цвета.',
@@ -225,8 +230,8 @@ ru: {
   'st.h2':'Основанный тайваньцами орхидейный дом на высокогорье Юньнани: селекция и выращивание фаленопсиса от колбы до цветущего растения — ' + ACC.st + 'всё в одном месте.' + ACC.s,
   'st.p1':'С 2000 года Kunming Tong Yi Biotechnology специализируется на селекции фаленопсисов, размножении лучших сортов, сеянцах и промышленном производстве цветущих растений — на базах цветочного парка Сяоцзе в уезде Сунмин, Юньнань.',
   'st.p2':'С 2020 года, по таможенным данным, мы — крупнейший экспортёр цветущих фаленопсисов Китая с более чем половиной национального экспорта. За каждым растением — портфель патентов и прав на новые сорта.',
-  'st.b1':'экспортёр цветущих<br>фаленопсисов в Китае','st.b2':'национального экспорта<br>с 2020 года','st.b3':'лет селекции<br>и выращивания','st.b4':'рынков в Азии<br>и Заливе',
-  'st.f0':'ФОТО 01 — Команда Kunming Tong Yi, Праздник весны у штаб-квартиры в Сунмине','st.f1':'ФОТО 02 — Автоматизированная теплица, Сунмин','st.f2':'ФОТО 03 — Смесь сортов, только со стеллажа','st.f3':'ФОТО 04 — Погрузка рефконтейнера, Куньмин',
+  'st.b1':'лет селекции<br>и выращивания','st.b2':'базы выращивания —<br>от колбы до цветения','st.b3':'сортов<br>в производстве','st.b4':'рынков в Азии<br>и Заливе',
+  'st.f0':'ФОТО 01 — Стеллаж кремовых фаленопсисов, Сунмин','st.f1':'ФОТО 02 — Автоматизированная теплица, Сунмин','st.f2':'ФОТО 03 — Смесь сортов, только со стеллажа','st.f3':'ФОТО 04 — Погрузка рефконтейнера, Куньмин',
   'g.eyebrow':'02 / Как мы выращиваем','g.h2':'Восемнадцать месяцев, ' + ACC.st + 'четыре сезона заботы.' + ACC.s,
   'g.note':'Весь путь одного растения — ниже. Следуйте по стеблю: от колбы до цветения.',
   'g.s1.chip':'Месяцы 0–5','g.s1.word':'один','g.s1.title':'Колба и сеянец','g.s1.body':'В размножение идут только здоровые безвирусные растения — каждое маточное проверяется методами ПЦР и ИФА, прежде чем будет налита первая колба.','g.s1.fact':'Безвирусный материал с лабораторным сертификатом','g.s1.note':'— посеяно в стекле, в стерильном воздухе: целая теплица в бутылке.',
@@ -241,7 +246,7 @@ ru: {
   'gr.c3.stem':'Цветонос чистый; обрезка допустима','gr.c3.leaf':'Допустимы лёгкие повреждения листа','gr.c3.roots':'1–2 корня ослаблены, остальные здоровы',
   'gr.c4.stem':'Допустимы пятна и рубцы на цветоносе','gr.c4.leaf':'Допустимы пятна и трещины листа','gr.c4.roots':'Мало активных корней',
   'gr.note':'Сортировка идёт сверху вниз — растение должно отвечать <em>каждому</em> критерию класса. Девять цветков на обрезанном цветоносе — это B, а не A. В инвойсе всегда ровно то, что в коробке.',
-  'g.co2':'≈1 900 м над уровнем моря','g.co3':'в среднем 17°C','g.co4':'2 446 солнечных часов/год',
+  'g.co2':'1 910 м над уровнем моря','g.co3':'в среднем 15°C','g.co4':'2 250 солнечных часов/год',
   'pano.lb':'ОДИН СТЕЛЛАЖ ИЗ МНОГИХ — СУНМИН, ФЕВРАЛЬ',
   'p.eyebrow':'03 / Продукция','p.h2':'Закрываем все ваши потребности в закупках.','p.note':'Один питомник — весь жизненный цикл: от сеянца из колбы до свежего среза.',
   'p.c1.tag':'01 · Сеянцы','p.c1.title':'Сеянцы','p.c1.body':'Безвирусные молодые растения из проверенного ПЦР и ИФА материала, доращиваемые под ваш график.',
@@ -302,7 +307,7 @@ vi: {
   'hero.mkts':'Thị trường xuất khẩu',
   'mkt.kr':'Hàn Quốc','mkt.vn':'Việt Nam','mkt.ph':'Philippines','mkt.th':'Thái Lan','mkt.sg':'Singapore','mkt.bn':'Brunei','mkt.db':'Dubai','mkt.om':'Oman','mkt.hk':'Hồng Kông',
   'ticker':'CÂY GIỐNG'+SEP+'HOA CHẬU'+SEP+'HOA CẮT CÀNH'+SEP+'NHÂN GIỐNG SẠCH VIRUS'+SEP+'NHÀ KÍNH CHUẨN CHÂU ÂU'+SEP+'ART ORCHID'+SEP+'HÀN QUỐC · VIỆT NAM · PHILIPPINES · THÁI LAN · SINGAPORE · DUBAI · OMAN · BRUNEI · HỒNG KÔNG'+SEP,
-  't.eyebrow':'Vân Nam · cao nguyên 25°B','t.h2':'Trồng nơi ' + ACC.t + 'mây ngủ' + ACC.s + ' lại','t.zhsub':'Nơi mây dừng chân, lan đơm hoa',
+  't.eyebrow':'Vân Nam · cao nguyên 25°B','t.h2':'Trồng nơi ' + ACC.t + 'mây ngủ' + ACC.s + ' lại','t.zhsub':'',
   't.para':'Gió mùa leo núi đổ về đây — một cao nguyên mát và ngập sáng, nơi sương nuôi tán rừng quanh năm. Biên độ nhiệt ngày–đêm tự nhiên của Côn Minh cùng tia cực tím mạnh hơn của cao nguyên tạo nên môi trường tự nhiên tốt nhất cho lan nở hoa — ' + ACC.i + 'hồ điệp' + ACC.is + ' đáp lại bằng vòi hoa cứng cáp, sắc hoa đậm đà, với chỉ một phần năng lượng nhà kính đồng bằng phải đốt.',
   't.st1':'Độ cao','t.st2':'Nhiệt độ TB','t.st3':'Biên độ ngày–đêm','t.st4':'Nắng mỗi năm','t.st5':'Mùa sinh trưởng',
   't.adv1.t':'Chênh lệch ngày–đêm lớn','t.adv1.b':'Ngày ấm tích đường, đêm núi lạnh giữ lại — chìa khóa tự nhiên cho cần hoa cứng cáp và màu đậm, bền hơn.',
@@ -315,8 +320,8 @@ vi: {
   'st.h2':'Một nhà lan do người Đài Loan sáng lập trên cao nguyên Vân Nam, lai tạo và nuôi hồ điệp từ chai cấy mô đến cây nở hoa — ' + ACC.st + 'trọn vẹn tại một nơi.' + ACC.s,
   'st.p1':'Từ năm 2000, Kunming Tong Yi Biotechnology chuyên lai tạo hồ điệp, nhân giống ưu tú, cây giống và sản xuất cây nở hoa quy mô công nghiệp — tại khu hoa viên Tiểu Nhai, huyện Tùng Minh, Vân Nam.',
   'st.p2':'Từ năm 2020, dữ liệu hải quan xếp chúng tôi là nhà xuất khẩu hồ điệp nở hoa lớn nhất Trung Quốc, giữ hơn một nửa thị phần cả nước — với danh mục bằng sáng chế và quyền giống cây trồng mới sau mỗi cây.',
-  'st.b1':'xuất khẩu hồ điệp<br>nở hoa tại Trung Quốc','st.b2':'thị phần xuất khẩu<br>từ 2020','st.b3':'năm lai tạo<br>và canh tác','st.b4':'thị trường khắp<br>châu Á &amp; vùng Vịnh',
-  'st.f0':'HÌNH 01 — Đại gia đình Kunming Tong Yi, Tết tại trụ sở Tùng Minh','st.f1':'HÌNH 02 — Nhà kính tự động, Tùng Minh','st.f2':'HÌNH 03 — Các giống hỗn hợp vừa rời giàn','st.f3':'HÌNH 04 — Đóng container lạnh, Côn Minh',
+  'st.b1':'năm lai tạo<br>và canh tác','st.b2':'cơ sở trồng tại Vân Nam —<br>từ bình mô đến nở hoa','st.b3':'giống<br>đang sản xuất','st.b4':'thị trường khắp<br>châu Á &amp; vùng Vịnh',
+  'st.f0':'HÌNH 01 — Giàn hồ điệp màu kem, Tùng Minh','st.f1':'HÌNH 02 — Nhà kính tự động, Tùng Minh','st.f2':'HÌNH 03 — Các giống hỗn hợp vừa rời giàn','st.f3':'HÌNH 04 — Đóng container lạnh, Côn Minh',
   'g.eyebrow':'02 / Cách chúng tôi trồng','g.h2':'Mười tám tháng, ' + ACC.st + 'bốn mùa chăm chút.' + ACC.s,
   'g.note':'Trọn hành trình của một cây lan trải ra bên dưới — men theo thân, từ chai mô đến hoa nở.',
   'g.s1.chip':'Tháng 0–5','g.s1.word':'một','g.s1.title':'Chai mô &amp; cây giống','g.s1.body':'Chỉ những cá thể khỏe, sạch virus mới được nhân giống — mỗi cây mẹ đều qua sàng lọc PCR và ELISA trước khi rót chai mô đầu tiên.','g.s1.fact':'Nguồn giống sạch virus có chứng nhận','g.s1.note':'— gieo trong thủy tinh, giữa không khí vô trùng: cả một nhà kính trong chiếc chai.',
@@ -331,7 +336,7 @@ vi: {
   'gr.c3.stem':'Vòi sạch; cho phép cắt tỉa','gr.c3.leaf':'Cho phép vết thương nhẹ trên lá','gr.c3.roots':'1–2 rễ suy, còn lại khỏe',
   'gr.c4.stem':'Cho phép đốm hoặc sẹo trên vòi','gr.c4.leaf':'Cho phép đốm hoặc nứt lá','gr.c4.roots':'Ít rễ hoạt động',
   'gr.note':'Phân loại từ trên xuống — cây phải đạt <em>mọi</em> tiêu chí của một hạng mới được xếp hạng đó. Chín bông trên vòi đã tỉa là hạng B, không phải A. Hóa đơn luôn ghi đúng những gì trong thùng.',
-  'g.co2':'≈1.900 m độ cao','g.co3':'trung bình 17°C','g.co4':'2.446 giờ nắng/năm',
+  'g.co2':'1.910 m độ cao','g.co3':'trung bình 15°C','g.co4':'2.250 giờ nắng/năm',
   'pano.lb':'MỘT GIÀN TRONG MUÔN GIÀN — TÙNG MINH, THÁNG HAI',
   'p.eyebrow':'03 / Sản phẩm','p.h2':'Đáp ứng mọi nhu cầu mua hàng của bạn.','p.note':'Một vườn ươm, trọn vòng đời — từ cây giống chai mô đến cành cắt tươi.',
   'p.c1.tag':'01 · Cây giống','p.c1.title':'Cây giống','p.c1.body':'Cây non sạch virus, nhân từ nguồn đã sàng lọc PCR và ELISA, nuôi theo lịch hoàn thiện của bạn.',
@@ -383,9 +388,43 @@ vi: {
 };
 
 /* ============================================================ engine */
+// First visit: pick the language from the visitor's locale. Offline signals
+// only (browser languages, then timezone as a location hint) — this site makes
+// no external calls, so no geo-IP service. An explicit choice always wins.
+var TITLES = {
+  en: 'KMTY Orchid — Kunming Tong Yi · Phalaenopsis from Yunnan',
+  zh: '昆明统一生物 KMTY — 云南蝴蝶兰 · 种苗 盆花 切花',
+  ru: 'KMTY Orchid — Kunming Tong Yi · фаленопсисы из Юньнани',
+  vi: 'KMTY Orchid — Kunming Tong Yi · hồ điệp từ Vân Nam'
+};
+function detectLang() {
+  try {
+    var prefs = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ''];
+    for (var i = 0; i < prefs.length; i++) {
+      var p = String(prefs[i]).toLowerCase();
+      if (p.indexOf('zh') === 0) return 'zh';
+      if (p.indexOf('vi') === 0) return 'vi';
+      if (p.indexOf('ru') === 0) return 'ru';
+      if (p.indexOf('en') === 0) return 'en';   // an explicit English preference outranks the timezone hint
+    }
+  } catch (e) {}
+  try {
+    var tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    if (/^Asia\/(Shanghai|Chongqing|Urumqi|Harbin|Hong_Kong|Macau|Taipei)$/.test(tz)) return 'zh';
+    if (/^Asia\/(Ho_Chi_Minh|Saigon|Hanoi)$/.test(tz)) return 'vi';
+    if (/^Europe\/(Moscow|Kaliningrad|Samara|Volgograd|Saratov|Kirov|Astrakhan|Ulyanovsk)$/.test(tz) ||
+        /^Asia\/(Yekaterinburg|Omsk|Novosibirsk|Barnaul|Tomsk|Novokuznetsk|Krasnoyarsk|Irkutsk|Chita|Yakutsk|Khandyga|Vladivostok|Ust-Nera|Magadan|Sakhalin|Srednekolymsk|Kamchatka|Anadyr)$/.test(tz)) return 'ru';
+  } catch (e) {}
+  return 'en';
+}
+function reflectLang() {
+  // applyDict() owns the html lang attribute; this keeps the tab title in step
+  try { if (TITLES[LANG]) document.title = TITLES[LANG]; } catch (e) {}
+}
 var LANG = 'en';
-try { LANG = localStorage.getItem('kmty-lang') || 'en'; } catch (e) {}
+try { LANG = localStorage.getItem('kmty-lang') || detectLang(); } catch (e) {}
 if (!I18N[LANG]) LANG = 'en';
+reflectLang();
 
 function applyDict() {
   var d = I18N[LANG];
@@ -419,6 +458,7 @@ window.KMTY_I18N = {
     if (!I18N[lang] || lang === LANG) return;
     LANG = lang;
     try { localStorage.setItem('kmty-lang', lang); } catch (e) {}
+    reflectLang();
     applyDict();
     MAP.render();
     window.dispatchEvent(new CustomEvent('kmty:lang'));
@@ -706,7 +746,18 @@ function fabricWidget() {
   var st = document.createElement('style');
   st.textContent = '#kmty-fabweb button.on{background:#F3EEE4;color:#1A1E17;}@media(max-width:820px){#kmty-fabweb{display:none !important;}}';
   w.appendChild(st);
-  document.body.appendChild(w);
+  // live in the footer as a quiet easter egg rather than floating over the page
+  var mount = document.querySelector('[data-fabmount]');
+  if (mount) {
+    w.style.position = 'static';
+    w.style.display = 'inline-flex';
+    w.style.boxShadow = 'none';
+    w.style.background = 'rgba(243,238,228,.05)';
+    w.style.border = '1px solid rgba(243,238,228,.14)';
+    mount.appendChild(w);
+  } else {
+    document.body.appendChild(w);
+  }
 }
 
 function boot() {
