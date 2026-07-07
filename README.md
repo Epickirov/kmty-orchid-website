@@ -23,17 +23,27 @@ works reliably in mainland China.
 
 ## Live preview
 
-One stable URL, always the latest `main` (updates within ~5 minutes of a push;
-requires the repo to stay public):
+**Preferred (GitHub Pages)** — no rate limits, real CDN, auto-updates on every
+push to `main`. Enable once under *Settings → Pages → Deploy from a branch →
+`main` / `(root)`*, then the site lives at:
+
+```
+https://epickirov.github.io/kmty-orchid-website/
+```
+
+(`index.html` redirects to the main page, so the bare URL works.)
+
+**Fallback (githack)** — same idea, but githack's branch endpoint throttles
+multi-asset bursts, so images can drop under load; the page retries failed
+images automatically, but Pages is the reliable home:
 
 ```
 https://raw.githack.com/Epickirov/kmty-orchid-website/main/KMTY%20Orchid%20v5.dc.html
 ```
 
-Do not swap in `rawcdn.githack.com` for this link — the production CDN caches
-branch refs permanently and would freeze on an old version. Use
-`rawcdn.githack.com/<user>/<repo>/<commit-sha>/…` only when you want an
-immutable snapshot of a specific commit to share.
+Do not swap in `rawcdn.githack.com` for a branch link — the production CDN
+caches branch refs permanently and would freeze on an old version. Use
+`rawcdn.githack.com/<user>/<repo>/<commit-sha>/…` only for immutable snapshots.
 
 ## Local preview
 

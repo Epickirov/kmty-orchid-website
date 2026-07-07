@@ -12,7 +12,7 @@
   // bursts — a large desktop viewport prefetches many at once and a few can fail,
   // and a failed edge fetch may be cached. Retry with backoff and a cache-busting
   // param so the retry cannot be served the cached failure.
-  var MAX = 3;
+  var MAX = 5;
   function retry(img) {
     var n = +(img.dataset.kmtyRetry || 0);
     if (n >= MAX) return;
@@ -20,7 +20,8 @@
     if (!base || base.indexOf('data:') === 0) return;
     img.dataset.kmtyRetry = n + 1;
     img.dataset.kmtySrc = base;
-    setTimeout(function () { img.src = base + '?r=' + (n + 1); }, 600 * Math.pow(3, n));
+    // 0.8s, 1.9s, 4.6s, 11s, 26.5s - long enough to outlast a sustained throttle window
+    setTimeout(function () { img.src = base + '?r=' + (n + 1); }, 800 * Math.pow(2.4, n));
   }
   window.addEventListener('error', function (e) {
     var t = e.target;
@@ -34,8 +35,8 @@
       document.querySelectorAll('img').forEach(function (im) {
         if (im.complete && im.naturalWidth === 0 && im.getAttribute('src')) retry(im);
       });
-      if (tries >= 6) clearInterval(iv);
-    }, 3500);
+      if (tries >= 8) clearInterval(iv);
+    }, 4000);
   });
 })();
 </script>
