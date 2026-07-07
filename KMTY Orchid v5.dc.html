@@ -70,8 +70,6 @@
   [data-railbtn]{width:38px;height:38px;border-radius:50%;border:1px solid rgba(243,238,228,.35);background:rgba(243,238,228,.06);color:#F3EEE4;font-size:20px;line-height:1;cursor:pointer;transition:background .25s ease,border-color .25s ease;}
   [data-railbtn]:hover{background:rgba(243,238,228,.16);border-color:rgba(243,238,228,.6);}
   @media(max-width:700px){[data-railbtn]{display:none;}}
-  [data-mix-again]{transition:background .25s ease,border-color .25s ease,transform .15s ease;}
-  [data-mix-again]:active{transform:scale(.955);}
   [data-mix-swatches] button{width:34px;height:34px;border-radius:50%;border:2px solid rgba(243,238,228,.35);cursor:pointer;padding:0;transition:transform .2s ease,box-shadow .2s ease,opacity .2s ease;}
   [data-mix-swatches] button.on{box-shadow:0 0 0 3px #141018,0 0 0 5px #E7B7CF;transform:scale(1.08);}
   [data-mix-swatches] button.off{opacity:.32;}
@@ -977,7 +975,7 @@
         <div style="font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(243,238,228,.5);margin:22px 0 8px;" data-t="mix.balance">Balance</div>
         <div data-mix-sliders style="display:flex;flex-direction:column;gap:9px;max-width:460px;"></div>
         <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:26px;">
-          <button data-mix-again type="button" style="display:inline-flex;align-items:center;gap:8px;padding:13px 22px;border-radius:999px;border:1px solid rgba(243,238,228,.4);background:rgba(243,238,228,.07);color:#F3EEE4;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:13px;font-weight:500;cursor:pointer;"><span data-mix-spin style="display:inline-block;">↻</span> <span data-t="mix.again">Swirl again</span></button>
+          <button data-mix-again type="button" style="display:inline-flex;align-items:center;gap:8px;padding:13px 22px;border-radius:999px;border:1px solid rgba(243,238,228,.4);background:rgba(243,238,228,.07);color:#F3EEE4;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:13px;font-weight:500;cursor:pointer;">↻ <span data-t="mix.again">Swirl again</span></button>
           <button data-mix-save type="button" style="display:inline-flex;align-items:center;gap:8px;padding:13px 22px;border-radius:999px;border:1px solid rgba(243,238,228,.4);background:rgba(243,238,228,.07);color:#F3EEE4;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:13px;font-weight:500;cursor:pointer;">⤓ <span data-t="mix.save">Save this mix</span></button>
           <a href="#contact" style="display:inline-flex;align-items:center;padding:13px 24px;border-radius:999px;background:#B0552F;color:#F3EEE4;text-decoration:none;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:13px;font-weight:500;" data-t="mix.order">Order this mix</a>
         </div>
@@ -1602,7 +1600,6 @@ class Component extends DCLogic {
       };
       function render() {
         if (!bloom.complete || !bloom.naturalWidth || !sel.length) return;
-        cancelTransition();
         const rnd = mulberry(seed);
         const n1 = makeNoise(rnd), n2 = makeNoise(rnd), n3 = makeNoise(rnd), n4 = makeNoise(rnd);
         const field = new Float32Array(FIELD * FIELD);
@@ -1613,7 +1610,6 @@ class Component extends DCLogic {
           const qx = fbm(n2, px + 3.1, py + 1.7), qy = fbm(n2, px + 8.2, py + 4.9);
           field[i] = fbm(n1, px + 1.6 * qx, py + 1.6 * qy);
         }
-        lastField = field;                          // the re-swirl reveal follows these veins
         // the pistil's own pour: independent pattern at a finer scale, computed
         // only inside the pistil's bounds — the rest of the frame never reads it
         const fieldB = new Float32Array(FIELD * FIELD);
@@ -1685,65 +1681,6 @@ class Component extends DCLogic {
       }
       let pending = 0;
       const queueRender = () => { if (!pending) pending = requestAnimationFrame(() => { pending = 0; render(); }); };
-      // fluid re-swirl: the old pour stays put while the fresh one bleeds in
-      // along its own marbling veins — the reveal mask is the new field itself,
-      // swept through its quantiles so coverage grows organically and area-true
-      let lastField = null, transRAF = 0;
-      const cancelTransition = () => { if (transRAF) { cancelAnimationFrame(transRAF); transRAF = 0; } };
-      const prevCv = document.createElement('canvas'); prevCv.width = prevCv.height = SIZE;
-      const nextCv = document.createElement('canvas'); nextCv.width = nextCv.height = SIZE;
-      const tmpCv = document.createElement('canvas'); tmpCv.width = tmpCv.height = SIZE;
-      const maskCv = document.createElement('canvas'); maskCv.width = maskCv.height = SIZE;
-      const maskImg = maskCv.getContext('2d').createImageData(SIZE, SIZE);
-      const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
-      const swirlTransition = () => {
-        const pc = prevCv.getContext('2d');
-        pc.clearRect(0, 0, SIZE, SIZE); pc.drawImage(canvas, 0, 0);
-        render();                                   // synchronous: canvas now holds the new pour
-        const f0 = lastField;
-        if (!f0) return;
-        const nc = nextCv.getContext('2d');
-        nc.clearRect(0, 0, SIZE, SIZE); nc.drawImage(canvas, 0, 0);
-        // the reveal mask reads per canvas pixel: upsample the field once
-        const f = new Float32Array(SIZE * SIZE);
-        const R2 = (FIELD - 1) / (SIZE - 1);
-        for (let y = 0, i2 = 0; y < SIZE; y++) {
-          const fy = y * R2, y0 = fy | 0, y1 = Math.min(FIELD - 1, y0 + 1), ty = fy - y0;
-          for (let x = 0; x < SIZE; x++, i2++) {
-            const fx = x * R2, x0 = fx | 0, x1 = Math.min(FIELD - 1, x0 + 1), tx = fx - x0;
-            const a = f0[y0 * FIELD + x0], b2 = f0[y0 * FIELD + x1];
-            const c2 = f0[y1 * FIELD + x0], d2 = f0[y1 * FIELD + x1];
-            f[i2] = a + (b2 - a) * tx + (c2 - a) * ty + (a - b2 - c2 + d2) * tx * ty;
-          }
-        }
-        const qs = [];
-        for (let j = 0; j < f.length; j += 7) qs.push(f[j]);
-        qs.sort((a, b) => a - b);
-        const band = (qs[qs.length - 1] - qs[0]) * .06 + 1e-6;
-        const mk = maskCv.getContext('2d'), tc = tmpCv.getContext('2d'), md = maskImg.data;
-        const T = 700, t0 = performance.now();
-        const step = (now) => {
-          const t = Math.min(1, (now - t0) / T);
-          const e = 1 - Math.pow(1 - t, 3);          // fast start: the pour answers the click
-          const thr = qs[Math.min(qs.length - 1, (e * qs.length) | 0)] + (e * 2 - 1) * band;
-          for (let j = 0, k = 3; j < f.length; j++, k += 4) {
-            const a = (thr - f[j]) / (2 * band) + .5;
-            md[k] = a <= 0 ? 0 : a >= 1 ? 255 : (a * 255) | 0;
-          }
-          mk.putImageData(maskImg, 0, 0);
-          tc.globalCompositeOperation = 'source-over';
-          tc.clearRect(0, 0, SIZE, SIZE);
-          tc.drawImage(nextCv, 0, 0);
-          tc.globalCompositeOperation = 'destination-in';
-          tc.drawImage(maskCv, 0, 0);
-          mctx.clearRect(0, 0, SIZE, SIZE);
-          mctx.drawImage(prevCv, 0, 0);
-          mctx.drawImage(tmpCv, 0, 0);
-          if (e < 1) transRAF = requestAnimationFrame(step);
-          else { transRAF = 0; mctx.clearRect(0, 0, SIZE, SIZE); mctx.drawImage(nextCv, 0, 0); }
-        };
-        transRAF = requestAnimationFrame(step);
-      };
       const swWrap = mix.querySelector('[data-mix-swatches]');
       const slWrap = mix.querySelector('[data-mix-sliders]');
       const rebuildSliders = () => {
@@ -1782,34 +1719,11 @@ class Component extends DCLogic {
         });
       };
       mix.querySelector('[data-mix-again]').addEventListener('click', () => {
-        seed = (Math.random() * 1e9) >>> 0;
-        const glyph = mix.querySelector('[data-mix-spin]');
-        if (glyph && glyph.animate) glyph.animate(
-          [{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }],
-          { duration: 800, easing: 'cubic-bezier(.4,0,.2,1)' });
-        if (reduceMotion.matches || !bloom.complete || !bloom.naturalWidth || !sel.length) {
-          queueRender(); return;
-        }
-        // instant, compositor-driven feedback: the cup gets a gentle stir while
-        // the heavy field render (deferred two frames so this paints first)
-        // blocks the main thread, then the bleed takes over
-        if (canvas.animate) canvas.animate(
-          [{ transform: 'rotate(0deg) scale(1)' }, { transform: 'rotate(-1.6deg) scale(1.012)' },
-           { transform: 'rotate(1.1deg) scale(1.018)' }, { transform: 'rotate(0deg) scale(1)' }],
-          { duration: 900, easing: 'ease-in-out' });
-        requestAnimationFrame(() => requestAnimationFrame(() => {
-          swirlTransition();
-          const no = mix.querySelector('[data-mix-no]');
-          if (no && no.animate) no.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 450, easing: 'ease-out' });
-        }));
+        seed = (Math.random() * 1e9) >>> 0; queueRender();
       });
       // save the mix: a specimen-sheet card in the site's letterbox language
       mix.querySelector('[data-mix-save]').addEventListener('click', () => {
         if (!bloom.complete || !bloom.naturalWidth) return;
-        if (transRAF) {                             // mid-transition: land on the finished pour
-          cancelTransition();
-          mctx.clearRect(0, 0, SIZE, SIZE); mctx.drawImage(nextCv, 0, 0);
-        }
         const W = 1080, H = 1350, MX = 120;
         const card = document.createElement('canvas'); card.width = W; card.height = H;
         const g = card.getContext('2d');
@@ -1928,26 +1842,11 @@ class Component extends DCLogic {
         tracked('HAND-FINISHED · SONGMING, YUNNAN', W - MX, H - 40, 4, true);
         const no = (noEl ? noEl.textContent.replace(/\D/g, '') : 'mix') || 'mix';
         card.toBlob((blob) => {
-          const name = 'kmty-constellation-' + no + '.png';
-          const download = () => {
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = name;
-            a.click();
-            setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-          };
-          // phones: the native share sheet puts "Save Image" (straight to the
-          // photo gallery) one tap away — a silent Downloads drop is easy to
-          // lose. Cancelling the sheet cancels; only a failure falls back.
-          let file = null;
-          try { file = new File([blob], name, { type: 'image/png' }); } catch (e) {}
-          if (file && matchMedia('(pointer: coarse)').matches &&
-              navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
-            navigator.share({ files: [file], title: 'KMTY Constellation' })
-              .catch((err) => { if (!err || err.name !== 'AbortError') download(); });
-          } else {
-            download();
-          }
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'kmty-constellation-' + no + '.png';
+          a.click();
+          setTimeout(() => URL.revokeObjectURL(a.href), 4000);
         }, 'image/png');
       });
       rebuildSwatches(); rebuildSliders(); render();
