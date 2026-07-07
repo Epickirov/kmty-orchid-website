@@ -21,6 +21,20 @@ works reliably in mainland China.
 | `terroir-geo.json` | Yunnan map geometry + production-base pin coordinates. |
 | `build_fonts.py` | Regenerates the self-hosted font subset (see below). |
 
+## Live preview
+
+One stable URL, always the latest `main` (updates within ~5 minutes of a push;
+requires the repo to stay public):
+
+```
+https://raw.githack.com/Epickirov/kmty-orchid-website/main/KMTY%20Orchid%20v5.dc.html
+```
+
+Do not swap in `rawcdn.githack.com` for this link — the production CDN caches
+branch refs permanently and would freeze on an old version. Use
+`rawcdn.githack.com/<user>/<repo>/<commit-sha>/…` only when you want an
+immutable snapshot of a specific commit to share.
+
 ## Local preview
 
 Any static file server works:
