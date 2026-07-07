@@ -1485,7 +1485,7 @@ class Component extends DCLogic {
     if (mix) {
       const canvas = mix.querySelector('[data-mix-canvas]');
       const mctx = canvas.getContext('2d');
-      const SIZE = 560, LOW = 280;
+      const SIZE = 560, FIELD = 560;
       const PAL = [
         ['Porcelain', '#F2EFE6'], ['Blush', '#F2C4CF'], ['Saffron', '#E8A33D'],
         ['Flame', '#CE4A2D'], ['Wine', '#8E2F44'], ['Fuchsia', '#C0368B'],
@@ -1494,13 +1494,18 @@ class Component extends DCLogic {
       let sel = [0, 2, 3];                        // porcelain / saffron / flame
       const weights = { 0: 40, 2: 25, 3: 35 };
       let seed = (Math.random() * 1e9) >>> 0;
-      const low = document.createElement('canvas'); low.width = low.height = LOW;
-      const lctx = low.getContext('2d');
-      // a white bloom, used untouched: multiplying the paint over its natural
-      // petals keeps colours truthful and the flower looking like a real orchid
+      // pure-white bloom at full resolution, drawn once into a square layer that
+      // provides both the petal shading (multiply) and the cut-out mask
+      const bloomCv = document.createElement('canvas'); bloomCv.width = bloomCv.height = SIZE;
       const bloom = new Image();
-      bloom.src = 'images/blooms/wall-05.webp';
-      bloom.onload = () => render();
+      bloom.src = 'images/blooms/bloom-19.webp';
+      bloom.onload = () => {
+        const bctx = bloomCv.getContext('2d');
+        const sc = SIZE * .92 / Math.max(bloom.naturalWidth, bloom.naturalHeight);
+        const w = bloom.naturalWidth * sc, h = bloom.naturalHeight * sc;
+        bctx.drawImage(bloom, (SIZE - w) / 2, (SIZE - h) / 2, w, h);
+        render();
+      };
       const hex2rgb = (h) => { const n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
       const mulberry = (a) => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
       const makeNoise = (rnd) => {
@@ -1523,10 +1528,10 @@ class Component extends DCLogic {
         if (!bloom.complete || !bloom.naturalWidth || !sel.length) return;
         const rnd = mulberry(seed);
         const n1 = makeNoise(rnd), n2 = makeNoise(rnd);
-        const field = new Float32Array(LOW * LOW);
-        const s = 4.2 / LOW;
+        const field = new Float32Array(FIELD * FIELD);
+        const s = 4.2 / FIELD;
         let i = 0;
-        for (let y = 0; y < LOW; y++) for (let x = 0; x < LOW; x++, i++) {
+        for (let y = 0; y < FIELD; y++) for (let x = 0; x < FIELD; x++, i++) {
           const px = x * s, py = y * s;
           const qx = fbm(n2, px + 3.1, py + 1.7), qy = fbm(n2, px + 8.2, py + 4.9);
           field[i] = fbm(n1, px + 1.6 * qx, py + 1.6 * qy);
@@ -1540,32 +1545,29 @@ class Component extends DCLogic {
           acc += (weights[sel[c]] || 1) / total;
           cuts.push(sorted[Math.min(sorted.length - 1, (acc * sorted.length) | 0)]);
         }
-        const img = lctx.createImageData(LOW, LOW), d = img.data;
-        const E = .022;                              // soft paint blend at the band edges
+        // colourise at full canvas resolution: bilinear-sample the field and cut
+        // hard at the thresholds — clean, distinct borders between the paints
+        const img = mctx.createImageData(SIZE, SIZE), d = img.data;
+        const R = (FIELD - 1) / (SIZE - 1);
         i = 0;
-        for (let p = 0; p < field.length; p++, i += 4) {
-          const v = field[p];
-          let band = 0; while (band < cuts.length && v > cuts[band]) band++;
-          let r = cols[band][0], g = cols[band][1], b = cols[band][2];
-          if (band < cuts.length && cuts[band] - v < E) {
-            const t = .5 + (v - cuts[band]) / (2 * E), n = cols[band + 1];
-            r += (n[0] - r) * t; g += (n[1] - g) * t; b += (n[2] - b) * t;
-          } else if (band > 0 && v - cuts[band - 1] < E) {
-            const t = .5 - (v - cuts[band - 1]) / (2 * E), n = cols[band - 1];
-            r += (n[0] - r) * t; g += (n[1] - g) * t; b += (n[2] - b) * t;
+        for (let y = 0; y < SIZE; y++) {
+          const fy = y * R, y0 = fy | 0, y1 = Math.min(FIELD - 1, y0 + 1), ty = fy - y0;
+          for (let x = 0; x < SIZE; x++, i += 4) {
+            const fx = x * R, x0 = fx | 0, x1 = Math.min(FIELD - 1, x0 + 1), tx = fx - x0;
+            const a = field[y0 * FIELD + x0], b2 = field[y0 * FIELD + x1];
+            const c2 = field[y1 * FIELD + x0], d2 = field[y1 * FIELD + x1];
+            const v = a + (b2 - a) * tx + (c2 - a) * ty + (a - b2 - c2 + d2) * tx * ty;
+            let band = 0; while (band < cuts.length && v > cuts[band]) band++;
+            d[i] = cols[band][0]; d[i + 1] = cols[band][1]; d[i + 2] = cols[band][2]; d[i + 3] = 255;
           }
-          const vein = .965 + .07 * fbm(n2, (p % LOW) * s * 2 + 11, ((p / LOW) | 0) * s * 2 + 5);
-          d[i] = r * vein; d[i + 1] = g * vein; d[i + 2] = b * vein; d[i + 3] = 255;
         }
-        lctx.putImageData(img, 0, 0);
-        mctx.clearRect(0, 0, SIZE, SIZE);
-        mctx.imageSmoothingEnabled = true; mctx.imageSmoothingQuality = 'high';
         mctx.globalCompositeOperation = 'source-over';
-        mctx.drawImage(low, 0, 0, SIZE, SIZE);
+        mctx.putImageData(img, 0, 0);
+        mctx.imageSmoothingEnabled = true; mctx.imageSmoothingQuality = 'high';
         mctx.globalCompositeOperation = 'multiply';   // real petal shading carries the paint
-        mctx.drawImage(bloom, 0, 0, SIZE, SIZE);
+        mctx.drawImage(bloomCv, 0, 0);
         mctx.globalCompositeOperation = 'destination-in';
-        mctx.drawImage(bloom, 0, 0, SIZE, SIZE);
+        mctx.drawImage(bloomCv, 0, 0);
         mctx.globalCompositeOperation = 'source-over';
         const no = mix.querySelector('[data-mix-no]');
         if (no) no.textContent = '№ ' + (1000 + seed % 9000);
