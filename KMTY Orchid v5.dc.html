@@ -1499,6 +1499,10 @@ class Component extends DCLogic {
       // pure-white bloom at full resolution, drawn once into a square layer that
       // provides both the petal shading (multiply) and the cut-out mask
       const bloomCv = document.createElement('canvas'); bloomCv.width = bloomCv.height = SIZE;
+      // the pistil is its own protruding structure — it carries a separate pour,
+      // so its mask comes from the bloom's naturally coloured heart (chroma),
+      // which follows the true anatomy and self-feathers at the rim
+      const pistil = new Float32Array(SIZE * SIZE);
       const bloom = new Image();
       bloom.src = 'images/blooms/bloom-19.webp';
       bloom.onload = () => {
@@ -1506,6 +1510,12 @@ class Component extends DCLogic {
         const sc = SIZE * .92 / Math.max(bloom.naturalWidth, bloom.naturalHeight);
         const w = bloom.naturalWidth * sc, h = bloom.naturalHeight * sc;
         bctx.drawImage(bloom, (SIZE - w) / 2, (SIZE - h) / 2, w, h);
+        const sd = bctx.getImageData(0, 0, SIZE, SIZE).data;
+        for (let j = 0, p2 = 0; j < sd.length; j += 4, p2++) {
+          const ch = Math.max(sd[j], sd[j + 1], sd[j + 2]) - Math.min(sd[j], sd[j + 1], sd[j + 2]);
+          let t = (ch - 26) / 36; t = t < 0 ? 0 : t > 1 ? 1 : t;
+          pistil[p2] = sd[j + 3] > 60 ? t * t * (3 - 2 * t) : 0;
+        }
         render();
       };
       const hex2rgb = (h) => { const n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
@@ -1529,7 +1539,7 @@ class Component extends DCLogic {
       function render() {
         if (!bloom.complete || !bloom.naturalWidth || !sel.length) return;
         const rnd = mulberry(seed);
-        const n1 = makeNoise(rnd), n2 = makeNoise(rnd);
+        const n1 = makeNoise(rnd), n2 = makeNoise(rnd), n3 = makeNoise(rnd), n4 = makeNoise(rnd);
         const field = new Float32Array(FIELD * FIELD);
         const s = 4.2 / FIELD;
         let i = 0;
@@ -1537,6 +1547,15 @@ class Component extends DCLogic {
           const px = x * s, py = y * s;
           const qx = fbm(n2, px + 3.1, py + 1.7), qy = fbm(n2, px + 8.2, py + 4.9);
           field[i] = fbm(n1, px + 1.6 * qx, py + 1.6 * qy);
+        }
+        // the pistil's own pour: independent pattern at a finer scale
+        const fieldB = new Float32Array(FIELD * FIELD);
+        const s2 = s * 2.2;
+        i = 0;
+        for (let y = 0; y < FIELD; y++) for (let x = 0; x < FIELD; x++, i++) {
+          const px = x * s2, py = y * s2;
+          const qx = fbm(n4, px + 2.2, py + 6.3), qy = fbm(n4, px + 7.4, py + 1.9);
+          fieldB[i] = fbm(n3, px + 1.6 * qx, py + 1.6 * qy);
         }
         // per-colour area follows the sliders: thresholds from the field's own percentiles
         const sorted = field.slice().sort();
@@ -1546,6 +1565,14 @@ class Component extends DCLogic {
         for (let c = 0; c < sel.length - 1; c++) {
           acc += (weights[sel[c]] || 1) / total;
           cuts.push(sorted[Math.min(sorted.length - 1, (acc * sorted.length) | 0)]);
+        }
+        const bVals = [];
+        for (let p2 = 0; p2 < fieldB.length; p2++) if (pistil[p2] > .5) bVals.push(fieldB[p2]);
+        bVals.sort((a, b) => a - b);
+        const cutsB = []; acc = 0;
+        for (let c = 0; c < sel.length - 1; c++) {
+          acc += (weights[sel[c]] || 1) / total;
+          cutsB.push(bVals.length > 400 ? bVals[Math.min(bVals.length - 1, (acc * bVals.length) | 0)] : cuts[c]);
         }
         // colourise at full canvas resolution: bilinear-sample the field and cut
         // hard at the thresholds — clean, distinct borders between the paints
@@ -1560,7 +1587,13 @@ class Component extends DCLogic {
             const c2 = field[y1 * FIELD + x0], d2 = field[y1 * FIELD + x1];
             const v = a + (b2 - a) * tx + (c2 - a) * ty + (a - b2 - c2 + d2) * tx * ty;
             let band = 0; while (band < cuts.length && v > cuts[band]) band++;
-            d[i] = cols[band][0]; d[i + 1] = cols[band][1]; d[i + 2] = cols[band][2]; d[i + 3] = 255;
+            const vb = (() => { const a2 = fieldB[y0 * FIELD + x0], b3 = fieldB[y0 * FIELD + x1], c3 = fieldB[y1 * FIELD + x0], d3 = fieldB[y1 * FIELD + x1]; return a2 + (b3 - a2) * tx + (c3 - a2) * ty + (a2 - b3 - c3 + d3) * tx * ty; })();
+            let bandB = 0; while (bandB < cutsB.length && vb > cutsB[bandB]) bandB++;
+            const m = pistil[y * SIZE + x], cA = cols[band], cB = cols[bandB];
+            d[i] = cA[0] + (cB[0] - cA[0]) * m;
+            d[i + 1] = cA[1] + (cB[1] - cA[1]) * m;
+            d[i + 2] = cA[2] + (cB[2] - cA[2]) * m;
+            d[i + 3] = 255;
           }
         }
         mctx.globalCompositeOperation = 'source-over';
