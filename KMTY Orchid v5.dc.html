@@ -1265,6 +1265,56 @@ class Component extends DCLogic {
       v.addEventListener('canplay', tryPlay, { once: true });
       v.addEventListener('loadeddata', tryPlay, { once: true });
     });
+    /* the bloom timelapse ships with true alpha (webm). Engines that can't play
+       it fall back to the H.264 file and would show its black studio backdrop —
+       key the black out live onto a canvas so the bloom floats there too. One
+       persistent sweep, because the runtime re-creates these nodes after mount
+       (see heal() in i18n.js): the loop re-finds the live video and re-attaches
+       its canvas whenever the node is swapped. Idle cost on the webm path is a
+       DOM scan every ~600ms. */
+    (() => {
+      const LO = 16, HI = 56;
+      let v = null, cv = null, ctx = null, w = 0, h = 0, last = -1, lastDraw = 0, lastScan = -1e9;
+      const tick = (now) => {
+        requestAnimationFrame(tick);
+        if (now - lastScan > 600 || (v && !v.isConnected)) {
+          lastScan = now; v = null;
+          document.querySelectorAll('video[data-bgvideo]').forEach(x => {
+            if (!v && x.querySelector('source[src*="bloom-alpha"]')) v = x;
+          });
+        }
+        if (!v || !/\.mp4($|\?)/.test(v.currentSrc || '') || v.readyState < 2 || !v.videoWidth) return;
+        if (!cv || !cv.isConnected || cv.parentElement !== v.parentElement) {
+          if (cv) cv.remove();
+          const sc = Math.min(1, 560 / Math.max(v.videoWidth, v.videoHeight));
+          w = Math.max(2, Math.round(v.videoWidth * sc)); h = Math.max(2, Math.round(v.videoHeight * sc));
+          cv = document.createElement('canvas');
+          cv.width = w; cv.height = h;
+          cv.setAttribute('aria-hidden', 'true');
+          cv.style.cssText = 'position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);height:104%;max-width:100%;pointer-events:none;filter:drop-shadow(0 24px 38px rgba(26,30,23,.20));';
+          ctx = cv.getContext('2d', { willReadFrequently: true });
+          v.parentElement.appendChild(cv);
+          last = -1;
+        }
+        if (v.style.opacity !== '0') v.style.opacity = '0';   // survives node re-creation
+        if (v.currentTime === last || now - lastDraw < 62 || document.hidden) return;
+        last = v.currentTime; lastDraw = now;
+        ctx.drawImage(v, 0, 0, w, h);
+        const im = ctx.getImageData(0, 0, w, h), d2 = im.data;
+        for (let i = 0; i < d2.length; i += 4) {
+          const m = d2[i] > d2[i + 1] ? (d2[i] > d2[i + 2] ? d2[i] : d2[i + 2]) : (d2[i + 1] > d2[i + 2] ? d2[i + 1] : d2[i + 2]);
+          if (m <= LO) d2[i + 3] = 0;
+          else if (m < HI) {
+            const k = 255 / m;                       // un-fringe: colour was premultiplied by black
+            d2[i] = Math.min(255, d2[i] * k); d2[i + 1] = Math.min(255, d2[i + 1] * k);
+            d2[i + 2] = Math.min(255, d2[i + 2] * k);
+            d2[i + 3] = (m - LO) * 255 / (HI - LO);
+          }
+        }
+        ctx.putImageData(im, 0, 0);
+      };
+      requestAnimationFrame(tick);
+    })();
 
     /* reveal + clip + count */
     const els = $$('[data-reveal]');
