@@ -1668,11 +1668,24 @@ class Component extends DCLogic {
         // ground: the site's linen weave under a soft mat wash, then the keyline
         g.fillStyle = '#F5F4F2'; g.fillRect(0, 0, W, H);
         if (linen.complete && linen.naturalWidth) {
+          // the linen tile is a dark source; remap its weave onto the mat tone
+          // with strong gain so the fabric structure reads at paper lightness
           const t2 = document.createElement('canvas'); t2.width = t2.height = 300;
-          t2.getContext('2d').drawImage(linen, 0, 0, 300, 300);
+          const tc = t2.getContext('2d');
+          tc.fillStyle = '#F5F4F2'; tc.fillRect(0, 0, 300, 300);   // the tile is a translucent overlay
+          tc.drawImage(linen, 0, 0, 300, 300);
+          const td = tc.getImageData(0, 0, 300, 300), q = td.data;
+          let lsum = 0;
+          for (let j = 0; j < q.length; j += 4) lsum += q[j] * .299 + q[j + 1] * .587 + q[j + 2] * .114;
+          const lmean = lsum / (q.length / 4);
+          for (let j = 0; j < q.length; j += 4) {
+            const lum = q[j] * .299 + q[j + 1] * .587 + q[j + 2] * .114;
+            const v = 244 + (lum - lmean) * 6.5;
+            q[j] = v + 1; q[j + 1] = v; q[j + 2] = v - 3; q[j + 3] = 255;
+          }
+          tc.putImageData(td, 0, 0);
           g.fillStyle = g.createPattern(t2, 'repeat');
           g.fillRect(0, 0, W, H);
-          g.fillStyle = 'rgba(245,244,242,.42)'; g.fillRect(0, 0, W, H);
         }
         g.strokeStyle = 'rgba(26,30,23,.09)'; g.lineWidth = 2;
         g.strokeRect(36, 36, W - 72, H - 72);
