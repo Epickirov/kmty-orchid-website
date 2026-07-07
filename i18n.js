@@ -687,7 +687,7 @@ function fabricWidget() {
     w.appendChild(b);
   });
   var st = document.createElement('style');
-  st.textContent = '#kmty-fabweb button.on{background:#F3EEE4;color:#1A1E17;}@media(max-width:820px){#kmty-fabweb{display:none;}}';
+  st.textContent = '#kmty-fabweb button.on{background:#F3EEE4;color:#1A1E17;}@media(max-width:820px){#kmty-fabweb{display:none !important;}}';
   w.appendChild(st);
   document.body.appendChild(w);
 }

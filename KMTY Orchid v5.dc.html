@@ -49,11 +49,18 @@
     [data-vinestage]{padding:16px 0 !important;}
     [data-vinestage] [data-reveal]:last-child{align-items:flex-start !important;text-align:left !important;}
     [data-vinestage] [data-reveal]:last-child p{margin-left:0 !important;}
+    [data-heroscrim]{background:linear-gradient(178deg,rgba(18,16,12,.74) 0%,rgba(18,16,12,.44) 36%,rgba(18,16,12,.56) 66%,rgba(18,16,12,.92) 100%) !important;}
+    [data-mtb],[data-mtf]{opacity:.3;}
+    [data-ctameta]{flex-direction:column;gap:7px;align-items:center;}
+    [data-ctameta] [data-dot]{display:none;}
+    #contact > img:nth-of-type(2),#contact > img:nth-of-type(3){display:none;}
   }
   @media(max-width:900px){
     [data-desktopnav]{display:none !important;}
     [data-navcta]{display:none !important;}
     [data-burger]{display:inline-flex !important;}
+    #contact input[type=email]{border-color:rgba(243,238,228,.55) !important;background:rgba(243,238,228,.12) !important;}
+    #contact input[type=email]::placeholder{color:rgba(243,238,228,.78);}
   }
 </style>
 </helmet>
@@ -97,7 +104,10 @@
   <!-- MOBILE MENU -->
   <div data-mobilemenu style="position:fixed;inset:0;z-index:210;background:#1A1E17;transform:translateX(100%);transition:transform .5s cubic-bezier(.7,0,.2,1);display:flex;flex-direction:column;padding:22px clamp(20px,6vw,40px);">
     <div style="display:flex;align-items:center;justify-content:space-between;">
-      <img src="images/logo.png" alt="KMTY" style="height:30px;width:auto;"/>
+      <a href="#top" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+        <img src="images/logo.png" alt="KMTY" style="height:30px;width:auto;"/>
+        <span style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:700;font-size:21px;letter-spacing:-.01em;color:#F3EEE4;">KMTY</span>
+      </a>
       <button data-burger style="width:44px;height:44px;border:none;border-radius:8px;background:rgba(243,238,228,.1);color:#F3EEE4;font-size:22px;cursor:pointer;">&times;</button>
     </div>
     <div style="display:flex;flex-direction:column;margin-top:34px;">
@@ -115,7 +125,7 @@
   <!-- HERO -->
   <section id="top" data-screen-label="Hero" style="position:relative;min-height:100svh;display:flex;flex-direction:column;justify-content:center;overflow:hidden;background:#12100c;">
     <img src="images/hero-field.jpg" alt="A sea of magenta Phalaenopsis in the KMTY greenhouse" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;animation:kmtyKen 24s ease-in-out infinite alternate;"/>
-    <div style="position:absolute;inset:0;background:linear-gradient(174deg,rgba(18,16,12,.68) 0%,rgba(18,16,12,.22) 34%,rgba(18,16,12,.4) 68%,rgba(18,16,12,.9) 100%);"></div>
+    <div data-heroscrim style="position:absolute;inset:0;background:linear-gradient(174deg,rgba(18,16,12,.68) 0%,rgba(18,16,12,.22) 34%,rgba(18,16,12,.4) 68%,rgba(18,16,12,.9) 100%);"></div>
     <div style="position:relative;width:100%;max-width:1300px;margin:0 auto;padding:104px clamp(18px,4vw,44px) 0;z-index:3;">
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;">
         <span style="display:block;height:2px;width:60px;border-radius:999px;background:linear-gradient(90deg,#4C8C57,#C6952F 55%,#D48CB0);opacity:.85;"></span>
@@ -959,8 +969,8 @@
           <input type="email" placeholder="Your work email" data-t-ph="c.ph" style="flex:1 1 240px;min-width:0;padding:16px 20px;border-radius:999px;border:1px solid rgba(243,238,228,.3);background:rgba(243,238,228,.07);color:#F3EEE4;font-size:15px;font-family:inherit;outline:none;"/>
           <button style="padding:16px 28px;border-radius:999px;border:none;background:#B0552F;color:#F3EEE4;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:14px;font-weight:500;cursor:pointer;" data-t="nav.cta">Request catalog</button>
         </div>
-        <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px 22px;margin-top:26px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12.5px;color:rgba(243,238,228,.62);">
-          <span data-t="c.addr">Xiaojie, Songming County, Kunming</span><span style="color:#E7B7CF;">·</span><span>kmtyorchid.com</span><span style="color:#E7B7CF;">·</span><span data-t="c.langs">EN / 中文</span>
+        <div data-ctameta style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px 22px;margin-top:26px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12.5px;color:rgba(243,238,228,.62);">
+          <span data-t="c.addr">Xiaojie, Songming County, Kunming</span><span data-dot style="color:#E7B7CF;">·</span><span>kmtyorchid.com</span><span data-dot style="color:#E7B7CF;">·</span><span data-t="c.langs">EN / 中文</span>
         </div>
       </div>
     </div>
@@ -1093,16 +1103,26 @@ class Component extends DCLogic {
     /* nav + progress */
     const nav = $('[data-nav]');
     const progress = $('[data-progress]');
+    const mqMobileNav = window.matchMedia('(max-width:900px)');
     const setNav = () => {
       const scrolled = window.scrollY > 40;
       if (nav) {
-        nav.style.background = scrolled ? 'rgba(243,238,228,.93)' : 'transparent';
+        // near-opaque on mobile: WeChat/older-Android webviews lack backdrop-filter,
+        // so at .93 the section text ghosts through the bar
+        nav.style.background = scrolled ? (mqMobileNav.matches ? 'rgba(243,238,228,.985)' : 'rgba(243,238,228,.93)') : 'transparent';
         nav.style.backdropFilter = scrolled ? 'saturate(1.3) blur(16px)' : 'none';
         nav.style.webkitBackdropFilter = scrolled ? 'saturate(1.3) blur(16px)' : 'none';
         nav.style.borderBottomColor = scrolled ? 'rgba(26,30,23,.1)' : 'transparent';
         nav.style.boxShadow = scrolled ? '0 6px 30px rgba(26,30,23,.06)' : 'none';
         const wm = nav.querySelector('[data-wordmark]');
         if (wm) wm.style.color = scrolled ? '#1A1E17' : '#F3EEE4';
+        const bl = nav.querySelector('[data-burger] span');
+        if (bl) {
+          const c = scrolled ? '#1A1E17' : '#F3EEE4';
+          bl.style.background = c;
+          bl.style.boxShadow = '0 -6px 0 ' + c + ',0 6px 0 ' + c;
+          bl.parentElement.style.background = scrolled ? 'rgba(26,30,23,.07)' : 'rgba(243,238,228,.16)';
+        }
         nav.querySelectorAll('[data-navlink]').forEach(a => { a.style.color = scrolled ? '#55564A' : 'rgba(243,238,228,.82)'; });
         const sw = nav.querySelector('[data-langsw]');
         if (sw) {
