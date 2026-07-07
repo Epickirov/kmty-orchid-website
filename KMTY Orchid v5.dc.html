@@ -1497,6 +1497,7 @@ class Component extends DCLogic {
       // pure-white bloom at full resolution, drawn once into a square layer that
       // provides both the petal shading (multiply) and the cut-out mask
       const bloomCv = document.createElement('canvas'); bloomCv.width = bloomCv.height = SIZE;
+      let cx = SIZE / 2, cy = SIZE / 2;   // pistil position, found from the coloured heart
       const bloom = new Image();
       bloom.src = 'images/blooms/bloom-19.webp';
       bloom.onload = () => {
@@ -1504,6 +1505,15 @@ class Component extends DCLogic {
         const sc = SIZE * .92 / Math.max(bloom.naturalWidth, bloom.naturalHeight);
         const w = bloom.naturalWidth * sc, h = bloom.naturalHeight * sc;
         bctx.drawImage(bloom, (SIZE - w) / 2, (SIZE - h) / 2, w, h);
+        const sd = bctx.getImageData(0, 0, SIZE, SIZE).data;
+        let sx = 0, sy = 0, sw = 0;
+        for (let y = 0; y < SIZE; y += 3) for (let x = 0; x < SIZE; x += 3) {
+          const j = (y * SIZE + x) * 4;
+          const ch = Math.max(sd[j], sd[j + 1], sd[j + 2]) - Math.min(sd[j], sd[j + 1], sd[j + 2]);
+          if (sd[j + 3] > 128 && ch > 40) { sx += x * ch; sy += y * ch; sw += ch; }
+        }
+        if (sw) { cx = sx / sw; cy = sy / sw; }
+        mix.dataset.cx = cx.toFixed(1); mix.dataset.cy = cy.toFixed(1);
         render();
       };
       const hex2rgb = (h) => { const n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
@@ -1529,12 +1539,16 @@ class Component extends DCLogic {
         const rnd = mulberry(seed);
         const n1 = makeNoise(rnd), n2 = makeNoise(rnd);
         const field = new Float32Array(FIELD * FIELD);
-        const s = 4.2 / FIELD;
         let i = 0;
         for (let y = 0; y < FIELD; y++) for (let x = 0; x < FIELD; x++, i++) {
-          const px = x * s, py = y * s;
-          const qx = fbm(n2, px + 3.1, py + 1.7), qy = fbm(n2, px + 8.2, py + 4.9);
-          field[i] = fbm(n1, px + 1.6 * qx, py + 1.6 * qy);
+          // polar sampling around the pistil: colour fields ray outward from the
+          // flower's throat (cos/sin keep the pattern seamless around the circle)
+          const dx = x - cx, dy = y - cy;
+          const rr = Math.sqrt(dx * dx + dy * dy) || 1e-4;
+          const ct = dx / rr, st = dy / rr;
+          const rn = rr / (FIELD * .5);
+          const q = fbm(n2, 5 + 1.9 * ct + rn * .45, 5 + 1.9 * st + rn * .45);
+          field[i] = fbm(n1, 2.5 + 1.7 * ct + .85 * q, 2.5 + 1.7 * st + .85 * q) * .88 + rn * .12;
         }
         // per-colour area follows the sliders: thresholds from the field's own percentiles
         const sorted = field.slice().sort();
