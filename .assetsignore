@@ -1,0 +1,12 @@
+# Files in the repo root that are NOT part of the served website, so Cloudflare
+# Workers does not try to upload them as static assets. Uses .gitignore syntax.
+.git
+worker.js
+wrangler.jsonc
+wrangler.toml
+netlify.toml
+README.md
+build_fonts.py
+*.py
+.gitignore
+.assetsignore
