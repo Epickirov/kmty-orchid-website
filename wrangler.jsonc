@@ -5,7 +5,7 @@
   // The KV namespace (for persistent colour/stock) is added below once the
   // namespace exists — see README. The admin password (ADMIN_PASS) is set as a
   // dashboard Secret, not here.
-  "name": "kmty-orchid",
+  "name": "kmty-xingkong",
   "main": "worker.js",
   "compatibility_date": "2024-11-06",
   "assets": {
