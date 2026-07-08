@@ -20,6 +20,12 @@
   to = "/constellation.html"
   status = 200
 
+# staff-only stock manager (generates the daily order link)
+[[redirects]]
+  from = "/stock"
+  to = "/stock.html"
+  status = 200
+
 # ── caching ──
 # HTML is always revalidated, so a push goes live immediately — no stale CDN
 # copy the way githack served old versions. Static assets cache hard.

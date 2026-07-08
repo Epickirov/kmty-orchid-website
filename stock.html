@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>库存管理 · 星空艺术兰 — KMTY（内部工具）</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/png" href="images/favicon.png">
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;background:#141018;color:#F3EEE4;
+       font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans SC',system-ui,sans-serif;
+       -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+       padding:env(safe-area-inset-top) env(safe-area-inset-right) calc(30px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
+       background-image:radial-gradient(circle at 84% -4%,rgba(212,140,176,.12),transparent 46%),radial-gradient(circle at 6% 26%,rgba(46,78,158,.10),transparent 40%);}
+  .wrap{max-width:620px;margin:0 auto;padding:22px 20px 60px;}
+  .serif{font-family:Georgia,'Songti SC','Noto Serif SC',serif;}
+  header{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+  .mark{font-family:Georgia,'Songti SC','Noto Serif SC',serif;font-size:22px;font-weight:700;}
+  .mark b{color:#E7B7CF;font-weight:700;}
+  .tag{font-size:11px;letter-spacing:.22em;color:#9b93a4;}
+  .co{margin:10px 0 0;font-size:12px;color:#8d8596;line-height:1.6;}
+  h1{margin:22px 0 6px;font-size:23px;font-weight:600;}
+  .lead{margin:0 0 4px;font-size:14px;line-height:1.75;color:#bfb8c6;}
+  .lead b{color:#E7B7CF;font-weight:600;}
+  .counts{margin:20px 0 8px;font-size:12.5px;letter-spacing:.04em;color:#a79fb0;}
+  .counts b{color:#8FCf9c;font-weight:600;} .counts i{color:#e79b9b;font-style:normal;font-weight:600;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:6px 0 0;}
+  @media(min-width:520px){.grid{grid-template-columns:1fr 1fr 1fr;}}
+  .chip{display:flex;align-items:center;gap:11px;padding:12px 13px;border-radius:14px;cursor:pointer;
+        border:1px solid rgba(243,238,228,.16);background:rgba(243,238,228,.045);transition:border-color .18s,background .18s,opacity .18s;user-select:none;}
+  .chip:active{transform:scale(.98);}
+  .chip .dot{position:relative;width:34px;height:34px;border-radius:50%;border:2px solid rgba(243,238,228,.4);flex:0 0 auto;}
+  .chip .nm{line-height:1.25;min-width:0;}
+  .chip .nm em{display:block;font-style:normal;font-size:14px;font-weight:600;color:#EDE7DF;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .chip .nm small{display:block;font-size:10.5px;color:#8d8596;letter-spacing:.03em;}
+  .chip .st{margin-left:auto;font-size:11px;font-weight:600;letter-spacing:.04em;padding:3px 9px;border-radius:999px;flex:0 0 auto;}
+  .chip.in{border-color:rgba(120,190,140,.5);}
+  .chip.in .st{background:rgba(120,190,140,.16);color:#9ad3a8;}
+  .chip.out{background:rgba(243,238,228,.02);opacity:.7;}
+  .chip.out .dot{opacity:.3;filter:grayscale(.6);}
+  .chip.out .dot::after{content:'';position:absolute;left:2px;top:15px;width:28px;height:2px;background:rgba(243,238,228,.6);transform:rotate(-45deg);border-radius:2px;}
+  .chip.out .st{background:rgba(231,155,155,.16);color:#e79b9b;}
+  .chip.locked{cursor:not-allowed;opacity:.5;}
+  .chip.locked .st{background:#3a3341;color:#b9b1c2;}
+  .linkbox{margin:26px 0 0;padding:16px 16px 18px;border-radius:16px;background:rgba(212,140,176,.09);border:1px solid rgba(212,140,176,.28);}
+  .linkbox .h{font-size:12px;letter-spacing:.16em;color:#E7B7CF;margin:0 0 10px;}
+  .linkbox .url{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;line-height:1.6;word-break:break-all;color:#F3EEE4;
+        background:rgba(0,0,0,.28);border-radius:10px;padding:11px 13px;border:1px solid rgba(243,238,228,.12);}
+  .btns{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 0;}
+  .btn{flex:1 1 auto;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;cursor:pointer;
+       font-family:inherit;font-size:14px;font-weight:500;padding:14px 18px;border:1px solid rgba(243,238,228,.34);background:rgba(243,238,228,.06);color:#F3EEE4;text-decoration:none;transition:transform .15s;}
+  .btn:active{transform:scale(.97);}
+  .btn.solid{background:#B0552F;border:none;}
+  .btn.reset{flex:0 0 auto;}
+  .note{margin:16px 0 0;font-size:12.5px;line-height:1.75;color:#8d8596;}
+  .note b{color:#cfc8d5;font-weight:600;}
+  .err{margin:24px 0;padding:16px;border-radius:12px;background:rgba(231,155,155,.1);border:1px solid rgba(231,155,155,.3);font-size:14px;line-height:1.7;color:#f0c8c8;}
+  footer{margin-top:40px;padding-top:16px;border-top:1px solid rgba(243,238,228,.13);font-size:10.5px;letter-spacing:.12em;color:#7d7587;text-align:center;}
+  .toast{position:fixed;left:50%;bottom:calc(30px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);z-index:9;background:#F3EEE4;color:#1A1E17;font-size:13px;padding:11px 20px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="mark">KMTY <b>星空</b></span>
+    <span class="tag">库存管理 · STOCK</span>
+  </header>
+  <p class="co">昆明统一生物科技有限公司 · 内部工具（请勿分享此页）</p>
+
+  <h1>今天哪些颜色缺货？</h1>
+  <p class="lead">点一下<b>缺货</b>的颜色把它置灰。下方会生成<b>今日下单链接</b> — 把这个链接发给客户，客户就看不到这些颜色了。<br>随时可以改，改完重新复制链接即可。</p>
+
+  <div class="counts" id="counts"></div>
+  <div class="grid" id="grid"></div>
+  <div id="err"></div>
+
+  <div class="linkbox" id="linkbox" style="display:none;">
+    <p class="h">今日下单链接 · SHARE THIS</p>
+    <div class="url" id="url"></div>
+    <div class="btns">
+      <button class="btn solid" id="copy" type="button">复制链接</button>
+      <a class="btn" id="open" target="_blank" rel="noopener">打开预览</a>
+      <button class="btn reset" id="reset" type="button">全部有货</button>
+    </div>
+    <p class="note"><b>注意：</b>请分享上面这条链接，不要分享普通的 <span class="serif">/order</span> 链接 — 普通链接会显示全部颜色都有货。</p>
+  </div>
+
+  <footer>KMTYORCHID.COM · HAND-FINISHED · SONGMING, YUNNAN</footer>
+</div>
+<div class="toast" id="toast">已复制 ✓</div>
+
+<script>
+(function () {
+  'use strict';
+  var ORDER_PATH = '/order';                 // matches the netlify.toml rewrite
+  var grid = document.getElementById('grid');
+  var errEl = document.getElementById('err');
+  var box = document.getElementById('linkbox');
+  var urlEl = document.getElementById('url');
+  var openEl = document.getElementById('open');
+  var countsEl = document.getElementById('counts');
+  var toastEl = document.getElementById('toast'), toastT = 0;
+  var PAL = [], state = [];                   // state[i]: 'in' | 'out' | 'fileout'
+
+  function toast(m) {
+    toastEl.textContent = m; toastEl.classList.add('show');
+    clearTimeout(toastT); toastT = setTimeout(function () { toastEl.classList.remove('show'); }, 2000);
+  }
+  // read the LIVE colour list from the order page so the two never drift —
+  // add a colour to constellation.html and it shows up here automatically
+  fetch('/constellation.html', { cache: 'no-store' })
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+    .then(function (txt) {
+      var m = txt.match(/var PALETTE\s*=\s*\[([\s\S]*?)\];/);
+      if (!m) throw new Error('palette not found');
+      var re = /\[\s*'([^']*)'\s*,\s*'([^']*)'\s*,\s*'(#[0-9A-Fa-f]{3,8})'\s*,\s*(true|false)\s*\]/g, mm;
+      while ((mm = re.exec(m[1]))) PAL.push({ en: mm[1], zh: mm[2], hex: mm[3], fileStock: mm[4] === 'true' });
+      if (!PAL.length) throw new Error('no colours parsed');
+      state = PAL.map(function (p) { return p.fileStock ? 'in' : 'fileout'; });
+      render();
+      box.style.display = 'block';
+    })
+    .catch(function (e) {
+      errEl.innerHTML = '<div class="err">无法读取颜色列表（' + String(e.message || e) +
+        '）。请确认此页与下单页在同一网站上、网络正常后<b>刷新重试</b>。</div>';
+    });
+
+  function render() {
+    grid.innerHTML = '';
+    PAL.forEach(function (p, i) {
+      var chip = document.createElement('div');
+      var s = state[i];
+      chip.className = 'chip ' + (s === 'fileout' ? 'locked' : s === 'out' ? 'out' : 'in');
+      chip.innerHTML =
+        '<span class="dot" style="background:' + p.hex + '"></span>' +
+        '<span class="nm"><em>' + p.zh + '</em><small>' + p.en + '</small></span>' +
+        '<span class="st">' + (s === 'fileout' ? '已下架' : s === 'out' ? '缺货' : '有货') + '</span>';
+      if (s !== 'fileout') chip.addEventListener('click', function () {
+        state[i] = state[i] === 'in' ? 'out' : 'in';
+        render();
+      });
+      grid.appendChild(chip);
+    });
+    var inN = 0, outN = 0, lockN = 0;
+    state.forEach(function (s) { if (s === 'in') inN++; else if (s === 'out') outN++; else lockN++; });
+    countsEl.innerHTML = '有货 <b>' + inN + '</b> 种 · 缺货 <i>' + outN + '</i> 种' +
+      (lockN ? ' · 已下架 ' + lockN + ' 种' : '');
+    updateLink();
+  }
+
+  function updateLink() {
+    var oos = [];
+    state.forEach(function (s, i) { if (s === 'out') oos.push(i); });
+    var link = location.origin + ORDER_PATH + (oos.length ? '?oos=' + oos.join(',') : '');
+    urlEl.textContent = link;
+    openEl.href = link;
+  }
+
+  document.getElementById('copy').addEventListener('click', function () {
+    var txt = urlEl.textContent;
+    var ok = function () { toast('已复制链接 ✓'); };
+    if (navigator.clipboard && navigator.clipboard.writeText)
+      navigator.clipboard.writeText(txt).then(ok, function () { legacy(txt, ok); });
+    else legacy(txt, ok);
+  });
+  function legacy(txt, ok) {
+    var ta = document.createElement('textarea');
+    ta.value = txt; ta.style.cssText = 'position:fixed;left:-999px;top:0;';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try { document.execCommand('copy'); ok(); } catch (e) { toast('复制失败，请手动选择'); }
+    document.body.removeChild(ta);
+  }
+  document.getElementById('reset').addEventListener('click', function () {
+    state = state.map(function (s) { return s === 'out' ? 'in' : s; });
+    render();
+  });
+})();
+</script>
+</body>
+</html>
