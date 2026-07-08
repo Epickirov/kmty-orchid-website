@@ -86,6 +86,15 @@ var ORDER_NOTE    = '';                    // 选填: 价格/交期等一句话�
   .sw.dead .x{position:absolute;left:6px;top:20px;width:32px;height:2px;background:rgba(243,238,228,.55);transform:rotate(-45deg);border-radius:2px;pointer-events:none;}
   .sw.dead em{color:#6f6879;}
   .sw .oos{position:absolute;right:-4px;top:-6px;font-size:9px;letter-spacing:.05em;background:#3a3341;color:#b9b1c2;border-radius:999px;padding:2px 7px;pointer-events:none;}
+  .fields{display:flex;gap:12px;margin:16px 0 0;flex-wrap:wrap;}
+  .fields label{display:flex;flex-direction:column;gap:8px;font-size:12px;letter-spacing:.03em;color:#9b93a4;}
+  .fields .fname{flex:1 1 200px;}
+  .fields .qty{flex:0 0 110px;}
+  .fields input{font-family:inherit;font-size:16px;color:#F3EEE4;background:rgba(243,238,228,.06);
+       border:1px solid rgba(243,238,228,.24);border-radius:12px;padding:13px 14px;outline:none;
+       transition:border-color .18s ease;-webkit-appearance:none;appearance:none;width:100%;}
+  .fields input:focus{border-color:#E7B7CF;}
+  .fields input::placeholder{color:#6f6879;}
   .rows{margin:14px 0 0;}
   .mixrow{display:grid;grid-template-columns:26px minmax(86px,auto) 1fr 44px;align-items:center;gap:12px;margin:13px 0;}
   .mixrow i{width:22px;height:22px;border-radius:50%;border:1.5px solid rgba(243,238,228,.3);}
@@ -140,6 +149,16 @@ var ORDER_NOTE    = '';                    // 选填: 价格/交期等一句话�
 
   <div class="sect">比例<small>BALANCE</small></div>
   <div class="rows" id="sliders"></div>
+
+  <div class="sect">下单信息<small>YOUR DETAILS</small></div>
+  <div class="fields">
+    <label class="fname">姓名 · Name
+      <input id="custname" type="text" autocomplete="name" placeholder="请填写您的姓名" maxlength="40">
+    </label>
+    <label class="qty">数量 · Qty
+      <input id="qty" type="number" inputmode="numeric" min="1" max="9999" step="1" value="1">
+    </label>
+  </div>
 
   <div class="btnrow">
     <button class="btn ghost" id="again" type="button"><span class="spin">↻</span> 再搅一次</button>
@@ -465,6 +484,7 @@ var ORDER_NOTE    = '';                    // 选填: 价格/交期等一句话�
   });
 
   /* ---------- the order card (specimen sheet, cream linen ground) ---------- */
+  var orderMeta = { name: '', qty: 1, date: '' };   // filled on 下单 (see the order handler)
   function buildCard() {
     var W = 1080, H = 1350, MX = 120;
     var card = document.createElement('canvas'); card.width = W; card.height = H;
@@ -528,19 +548,34 @@ var ORDER_NOTE    = '';                    // 选填: 价格/交期等一句话�
     g.fillStyle = '#98989b'; g.font = '500 15px ' + SANS;
     tracked('CONSTELLATION', W - MX, 146, 8, true);
     g.drawImage(canvas, 190, 176, 700, 700);
-    g.fillStyle = '#1A1E17'; g.font = '600 52px ' + SERIF;
+    // order meta — number + generation date
+    g.fillStyle = '#1A1E17'; g.font = '600 50px ' + SERIF;
     var no = document.getElementById('mixno').textContent;
-    g.fillText(no, MX, 968);
-    g.fillStyle = '#98989b'; g.font = '500 19px ' + SANS;
-    tracked('你的独一无二 · ONE-OF-ONE', W - MX, 960, 5, true);
+    g.fillText(no, MX, 934);
+    g.fillStyle = '#98989b'; g.font = '500 15px ' + SANS;
+    tracked('开单日期 · DATE', W - MX, 908, 4, true);
+    g.fillStyle = '#1A1E17'; g.font = '500 27px ' + SANS;
+    g.fillText(orderMeta.date, W - MX - g.measureText(orderMeta.date).width, 936);
+    // customer (left) + quantity (right)
+    g.fillStyle = '#98989b'; g.font = '500 15px ' + SANS;
+    tracked('客户 · CUSTOMER', MX, 976, 3);
+    tracked('数量 · QUANTITY', W - MX, 976, 3, true);
+    g.fillStyle = '#1A1E17'; g.font = '600 31px ' + SANS;
+    var qtyTxt = orderMeta.qty + ' 株';
+    g.fillText(qtyTxt, W - MX - g.measureText(qtyTxt).width, 1008);
+    var nmMax = (W - MX - g.measureText(qtyTxt).width) - MX - 40;
+    var cnm = orderMeta.name || '—';
+    while (g.measureText(cnm).width > nmMax && cnm.length > 1) cnm = cnm.slice(0, -2) + '…';
+    g.fillText(cnm, MX, 1008);
+    // brand gradient hairline
     var grad = g.createLinearGradient(MX, 0, W - MX, 0);
     grad.addColorStop(0, 'rgba(47,93,58,.45)'); grad.addColorStop(.5, 'rgba(198,149,47,.45)'); grad.addColorStop(1, 'rgba(212,140,176,.45)');
-    g.fillStyle = grad; g.fillRect(MX, 1002, W - 2 * MX, 2);
+    g.fillStyle = grad; g.fillRect(MX, 1034, W - 2 * MX, 2);
     var total = sel.reduce(function (t, k) { return t + (weights[k] || 1); }, 0);
     var shares = sel.map(function (k) { return Math.round((weights[k] || 1) / total * 100); });
     shares[shares.indexOf(Math.max.apply(null, shares))] += 100 - shares.reduce(function (a, b) { return a + b; }, 0);
     sel.forEach(function (k, r) {
-      var yy = 1064 + r * 58;
+      var yy = 1086 + r * 52;
       g.fillStyle = COLORS[k].hex;
       g.beginPath(); g.arc(MX + 15, yy - 10, 15, 0, 7); g.fill();
       g.strokeStyle = 'rgba(26,30,23,.18)'; g.lineWidth = 2; g.stroke();
@@ -589,12 +624,22 @@ var ORDER_NOTE    = '';                    // 选填: 价格/交期等一句话�
     var link = location.origin + location.pathname + '#m=' + seed + '.' +
       sel.map(function (k) { return k + '-' + (weights[k] || 30); }).join('.');
     return '【KMTY 星空 Constellation 定制】\n昆明统一生物科技有限公司\n' +
-           document.getElementById('mixno').textContent +
+           document.getElementById('mixno').textContent + ' · ' + orderMeta.date +
+           '\n客户: ' + orderMeta.name +
+           '\n数量: ' + orderMeta.qty + ' 株' +
            '\n配色: ' + mix + '\n复原链接: ' + link;
   };
   var shareFile = null, shareUrl = null;
   document.getElementById('order').addEventListener('click', function () {
     if (!bloom.complete || !bloom.naturalWidth) return;
+    // capture who is ordering, how many, and when
+    var custEl = document.getElementById('custname'), qtyEl = document.getElementById('qty');
+    var nm = (custEl.value || '').trim();
+    if (!nm) { toast('请先填写姓名'); custEl.focus(); return; }
+    var qn = parseInt(qtyEl.value, 10); if (!(qn >= 1)) qn = 1; if (qn > 9999) qn = 9999;
+    qtyEl.value = qn;
+    var dt = new Date(), pad = function (n) { return (n < 10 ? '0' : '') + n; };
+    orderMeta = { name: nm, qty: qn, date: dt.getFullYear() + '-' + pad(dt.getMonth() + 1) + '-' + pad(dt.getDate()) };
     if (transRAF) { cancelTransition(); mctx.clearRect(0, 0, SIZE, SIZE); mctx.drawImage(nextCv, 0, 0); }
     var card = buildCard();
     // JPEG keeps the data URL small (~200KB vs ~2MB PNG) so long-press → 保存图片
