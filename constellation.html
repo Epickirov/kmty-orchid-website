@@ -215,6 +215,18 @@ var ORDER_NOTE    = '';                    // 选填: 价格/交期等一句话�
     var q = location.search.match(/[?&]oos=([\d,]+)/);
     if (q) q[1].split(',').forEach(function (s) { var k = +s; if (COLORS[k]) COLORS[k].stock = false; });
   } catch (e) {}
+  // per-link additions: ?add=zh~en~hex;zh~en~hex — brand-new colours the staff
+  // add on the /stock page ride along here, appended in stock, without a redeploy
+  try {
+    var qa = location.search.match(/[?&]add=([^&#]+)/);
+    if (qa) decodeURIComponent(qa[1]).split(';').forEach(function (s) {
+      var f = s.split('~'), hex = (f[2] || '').trim();
+      if (f.length >= 2 && /^#?[0-9A-Fa-f]{3,8}$/.test(hex)) {
+        if (hex.charAt(0) !== '#') hex = '#' + hex;
+        COLORS.push({ en: (f[1] || '').trim() || 'Custom', zh: (f[0] || '').trim() || '定制', hex: hex, stock: true });
+      }
+    });
+  } catch (e) {}
 
   var canvas = document.getElementById('mixcv');
   var mctx = canvas.getContext('2d');
@@ -634,7 +646,7 @@ var ORDER_NOTE    = '';                    // 选填: 价格/交期等一句话�
     var shares = sel.map(function (k) { return Math.round((weights[k] || 1) / total * 100); });
     shares[shares.indexOf(Math.max.apply(null, shares))] += 100 - shares.reduce(function (a, b) { return a + b; }, 0);
     var mix = sel.map(function (k, i) { return COLORS[k].zh + ' ' + COLORS[k].en + ' ' + shares[i] + '%'; }).join(' · ');
-    var link = location.origin + location.pathname + '#m=' + seed + '.' +
+    var link = location.origin + location.pathname + location.search + '#m=' + seed + '.' +
       sel.map(function (k) { return k + '-' + (weights[k] || 30); }).join('.');
     return '【KMTY 星空 Constellation 定制】\n昆明统一生物科技有限公司\n' +
            document.getElementById('mixno').textContent + ' · ' + orderMeta.date +

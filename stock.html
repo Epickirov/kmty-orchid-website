@@ -43,6 +43,26 @@
   .chip.out .st{background:rgba(231,155,155,.16);color:#e79b9b;}
   .chip.locked{cursor:not-allowed;opacity:.5;}
   .chip.locked .st{background:#3a3341;color:#b9b1c2;}
+  .sect2{margin:30px 0 4px;font-size:12px;letter-spacing:.2em;color:#9b93a4;}
+  .sect2 small{letter-spacing:.06em;color:#6f6879;margin-left:8px;}
+  .addrow{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin:12px 0 0;}
+  .addrow .fld{display:flex;flex-direction:column;gap:6px;font-size:11px;letter-spacing:.03em;color:#9b93a4;}
+  .addrow .fld.zh{flex:1 1 130px;} .addrow .fld.en{flex:1 1 130px;}
+  .addrow input[type=text]{font-family:inherit;font-size:15px;color:#F3EEE4;background:rgba(243,238,228,.06);
+       border:1px solid rgba(243,238,228,.24);border-radius:11px;padding:12px 13px;outline:none;width:100%;-webkit-appearance:none;}
+  .addrow input[type=text]:focus{border-color:#E7B7CF;}
+  .addrow input[type=text]::placeholder{color:#6f6879;}
+  .addrow input[type=color]{width:52px;height:46px;padding:0;border:1px solid rgba(243,238,228,.24);border-radius:11px;background:none;cursor:pointer;}
+  .addrow .add{flex:0 0 auto;padding:13px 20px;border-radius:999px;border:none;background:#2F5D3A;color:#F3EEE4;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;}
+  .addrow .add:active{transform:scale(.97);}
+  .added{display:flex;flex-direction:column;gap:9px;margin:14px 0 0;}
+  .achip{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:12px;background:rgba(47,93,58,.12);border:1px solid rgba(120,190,140,.35);}
+  .achip .dot{width:30px;height:30px;border-radius:50%;border:2px solid rgba(243,238,228,.4);flex:0 0 auto;}
+  .achip .nm em{font-style:normal;font-size:14px;font-weight:600;color:#EDE7DF;}
+  .achip .nm small{display:block;font-size:10.5px;color:#8d8596;}
+  .achip .badge{margin-left:auto;font-size:10.5px;color:#9ad3a8;letter-spacing:.04em;}
+  .achip .rm{margin-left:10px;flex:0 0 auto;font-size:12px;color:#e79b9b;background:none;border:1px solid rgba(231,155,155,.4);border-radius:999px;padding:5px 12px;cursor:pointer;}
+  .hint{margin:10px 0 0;font-size:12px;line-height:1.7;color:#8d8596;}
   .linkbox{margin:26px 0 0;padding:16px 16px 18px;border-radius:16px;background:rgba(212,140,176,.09);border:1px solid rgba(212,140,176,.28);}
   .linkbox .h{font-size:12px;letter-spacing:.16em;color:#E7B7CF;margin:0 0 10px;}
   .linkbox .url{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;line-height:1.6;word-break:break-all;color:#F3EEE4;
@@ -76,6 +96,16 @@
   <div class="grid" id="grid"></div>
   <div id="err"></div>
 
+  <div class="sect2">加一个新颜色<small>ADD A COLOUR</small></div>
+  <div class="addrow">
+    <label class="fld zh">中文名<input id="azh" type="text" placeholder="如 翡翠绿" maxlength="12"></label>
+    <label class="fld en">English<input id="aen" type="text" placeholder="e.g. Emerald" maxlength="20"></label>
+    <label class="fld"><span>颜色</span><input id="ahex" type="color" value="#7FB069"></label>
+    <button class="add" id="addbtn" type="button">添加</button>
+  </div>
+  <div class="added" id="added"></div>
+  <p class="hint">新颜色会跟着<b style="color:#cfc8d5;">下方生成的链接</b>一起发给客户，客户即可选它下单。想把某个颜色<b style="color:#cfc8d5;">永久</b>加入目录（出现在所有链接上），把中文名 / English / 色号发给我们即可。</p>
+
   <div class="linkbox" id="linkbox" style="display:none;">
     <p class="h">今日下单链接 · SHARE THIS</p>
     <div class="url" id="url"></div>
@@ -103,6 +133,10 @@
   var countsEl = document.getElementById('counts');
   var toastEl = document.getElementById('toast'), toastT = 0;
   var PAL = [], state = [];                   // state[i]: 'in' | 'out' | 'fileout'
+  var added = [];                             // staff-added colours: {zh,en,hex}
+  var addedEl = document.getElementById('added');
+  try { var sv = localStorage.getItem('kmty-added'); if (sv) added = JSON.parse(sv) || []; } catch (e) { added = []; }
+  function saveAdded() { try { localStorage.setItem('kmty-added', JSON.stringify(added)); } catch (e) {} }
 
   function toast(m) {
     toastEl.textContent = m; toastEl.classList.add('show');
@@ -119,7 +153,7 @@
       while ((mm = re.exec(m[1]))) PAL.push({ en: mm[1], zh: mm[2], hex: mm[3], fileStock: mm[4] === 'true' });
       if (!PAL.length) throw new Error('no colours parsed');
       state = PAL.map(function (p) { return p.fileStock ? 'in' : 'fileout'; });
-      render();
+      render(); renderAdded();
       box.style.display = 'block';
     })
     .catch(function (e) {
@@ -146,14 +180,49 @@
     var inN = 0, outN = 0, lockN = 0;
     state.forEach(function (s) { if (s === 'in') inN++; else if (s === 'out') outN++; else lockN++; });
     countsEl.innerHTML = '有货 <b>' + inN + '</b> 种 · 缺货 <i>' + outN + '</i> 种' +
-      (lockN ? ' · 已下架 ' + lockN + ' 种' : '');
+      (lockN ? ' · 已下架 ' + lockN + ' 种' : '') +
+      (added.length ? ' · 新增 ' + added.length + ' 种' : '');
     updateLink();
   }
+
+  function renderAdded() {
+    addedEl.innerHTML = '';
+    added.forEach(function (a, i) {
+      var el = document.createElement('div'); el.className = 'achip';
+      var dot = document.createElement('span'); dot.className = 'dot'; dot.style.background = a.hex;
+      var nm = document.createElement('span'); nm.className = 'nm';
+      var em = document.createElement('em'); em.textContent = a.zh;
+      var sm = document.createElement('small'); sm.textContent = a.en;
+      nm.appendChild(em); nm.appendChild(sm);
+      var badge = document.createElement('span'); badge.className = 'badge'; badge.textContent = '新增 · 有货';
+      var rm = document.createElement('button'); rm.className = 'rm'; rm.type = 'button'; rm.textContent = '移除';
+      rm.addEventListener('click', function () { added.splice(i, 1); saveAdded(); render(); renderAdded(); });
+      el.appendChild(dot); el.appendChild(nm); el.appendChild(badge); el.appendChild(rm);
+      addedEl.appendChild(el);
+    });
+  }
+
+  document.getElementById('addbtn').addEventListener('click', function () {
+    var zhI = document.getElementById('azh'), enI = document.getElementById('aen'), hexI = document.getElementById('ahex');
+    var zh = (zhI.value || '').trim().replace(/[~;]/g, '');
+    var en = (enI.value || '').trim().replace(/[~;]/g, '');
+    var hex = (hexI.value || '').trim();
+    if (!zh) { toast('请填写中文名'); zhI.focus(); return; }
+    if (!/^#?[0-9A-Fa-f]{3,8}$/.test(hex)) { toast('颜色无效'); return; }
+    if (hex.charAt(0) !== '#') hex = '#' + hex;
+    added.push({ zh: zh, en: en || zh, hex: hex });
+    saveAdded(); zhI.value = ''; enI.value = '';
+    render(); renderAdded(); toast('已添加 ' + zh);
+  });
 
   function updateLink() {
     var oos = [];
     state.forEach(function (s, i) { if (s === 'out') oos.push(i); });
-    var link = location.origin + ORDER_PATH + (oos.length ? '?oos=' + oos.join(',') : '');
+    var params = [];
+    if (oos.length) params.push('oos=' + oos.join(','));
+    if (added.length) params.push('add=' + encodeURIComponent(
+      added.map(function (a) { return a.zh + '~' + a.en + '~' + a.hex.replace('#', ''); }).join(';')));
+    var link = location.origin + ORDER_PATH + (params.length ? '?' + params.join('&') : '');
     urlEl.textContent = link;
     openEl.href = link;
   }

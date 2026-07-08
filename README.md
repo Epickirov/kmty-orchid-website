@@ -60,6 +60,11 @@ https://raw.githack.com/Epickirov/kmty-orchid-website/main/constellation.html
   line to add a colour; set its last value to `false` to grey it out as 缺货
   (out of stock). Never delete or reorder lines — append new colours at the end,
   or old order links will point at the wrong colours.
+- **Staff stock control (no code)** — the `/stock` page lets staff tap colours
+  out of stock and **add brand-new colours** (name + swatch); it generates the
+  order link with those changes baked in (`?oos=…&add=…`) to share on WeChat.
+  Added colours ride on that link only; to make one **permanent** (on every
+  link, including the bare `/order`), append it to the `PALETTE` block.
 - **Quick stock override without editing**: append `?oos=4,7` to the shared link
   (0-based colour numbers) to grey extra colours for that link only.
 - Fill in `WECHAT_ID` (and optionally `ORDER_NOTE`) at the top of the file to
