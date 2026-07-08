@@ -1,0 +1,12 @@
+# Cloudflare Pages configuration.
+# No build step — the site is published straight from the repo root, and the
+# Pages Functions in functions/ (e.g. /api/config) deploy automatically.
+#
+# The KV binding and the admin password are set once in the Cloudflare
+# dashboard (they are secrets / account-specific, so they don't live here):
+#   Settings → Functions → KV namespace bindings:  KMTY_CONFIG → <your namespace>
+#   Settings → Environment variables (Production):  ADMIN_PASS  → <your password>
+
+name = "kmty-orchid"
+compatibility_date = "2024-11-06"
+pages_build_output_dir = "."

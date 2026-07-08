@@ -56,17 +56,19 @@ https://raw.githack.com/Epickirov/kmty-orchid-website/main/constellation.html
 
 (or `https://epickirov.github.io/kmty-orchid-website/constellation.html` once Pages is on.)
 
-- **Colours** are managed in the `PALETTE` block at the top of the file: add a
-  line to add a colour; set its last value to `false` to grey it out as 缺货
-  (out of stock). Never delete or reorder lines — append new colours at the end,
-  or old order links will point at the wrong colours.
-- **Staff stock control (no code)** — the `/stock` page lets staff tap colours
-  out of stock and **add brand-new colours** (name + swatch); it generates the
-  order link with those changes baked in (`?oos=…&add=…`) to share on WeChat.
-  Added colours ride on that link only; to make one **permanent** (on every
-  link, including the bare `/order`), append it to the `PALETTE` block.
-- **Quick stock override without editing**: append `?oos=4,7` to the shared link
-  (0-based colour numbers) to grey extra colours for that link only.
+- **Colour & stock control (persistent) → `/admin`.** On Cloudflare (see below)
+  the `/admin` page is the live control panel: enter the admin password, then
+  toggle colours in/out of stock, rename/recolour them, or add new ones — hit
+  **保存并发布** and it saves to Cloudflare KV, live for **every** customer on the
+  bare `/order` link within seconds. No code edit, no redeploy.
+- The `PALETTE` block baked into `constellation.html` is the **offline fallback**:
+  if `/api/config` is ever unreachable, the page shows this list so it never
+  breaks. Keep it roughly in sync as a safety net; the live source of truth is KV.
+- **One-off per-link overrides still work** on top of the live config: the
+  `/stock` page generates `?oos=…&add=…` links, or append `?oos=4,7` by hand to
+  grey colours for a single shared link.
+- Fill in `WECHAT_ID` (and optionally `ORDER_NOTE`) at the top of the file to
+  show your sales WeChat and terms in the order overlay.
 - Fill in `WECHAT_ID` (and optionally `ORDER_NOTE`) at the top of the file to
   show your sales WeChat and terms in the order overlay.
 - Customers long-press the generated card to save it (WeChat blocks downloads)
@@ -75,7 +77,43 @@ https://raw.githack.com/Epickirov/kmty-orchid-website/main/constellation.html
 - The page reuses the site's images but shares no code with the site — editing
   it cannot affect the main website.
 
-## Deploy on Netlify (recommended — free, no throttling, auto-updates)
+## Deploy on Cloudflare Pages (persistent colour/stock settings)
+
+Cloudflare Pages hosts the static site **and** runs the `/api/config` Function
+that stores the live colour/stock catalogue in Cloudflare **KV** — so `/admin`
+edits stick for every customer with no redeploy. All the code is in the repo
+(`functions/api/config.js`, `admin.html`, `wrangler.toml`, `_redirects`); the
+account steps below are done once in the Cloudflare dashboard.
+
+1. **dash.cloudflare.com** → *Workers & Pages* → **Create** → **Pages** →
+   **Connect to Git** → pick `Epickirov/kmty-orchid-website`.
+2. Build settings: framework preset **None**, build command **empty**, output
+   directory **`.`** → **Save and Deploy**.
+3. Create the storage: *Storage & Databases* → **KV** → **Create** a namespace
+   named e.g. `kmty-config`.
+4. Bind it: your Pages project → *Settings → Functions (or Bindings) → KV
+   namespace bindings* → **Add** → variable name **`KMTY_CONFIG`** → select that
+   namespace. (Add it for **Production**.)
+5. Set the admin password: *Settings → Variables and Secrets* → **Add** →
+   **`ADMIN_PASS`** = a password you choose (mark it a **Secret**).
+6. **Retry deployment** (or push any commit) so the binding + variable take
+   effect.
+
+Resulting URLs (rename the project under *Settings* to change the subdomain):
+
+| Page | URL |
+|------|-----|
+| Full marketing site | `https://kmty-orchid.pages.dev/` |
+| Order page (share on WeChat) | `https://kmty-orchid.pages.dev/order` |
+| Staff control panel (private) | `https://kmty-orchid.pages.dev/admin` |
+
+Notes: the order page reads `/api/config` on load and falls back to the baked
+`PALETTE` if that request is ever blocked, so it never breaks. A custom domain
+can be added under *Custom domains*. Cloudflare's network is weaker inside
+mainland China, but the order customers are overseas, so this is fine for the
+order tool; keep the main marketing site on a China-friendly host if needed.
+
+## Deploy on Netlify (alternative — static only, no persistent settings)
 
 The repo is Netlify-ready (`netlify.toml`): static, no build step, published
 from the root. Connect it once and every push to `main` redeploys.
