@@ -94,7 +94,12 @@ constellation.html   ← same file again (admin/stock read its PALETTE)
 admin.html           ← password control panel  → /admin
 stock.html           ← per-batch link generator → /stock
 _worker.js           ← Pages "advanced mode" Worker: /api/config + clean URLs
+bloom-fallback.png   ← full-quality bloom for old iOS (the inlined bloom is WebP)
 ```
+
+The bloom is inlined as **WebP** (small + smooth); browsers without WebP support
+(iOS < 14) hit `bloom.onerror` and load `/bloom-fallback.png` instead, so every
+device renders a clean flower.
 
 **Phase 1 — get it live (no persistence yet):**
 
