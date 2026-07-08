@@ -77,48 +77,69 @@ https://raw.githack.com/Epickirov/kmty-orchid-website/main/constellation.html
 - The page reuses the site's images but shares no code with the site — editing
   it cannot affect the main website.
 
-## Deploy on Cloudflare Workers (persistent colour/stock settings)
+## Deploy the order page on Cloudflare Pages (Direct Upload — works in China)
 
-Cloudflare now offers **Workers** (not classic Pages) for new projects. This
-repo is set up for the Workers **Static Assets** model: `worker.js` serves the
-whole static site, rewrites the clean URLs, and backs `/api/config` with
-Cloudflare **KV** — so `/admin` edits stick for every customer. Config:
-`worker.js` + `wrangler.jsonc` (`main` = worker, `assets` = repo root).
+This is the path that's actually in production. **Direct Upload** (dashboard
+drag-and-drop) — no Git, no build, no API tokens — onto a `*.pages.dev` project,
+which is reachable inside mainland China (and inside WeChat's browser). Git-built
+Pages/Workers were repeatedly blocked by token/permission issues; workers.dev is
+GFW-blocked in China. Direct Upload sidesteps all of it.
+
+**What to upload:** a folder containing the order page as `index.html` (so the
+bare project URL *is* the order page), plus the staff pages and the backend:
+
+```
+index.html          ← copy of constellation.html (served at /)
+constellation.html   ← same file again (admin/stock read its PALETTE)
+admin.html           ← password control panel  → /admin
+stock.html           ← per-batch link generator → /stock
+_worker.js           ← Pages "advanced mode" Worker: /api/config + clean URLs
+```
 
 **Phase 1 — get it live (no persistence yet):**
 
-1. **dash.cloudflare.com** → *Workers & Pages* → **Create** → **Workers** →
-   **Import a repository** → pick `Epickirov/kmty-orchid-website`.
-2. Project name **`kmty-orchid`** (must match `name` in `wrangler.jsonc`).
-   Deploy command: **`npx wrangler deploy`**. Build command: empty. Deploy.
-   The build reads `wrangler.jsonc`, bundles `worker.js`, and uploads the site.
+1. **dash.cloudflare.com** → *Workers & Pages* → **Create** → **Pages** tab →
+   **Upload assets** (Direct Upload — NOT "Connect to Git"). If it routes you to
+   "Create a Worker", use the small **"Looking to deploy Pages? Get started"**
+   link at the bottom.
+2. Name the project (e.g. `constellation`), **drag the folder in**, **Deploy**.
+   You get `https://<project>.pages.dev`. That bare URL is the order page.
 
-At this point the site + order page work; `/admin` loads but **saving** returns
-"storage not bound" until KV is added.
+At this point the order page + `/stock` (link generator, no backend) work fully.
+`/admin` loads but **saving** returns "storage not bound" until KV is added.
 
-**Phase 2 — switch on persistence:**
+**Why `_worker.js` and not `functions/`:** dashboard Direct Upload does **not**
+compile a `functions/` directory — only Git builds / `wrangler pages deploy` do.
+It **does** run a root `_worker.js` (Pages "advanced mode"). So the same
+`/api/config` logic lives in `_worker.js`; it intercepts only `/api/config` and
+the `/order` `/admin` `/stock` aliases and passes everything else (including `/`)
+straight to `env.ASSETS`, so the live order page can't be affected.
+(`functions/api/config.js` is kept as the equivalent for a Git-built deploy; when
+both exist, `_worker.js` wins.)
 
-3. Create the store: *Storage & Databases* → **KV** → **Create** a namespace
-   (e.g. `kmty-config`). Copy its **Namespace ID**.
-4. Put that ID in `wrangler.jsonc` — uncomment the `kv_namespaces` block and
-   paste the ID for binding **`KMTY_CONFIG`** — then commit/push (redeploys).
-5. Set the admin password: your Worker → *Settings → Variables and Secrets* →
-   **Add** → **`ADMIN_PASS`** = a password you choose → type **Secret**. (Secrets
-   survive redeploys; the KV binding must live in `wrangler.jsonc`.)
-6. Push once more (or **Retry**) so the binding + secret are live.
+**Phase 2 — switch on persistence (all in the dashboard, do in this order):**
 
-Resulting URLs (`<name>.<account>.workers.dev`, or add a custom domain):
+3. *Storage & Databases* → **KV** → **Create a namespace** (e.g. `kmty-config`).
+4. Project → *Settings → Bindings* → **Add → KV namespace**: variable
+   **`KMTY_CONFIG`** → the `kmty-config` namespace → Save.
+5. Project → *Settings → Variables and Secrets* → **Add** → **`ADMIN_PASS`** =
+   a password you choose → type **Secret**.
+6. **Redeploy** (Create deployment → drag the folder again, or Deployments → ⋯ →
+   Retry) so the binding + secret attach to a live deployment.
+
+Resulting URLs (`<project>.pages.dev`, or CNAME a subdomain like
+`order.kmtyorchid.com` to it under *Custom domains*):
 
 | Page | URL |
 |------|-----|
-| Full marketing site | `https://kmty-orchid.<account>.workers.dev/` |
-| Order page (share on WeChat) | `…/order` |
-| Staff control panel (private) | `…/admin` |
+| Order page (share on WeChat) | `https://<project>.pages.dev/` |
+| Staff control panel (password) | `…/admin` |
+| Staff per-batch link generator | `…/stock` |
 
 Notes: the order page reads `/api/config` on load and falls back to the baked
-`PALETTE` if that request is ever blocked, so it never breaks. Cloudflare's
-network is weaker inside mainland China, but the order customers are overseas,
-so this is fine for the order tool.
+`PALETTE` if that request is ever unreachable, so it never breaks. To change the
+baked fallback (or before KV is on), edit the `PALETTE` block and re-upload the
+folder.
 
 ## Deploy on Netlify (alternative — static only, no persistent settings)
 
