@@ -45,6 +45,31 @@ Do not swap in `rawcdn.githack.com` for a branch link — the production CDN
 caches branch refs permanently and would freeze on an old version. Use
 `rawcdn.githack.com/<user>/<repo>/<commit-sha>/…` only for immutable snapshots.
 
+## Standalone: Constellation order page (WeChat)
+
+`constellation.html` is a self-contained, WeChat-optimised order page for the
+mix-your-own Constellation configurator — share this URL directly with customers:
+
+```
+https://raw.githack.com/Epickirov/kmty-orchid-website/main/constellation.html
+```
+
+(or `https://epickirov.github.io/kmty-orchid-website/constellation.html` once Pages is on.)
+
+- **Colours** are managed in the `PALETTE` block at the top of the file: add a
+  line to add a colour; set its last value to `false` to grey it out as 缺货
+  (out of stock). Never delete or reorder lines — append new colours at the end,
+  or old order links will point at the wrong colours.
+- **Quick stock override without editing**: append `?oos=4,7` to the shared link
+  (0-based colour numbers) to grey extra colours for that link only.
+- Fill in `WECHAT_ID` (and optionally `ORDER_NOTE`) at the top of the file to
+  show your sales WeChat and terms in the order overlay.
+- Customers long-press the generated card to save it (WeChat blocks downloads)
+  and send it to you on WeChat; the "复制订单文字" button copies an order
+  summary with a `#m=…` link that reopens their exact pour, seed and all.
+- The page reuses the site's images but shares no code with the site — editing
+  it cannot affect the main website.
+
 ## Local preview
 
 Any static file server works:

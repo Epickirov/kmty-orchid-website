@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>星空艺术兰 · 定制你的一株 — KMTY Constellation</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="description" content="KMTY 星空艺术兰 — 亲手调一支你的星空：选色、定比例、搅一搅，保存配色卡即可下单。每一株均为手工制作的独一无二。">
+<meta name="format-detection" content="telephone=no">
+<link rel="icon" type="image/png" href="images/favicon.png">
+<script>
+/* ══════════════════════════════════════════════════════════════════════
+   调色菜单 · COLOUR MENU — 只需要维护这一块 (this block is all you edit)
+
+   每行一个颜色: ['英文名', '中文名', '#色值', 有货?]
+     · 有货 true  = 客户可选
+     · 缺货 false = 仍然显示，但置灰不可选 (greyed out, not selectable)
+   新增颜色: 在列表【末尾】加一行即可 — 不要在中间插行、不要删行，
+   否则老订单链接里的颜色编号会串位。
+   临时缺货也可以不改文件: 分享链接时加 ?oos=编号 (从 0 数起, 逗号分隔)
+   例如 constellation.html?oos=4,7 会把 酒红 和 钴蓝 置灰。
+   ══════════════════════════════════════════════════════════════════════ */
+var PALETTE = [
+  ['Porcelain', '瓷白',   '#F2EFE6', true],
+  ['Blush',     '绯粉',   '#F2C4CF', true],
+  ['Saffron',   '藏红',   '#E8A33D', true],
+  ['Flame',     '焰红',   '#CE4A2D', true],
+  ['Wine',      '酒红',   '#8E2F44', true],
+  ['Fuchsia',   '紫红',   '#C0368B', true],
+  ['Sky',       '天青',   '#7FA8D4', true],
+  ['Cobalt',    '钴蓝',   '#2E4E9E', true],
+  ['Jade',      '玉青',   '#6FA98C', true],
+  ['Violet',    '紫罗兰', '#7C5BA6', true]
+];
+var WECHAT_ID     = '';                    // 销售微信号 — 填写后显示在下单页 (leave '' to hide)
+var CONTACT_EMAIL = 'kmtybio@gmail.com';   // 邮箱 — 留空 '' 可隐藏
+var ORDER_NOTE    = '';                    // 选填: 价格/交期等一句话，显示在下单页
+</script>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:#141018;color:#F3EEE4;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans SC',system-ui,sans-serif;
+       padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+       background-image:radial-gradient(circle at 82% -4%,rgba(212,140,176,.14),transparent 46%),radial-gradient(circle at 8% 30%,rgba(46,78,158,.10),transparent 40%);}
+  .serif{font-family:Georgia,'Times New Roman','Songti SC','STSong','Noto Serif SC',serif;}
+  .wrap{max-width:620px;margin:0 auto;padding:0 20px 60px;}
+  header{display:flex;align-items:center;justify-content:space-between;padding:20px 0 6px;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand img{height:26px;width:auto;display:block;}
+  .brand b{font-family:Georgia,'Songti SC',serif;font-size:19px;letter-spacing:-.01em;font-weight:700;}
+  .lock{text-align:right;line-height:1;}
+  .lock .zh{font-family:Georgia,'Songti SC','Noto Serif SC',serif;font-size:30px;font-weight:600;}
+  .lock .en{font-size:9.5px;letter-spacing:.34em;color:#9b93a4;margin-top:6px;}
+  .kick{margin:26px 0 0;font-size:12px;letter-spacing:.22em;color:#D48CB0;}
+  h1{margin:10px 0 10px;font-size:30px;line-height:1.25;font-weight:600;}
+  h1 i{font-style:normal;color:#E7B7CF;}
+  .sub{margin:0 0 6px;font-size:14.5px;line-height:1.75;color:#bfb8c6;}
+  .plate{position:relative;margin:18px 0 4px;}
+  .plate canvas{width:100%;height:auto;display:block;filter:drop-shadow(0 18px 30px rgba(0,0,0,.45));}
+  .numrow{display:flex;align-items:center;justify-content:space-between;margin:2px 0 20px;}
+  .numrow .no{font-family:Georgia,'Songti SC',serif;font-size:21px;color:#E7B7CF;}
+  .numrow .cap{font-size:11px;letter-spacing:.16em;color:#8d8596;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;cursor:pointer;
+       font-family:inherit;font-size:14px;font-weight:500;line-height:1;user-select:none;-webkit-user-select:none;}
+  .btn:active{transform:scale(.965);}
+  .btn,{transition:transform .15s ease;}
+  .btn.ghost{padding:14px 22px;border:1px solid rgba(243,238,228,.38);background:rgba(243,238,228,.06);color:#F3EEE4;}
+  .btn.solid{padding:16px 26px;border:none;background:#B0552F;color:#F3EEE4;font-size:15px;}
+  .btn.solid:active{background:#9d4a28;}
+  .btnrow{display:flex;gap:12px;flex-wrap:wrap;margin:22px 0 8px;}
+  .btnrow .solid{flex:1 1 auto;}
+  .spin{display:inline-block;}
+  .sect{margin:26px 0 0;font-size:12px;letter-spacing:.2em;color:#9b93a4;}
+  .sect small{letter-spacing:.08em;color:#6f6879;margin-left:8px;}
+  .swatches{display:flex;flex-wrap:wrap;gap:16px 14px;margin:16px 0 4px;}
+  .sw{position:relative;width:46px;padding:0;background:none;border:none;cursor:pointer;}
+  .sw i{display:block;width:44px;height:44px;border-radius:50%;border:2px solid rgba(243,238,228,.35);transition:transform .2s ease,box-shadow .2s ease,opacity .2s ease;}
+  .sw.on i{box-shadow:0 0 0 3px #141018,0 0 0 5px #E7B7CF;transform:scale(1.06);}
+  .sw.off i{opacity:.32;}
+  .sw em{display:block;margin-top:7px;font-style:normal;font-size:10.5px;color:#a79fb0;text-align:center;line-height:1.3;}
+  .sw.dead{cursor:not-allowed;}
+  .sw.dead i{opacity:.22;filter:grayscale(.55);}
+  .sw.dead i::after{content:'';}
+  .sw.dead .x{position:absolute;left:6px;top:20px;width:32px;height:2px;background:rgba(243,238,228,.55);transform:rotate(-45deg);border-radius:2px;pointer-events:none;}
+  .sw.dead em{color:#6f6879;}
+  .sw .oos{position:absolute;right:-4px;top:-6px;font-size:9px;letter-spacing:.05em;background:#3a3341;color:#b9b1c2;border-radius:999px;padding:2px 7px;pointer-events:none;}
+  .rows{margin:14px 0 0;}
+  .mixrow{display:grid;grid-template-columns:26px minmax(86px,auto) 1fr 44px;align-items:center;gap:12px;margin:13px 0;}
+  .mixrow i{width:22px;height:22px;border-radius:50%;border:1.5px solid rgba(243,238,228,.3);}
+  .mixrow em{font-style:normal;font-size:13.5px;color:#d9d3df;white-space:nowrap;}
+  .mixrow em small{color:#8d8596;font-size:11px;margin-left:5px;}
+  .mixrow b{font-size:13.5px;text-align:right;font-weight:600;color:#E7B7CF;}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:26px;background:transparent;margin:0;}
+  input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:999px;background:rgba(243,238,228,.22);}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#F3EEE4;margin-top:-9px;border:none;box-shadow:0 2px 8px rgba(0,0,0,.4);}
+  .disc{margin:18px 0 0;font-size:12px;line-height:1.8;color:#8d8596;}
+  .strip{margin:34px 0 0;}
+  .strip .row{display:flex;gap:10px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-top:14px;}
+  .strip .row::-webkit-scrollbar{display:none;}
+  .strip img{width:132px;height:165px;object-fit:cover;border-radius:14px;flex:0 0 auto;border:1px solid rgba(243,238,228,.14);}
+  footer{margin-top:44px;padding-top:18px;border-top:1px solid rgba(243,238,228,.14);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:10.5px;letter-spacing:.14em;color:#7d7587;}
+  .hair{height:2px;border:none;margin:30px 0 0;background:linear-gradient(90deg,rgba(76,140,87,.5),rgba(198,149,47,.5) 55%,rgba(212,140,176,.5));border-radius:999px;}
+  /* order overlay */
+  .ovl{position:fixed;inset:0;z-index:60;background:rgba(12,10,15,.96);display:none;overflow-y:auto;padding:26px 20px calc(30px + env(safe-area-inset-bottom));}
+  .ovl.open{display:block;}
+  .ovl .inner{max-width:560px;margin:0 auto;text-align:center;}
+  .ovl img{max-width:100%;max-height:58vh;border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.6);}
+  .ovl .hint{margin:18px 0 4px;font-size:16px;font-weight:600;color:#F3EEE4;}
+  .ovl .hint2{margin:6px 0 0;font-size:13px;line-height:1.8;color:#bfb8c6;}
+  .ovl .hint2 b{color:#E7B7CF;font-weight:600;}
+  .ovl .note{margin:10px 0 0;font-size:12.5px;color:#9b93a4;}
+  .ovl .btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:20px 0 0;}
+  .ovl .x{position:absolute;top:16px;right:16px;width:44px;height:44px;border-radius:50%;border:1px solid rgba(243,238,228,.3);background:rgba(243,238,228,.06);color:#F3EEE4;font-size:20px;line-height:1;cursor:pointer;}
+  .toast{position:fixed;left:50%;bottom:calc(34px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);z-index:70;background:#F3EEE4;color:#1A1E17;font-size:13px;padding:11px 20px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .3s ease,transform .3s ease;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  @media(min-width:640px){ h1{font-size:36px;} .lock .zh{font-size:34px;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="brand"><img id="logoimg" src="images/logo.png" alt="KMTY"><b>KMTY</b></span>
+    <span class="lock"><span class="zh">星空</span><div class="en">CONSTELLATION</div></span>
+  </header>
+
+  <div class="kick">手工艺术兰 · 一株一款</div>
+  <h1>亲手调一支<i>你的星空</i>。</h1>
+  <p class="sub">最多选三种颜色，调好比例，再搅一次 — 每一次的纹理都不一样，正如真正的艺术兰。满意后保存配色卡，发给我们即可下单。</p>
+
+  <div class="plate"><canvas id="mixcv" width="560" height="560" aria-label="星空艺术兰配色预览"></canvas></div>
+  <div class="numrow"><span class="no serif" id="mixno">№ ····</span><span class="cap">你的独一无二 · ONE-OF-ONE</span></div>
+
+  <div class="sect">颜色 · 最多选 3 种<small>COLOURS</small></div>
+  <div class="swatches" id="swatches"></div>
+
+  <div class="sect">比例<small>BALANCE</small></div>
+  <div class="rows" id="sliders"></div>
+
+  <div class="btnrow">
+    <button class="btn ghost" id="again" type="button"><span class="spin">↻</span> 再搅一次</button>
+    <button class="btn solid" id="order" type="button">⤓ 保存配色卡 · 下单</button>
+  </div>
+
+  <p class="disc">仅供参考 · 每一株星空艺术兰均为手工制作，实物与花色设计可能与预览图有所差异。<br>For reference only — every Constellation orchid is hand-finished; the actual plant and colour design may vary.</p>
+
+  <div class="strip">
+    <div class="sect">近期出品<small>RECENT POURS</small></div>
+    <div class="row">
+      <img loading="lazy" src="images/art-04-pink.webp" alt="星空艺术兰 · 粉">
+      <img loading="lazy" src="images/art-02-yellow.webp" alt="星空艺术兰 · 黄">
+      <img loading="lazy" src="images/art-03-blue.webp" alt="星空艺术兰 · 蓝">
+      <img loading="lazy" src="images/art-05-white.webp" alt="星空艺术兰 · 白">
+    </div>
+  </div>
+
+  <hr class="hair">
+  <footer><span>KMTYORCHID.COM</span><span>HAND-FINISHED · SONGMING, YUNNAN</span></footer>
+</div>
+
+<div class="ovl" id="ovl" role="dialog" aria-modal="true" aria-label="保存并下单">
+  <button class="x" id="ovlx" type="button" aria-label="关闭">✕</button>
+  <div class="inner">
+    <img id="cardimg" alt="你的星空配色卡">
+    <div class="hint" id="savehint">长按图片，保存到相册</div>
+    <div class="hint2" id="sendhint"></div>
+    <div class="note" id="ordernote"></div>
+    <div class="btns">
+      <button class="btn ghost" id="copybtn" type="button">复制订单文字</button>
+      <a class="btn ghost" id="dlbtn" style="text-decoration:none;display:none;">下载 PNG</a>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast">已复制 ✓</div>
+
+<script>
+(function () {
+  'use strict';
+  /* ---------- config intake ---------- */
+  var COLORS = PALETTE.map(function (p) { return { en: p[0], zh: p[1], hex: p[2], stock: !!p[3] }; });
+  // per-link stock override: ?oos=4,7 greys extra colours (never un-greys)
+  try {
+    var q = location.search.match(/[?&]oos=([\d,]+)/);
+    if (q) q[1].split(',').forEach(function (s) { var k = +s; if (COLORS[k]) COLORS[k].stock = false; });
+  } catch (e) {}
+
+  var canvas = document.getElementById('mixcv');
+  var mctx = canvas.getContext('2d');
+  var SIZE = 560, FIELD = 320;
+  var sel = [], weights = {};
+  COLORS.forEach(function (c, k) { if (c.stock && sel.length < 3) sel.push(k); });
+  var defW = [40, 25, 35];
+  sel.forEach(function (k, i) { weights[k] = defW[i] || 30; });
+  var seed = (Math.random() * 1e9) >>> 0;
+
+  // reproduce an order link: #m=seed.k-w.k-w.k-w
+  try {
+    var hm = location.hash.match(/^#m=(\d+)((?:\.\d+-\d+){1,3})$/);
+    if (hm) {
+      var hs = [], hw = {};
+      hm[2].slice(1).split('.').forEach(function (p) {
+        var kv = p.split('-'), k = +kv[0];
+        if (COLORS[k] && hs.length < 3 && hs.indexOf(k) < 0) { hs.push(k); hw[k] = Math.max(5, Math.min(90, +kv[1] || 30)); }
+      });
+      if (hs.length) { seed = (+hm[1]) >>> 0; sel = hs; weights = hw; }
+    }
+  } catch (e) {}
+
+  /* ---------- engine (same maths as the site's bench) ---------- */
+  var bloomCv = document.createElement('canvas'); bloomCv.width = bloomCv.height = SIZE;
+  var pistil = new Float32Array(SIZE * SIZE);
+  var pbx0 = 0, pbx1 = SIZE - 1, pby0 = 0, pby1 = SIZE - 1;
+  var bloom = new Image();
+  bloom.src = 'images/blooms/bloom-19.webp';
+  bloom.onload = function () {
+    var bctx = bloomCv.getContext('2d');
+    var sc = SIZE * .92 / Math.max(bloom.naturalWidth, bloom.naturalHeight);
+    var w = bloom.naturalWidth * sc, h = bloom.naturalHeight * sc;
+    bctx.drawImage(bloom, (SIZE - w) / 2, (SIZE - h) / 2, w, h);
+    var sd = bctx.getImageData(0, 0, SIZE, SIZE).data;
+    pbx0 = SIZE; pby0 = SIZE; pbx1 = 0; pby1 = 0;
+    for (var j = 0, p2 = 0; j < sd.length; j += 4, p2++) {
+      var ch = Math.max(sd[j], sd[j + 1], sd[j + 2]) - Math.min(sd[j], sd[j + 1], sd[j + 2]);
+      var t = (ch - 26) / 36; t = t < 0 ? 0 : t > 1 ? 1 : t;
+      var pv = sd[j + 3] > 60 ? t * t * (3 - 2 * t) : 0;
+      pistil[p2] = pv;
+      if (pv > .003) {
+        var x = p2 % SIZE, y = (p2 / SIZE) | 0;
+        if (x < pbx0) pbx0 = x; if (x > pbx1) pbx1 = x;
+        if (y < pby0) pby0 = y; if (y > pby1) pby1 = y;
+      }
+    }
+    if (pbx1 < pbx0) { pbx0 = 0; pby0 = 0; pbx1 = SIZE - 1; pby1 = SIZE - 1; }
+    render();
+  };
+  var hex2rgb = function (h) { var n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+  var mulberry = function (a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; };
+  var makeNoise = function (rnd) {
+    var G = 48, grid = new Float32Array(G * G);
+    for (var i = 0; i < grid.length; i++) grid[i] = rnd();
+    return function (x, y) {
+      x = ((x % G) + G) % G; y = ((y % G) + G) % G;
+      var x0 = x | 0, y0 = y | 0, x1 = (x0 + 1) % G, y1 = (y0 + 1) % G, fx = x - x0, fy = y - y0;
+      var sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
+      var a = grid[y0 * G + x0], b = grid[y0 * G + x1], c = grid[y1 * G + x0], d = grid[y1 * G + x1];
+      return a + (b - a) * sx + (c - a) * sy + (a - b - c + d) * sx * sy;
+    };
+  };
+  var fbm = function (n, x, y) {
+    var v = 0, a = .5, f = 1;
+    for (var o = 0; o < 3; o++) { v += a * n(x * f, y * f); a *= .5; f *= 2; }
+    return v / .875;
+  };
+  var lastField = null;
+  function render() {
+    if (!bloom.complete || !bloom.naturalWidth || !sel.length) return;
+    cancelTransition();
+    var rnd = mulberry(seed);
+    var n1 = makeNoise(rnd), n2 = makeNoise(rnd), n3 = makeNoise(rnd), n4 = makeNoise(rnd);
+    var field = new Float32Array(FIELD * FIELD);
+    var s = 4.2 / FIELD;
+    var i = 0, x, y, px, py, qx, qy;
+    for (y = 0; y < FIELD; y++) for (x = 0; x < FIELD; x++, i++) {
+      px = x * s; py = y * s;
+      qx = fbm(n2, px + 3.1, py + 1.7); qy = fbm(n2, px + 8.2, py + 4.9);
+      field[i] = fbm(n1, px + 1.6 * qx, py + 1.6 * qy);
+    }
+    lastField = field;
+    var fieldB = new Float32Array(FIELD * FIELD);
+    var s2 = s * 2.2, Rm = (FIELD - 1) / (SIZE - 1);
+    var fbxa = Math.max(0, ((pbx0 * Rm) | 0) - 3), fbxb = Math.min(FIELD - 1, ((pbx1 * Rm) | 0) + 3);
+    var fbya = Math.max(0, ((pby0 * Rm) | 0) - 3), fbyb = Math.min(FIELD - 1, ((pby1 * Rm) | 0) + 3);
+    for (y = fbya; y <= fbyb; y++) for (x = fbxa; x <= fbxb; x++) {
+      px = x * s2; py = y * s2;
+      qx = fbm(n4, px + 2.2, py + 6.3); qy = fbm(n4, px + 7.4, py + 1.9);
+      fieldB[y * FIELD + x] = fbm(n3, px + 1.6 * qx, py + 1.6 * qy);
+    }
+    var sorted = field.slice().sort();
+    var total = sel.reduce(function (t, k) { return t + (weights[k] || 1); }, 0);
+    var cols = sel.map(function (k) { return hex2rgb(COLORS[k].hex); });
+    var cuts = [], acc = 0, c;
+    for (c = 0; c < sel.length - 1; c++) {
+      acc += (weights[sel[c]] || 1) / total;
+      cuts.push(sorted[Math.min(sorted.length - 1, (acc * sorted.length) | 0)]);
+    }
+    var bVals = [];
+    for (y = 0; y < SIZE; y += 2) for (x = 0; x < SIZE; x += 2) {
+      if (pistil[y * SIZE + x] > .5) bVals.push(fieldB[Math.round(y * Rm) * FIELD + Math.round(x * Rm)]);
+    }
+    bVals.sort(function (a, b) { return a - b; });
+    var cutsB = []; acc = 0;
+    for (c = 0; c < sel.length - 1; c++) {
+      acc += (weights[sel[c]] || 1) / total;
+      cutsB.push(bVals.length > 100 ? bVals[Math.min(bVals.length - 1, (acc * bVals.length) | 0)] : cuts[c]);
+    }
+    var img = mctx.createImageData(SIZE, SIZE), d = img.data;
+    var R = (FIELD - 1) / (SIZE - 1);
+    i = 0;
+    for (y = 0; y < SIZE; y++) {
+      var fy = y * R, y0 = fy | 0, y1 = Math.min(FIELD - 1, y0 + 1), ty = fy - y0;
+      for (x = 0; x < SIZE; x++, i += 4) {
+        var fx = x * R, x0 = fx | 0, x1 = Math.min(FIELD - 1, x0 + 1), tx = fx - x0;
+        var a = field[y0 * FIELD + x0], b2 = field[y0 * FIELD + x1];
+        var c2 = field[y1 * FIELD + x0], d2 = field[y1 * FIELD + x1];
+        var v = a + (b2 - a) * tx + (c2 - a) * ty + (a - b2 - c2 + d2) * tx * ty;
+        var band = 0; while (band < cuts.length && v > cuts[band]) band++;
+        var m = pistil[y * SIZE + x], cA = cols[band];
+        var cB = cA;
+        if (m > .004) {
+          var a2 = fieldB[y0 * FIELD + x0], b3 = fieldB[y0 * FIELD + x1], c3 = fieldB[y1 * FIELD + x0], d3 = fieldB[y1 * FIELD + x1];
+          var vb = a2 + (b3 - a2) * tx + (c3 - a2) * ty + (a2 - b3 - c3 + d3) * tx * ty;
+          var bandB = 0; while (bandB < cutsB.length && vb > cutsB[bandB]) bandB++;
+          cB = cols[bandB];
+        }
+        d[i] = cA[0] + (cB[0] - cA[0]) * m;
+        d[i + 1] = cA[1] + (cB[1] - cA[1]) * m;
+        d[i + 2] = cA[2] + (cB[2] - cA[2]) * m;
+        d[i + 3] = 255;
+      }
+    }
+    mctx.globalCompositeOperation = 'source-over';
+    mctx.putImageData(img, 0, 0);
+    mctx.imageSmoothingEnabled = true; mctx.imageSmoothingQuality = 'high';
+    mctx.globalCompositeOperation = 'multiply';
+    mctx.drawImage(bloomCv, 0, 0);
+    mctx.globalCompositeOperation = 'destination-in';
+    mctx.drawImage(bloomCv, 0, 0);
+    mctx.globalCompositeOperation = 'source-over';
+    document.getElementById('mixno').textContent = '№ ' + (1000 + seed % 9000);
+  }
+  var pending = 0;
+  var queueRender = function () { if (!pending) pending = requestAnimationFrame(function () { pending = 0; render(); }); };
+
+  /* ---------- fluid re-swirl (same as the site) ---------- */
+  var transRAF = 0;
+  var cancelTransition = function () { if (transRAF) { cancelAnimationFrame(transRAF); transRAF = 0; } };
+  var prevCv = document.createElement('canvas'); prevCv.width = prevCv.height = SIZE;
+  var nextCv = document.createElement('canvas'); nextCv.width = nextCv.height = SIZE;
+  var tmpCv = document.createElement('canvas'); tmpCv.width = tmpCv.height = SIZE;
+  var maskCv = document.createElement('canvas'); maskCv.width = maskCv.height = SIZE;
+  var maskImg = maskCv.getContext('2d').createImageData(SIZE, SIZE);
+  var reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  var swirlTransition = function () {
+    var pc = prevCv.getContext('2d');
+    pc.clearRect(0, 0, SIZE, SIZE); pc.drawImage(canvas, 0, 0);
+    render();
+    var f0 = lastField;
+    if (!f0) return;
+    var nc = nextCv.getContext('2d');
+    nc.clearRect(0, 0, SIZE, SIZE); nc.drawImage(canvas, 0, 0);
+    var f = new Float32Array(SIZE * SIZE);
+    var R2 = (FIELD - 1) / (SIZE - 1), x, y;
+    for (y = 0; y < SIZE; y++) {
+      var fy = y * R2, y0 = fy | 0, y1 = Math.min(FIELD - 1, y0 + 1), ty = fy - y0;
+      for (x = 0; x < SIZE; x++) {
+        var fx = x * R2, x0 = fx | 0, x1 = Math.min(FIELD - 1, x0 + 1), tx = fx - x0;
+        var a = f0[y0 * FIELD + x0], b2 = f0[y0 * FIELD + x1];
+        var c2 = f0[y1 * FIELD + x0], d2 = f0[y1 * FIELD + x1];
+        f[y * SIZE + x] = a + (b2 - a) * tx + (c2 - a) * ty + (a - b2 - c2 + d2) * tx * ty;
+      }
+    }
+    var qs = [];
+    for (var j = 0; j < f.length; j += 7) qs.push(f[j]);
+    qs.sort(function (a, b) { return a - b; });
+    var band = (qs[qs.length - 1] - qs[0]) * .06 + 1e-6;
+    var mk = maskCv.getContext('2d'), tc = tmpCv.getContext('2d'), md = maskImg.data;
+    var T = 700, t0 = performance.now();
+    var step = function (now) {
+      var t = Math.min(1, (now - t0) / T);
+      var e = 1 - Math.pow(1 - t, 3);
+      var thr = qs[Math.min(qs.length - 1, (e * qs.length) | 0)] + (e * 2 - 1) * band;
+      for (var j2 = 0, k = 3; j2 < f.length; j2++, k += 4) {
+        var a3 = (thr - f[j2]) / (2 * band) + .5;
+        md[k] = a3 <= 0 ? 0 : a3 >= 1 ? 255 : (a3 * 255) | 0;
+      }
+      mk.putImageData(maskImg, 0, 0);
+      tc.globalCompositeOperation = 'source-over';
+      tc.clearRect(0, 0, SIZE, SIZE);
+      tc.drawImage(nextCv, 0, 0);
+      tc.globalCompositeOperation = 'destination-in';
+      tc.drawImage(maskCv, 0, 0);
+      mctx.clearRect(0, 0, SIZE, SIZE);
+      mctx.drawImage(prevCv, 0, 0);
+      mctx.drawImage(tmpCv, 0, 0);
+      if (e < 1) transRAF = requestAnimationFrame(step);
+      else { transRAF = 0; mctx.clearRect(0, 0, SIZE, SIZE); mctx.drawImage(nextCv, 0, 0); }
+    };
+    transRAF = requestAnimationFrame(step);
+  };
+
+  /* ---------- swatches + sliders ---------- */
+  var swWrap = document.getElementById('swatches');
+  var slWrap = document.getElementById('sliders');
+  function rebuildSliders() {
+    slWrap.innerHTML = '';
+    var total = sel.reduce(function (t, k) { return t + (weights[k] || 1); }, 0);
+    sel.forEach(function (k) {
+      var row = document.createElement('div'); row.className = 'mixrow';
+      row.innerHTML = '<i style="background:' + COLORS[k].hex + '"></i>' +
+        '<em>' + COLORS[k].zh + '<small>' + COLORS[k].en + '</small></em>' +
+        '<input type="range" min="5" max="90" value="' + (weights[k] || 30) + '">' +
+        '<b>' + Math.round((weights[k] || 1) / total * 100) + '%</b>';
+      row.querySelector('input').addEventListener('input', function (e) {
+        weights[k] = +e.target.value;
+        var t2 = sel.reduce(function (t, kk) { return t + (weights[kk] || 1); }, 0);
+        var rows = slWrap.querySelectorAll('.mixrow');
+        for (var idx = 0; idx < rows.length; idx++) {
+          rows[idx].querySelector('b').textContent = Math.round((weights[sel[idx]] || 1) / t2 * 100) + '%';
+        }
+        queueRender();
+      });
+      slWrap.appendChild(row);
+    });
+  }
+  function rebuildSwatches() {
+    swWrap.innerHTML = '';
+    COLORS.forEach(function (col, k) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'sw ' + (!col.stock ? 'dead' : sel.indexOf(k) >= 0 ? 'on' : (sel.length >= 3 ? 'off' : ''));
+      b.innerHTML = '<i style="background:' + col.hex + '"></i>' +
+        (!col.stock ? '<span class="x"></span><span class="oos">缺货</span>' : '') +
+        '<em>' + col.zh + '</em>';
+      if (!col.stock) {
+        b.setAttribute('aria-disabled', 'true');
+        b.title = col.zh + ' · 暂时缺货';
+      } else {
+        b.addEventListener('click', function () {
+          var at = sel.indexOf(k);
+          if (at >= 0) { if (sel.length > 1) sel.splice(at, 1); }
+          else if (sel.length < 3) { sel.push(k); if (!weights[k]) weights[k] = 30; }
+          else return;
+          rebuildSwatches(); rebuildSliders(); queueRender();
+        });
+      }
+      swWrap.appendChild(b);
+    });
+  }
+
+  /* ---------- re-swirl button ---------- */
+  document.getElementById('again').addEventListener('click', function () {
+    seed = (Math.random() * 1e9) >>> 0;
+    var glyph = document.querySelector('#again .spin');
+    if (glyph && glyph.animate) glyph.animate(
+      [{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }],
+      { duration: 800, easing: 'cubic-bezier(.4,0,.2,1)' });
+    if (reduceMotion.matches || !bloom.complete || !bloom.naturalWidth || !sel.length) {
+      queueRender(); return;
+    }
+    if (canvas.animate) canvas.animate(
+      [{ transform: 'rotate(0deg) scale(1)' }, { transform: 'rotate(-1.6deg) scale(1.012)' },
+       { transform: 'rotate(1.1deg) scale(1.018)' }, { transform: 'rotate(0deg) scale(1)' }],
+      { duration: 900, easing: 'ease-in-out' });
+    requestAnimationFrame(function () { requestAnimationFrame(function () {
+      swirlTransition();
+      var no = document.getElementById('mixno');
+      if (no.animate) no.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 450, easing: 'ease-out' });
+    }); });
+  });
+
+  /* ---------- the order card (specimen sheet, cream linen ground) ---------- */
+  function buildCard() {
+    var W = 1080, H = 1350, MX = 120;
+    var card = document.createElement('canvas'); card.width = W; card.height = H;
+    var g = card.getContext('2d');
+    var SANS = "-apple-system,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif";
+    var SERIF = "Georgia,'Times New Roman','Songti SC','STSong',serif";
+    var tracked = function (txt, x, y, track, alignRight) {
+      var chs = txt.split(''), ws = chs.map(function (ch) { return g.measureText(ch).width; });
+      var totalW = ws.reduce(function (a, b) { return a + b; }, 0) + track * (chs.length - 1);
+      var px = alignRight ? x - totalW : x;
+      chs.forEach(function (ch, i2) { g.fillText(ch, px, y); px += ws[i2] + track; });
+    };
+    var gd = g.createImageData(W, H), px2 = gd.data;
+    var trnd = mulberry(20260707);
+    var rowJ = new Float32Array(H), colJ = new Float32Array(W);
+    var y, x, a2;
+    for (y = 0; y < H; y += 3) {
+      a2 = (trnd() - .5) * (trnd() < .08 ? 72 : 34);
+      rowJ[y] = a2; if (y + 1 < H) rowJ[y + 1] = a2 * .82; if (y + 2 < H) rowJ[y + 2] = a2 * .55;
+    }
+    for (x = 0; x < W; x += 3) {
+      a2 = (trnd() - .5) * 27;
+      colJ[x] = a2; if (x + 1 < W) colJ[x + 1] = a2 * .82; if (x + 2 < W) colJ[x + 2] = a2 * .55;
+    }
+    var MC = 90, MW2 = Math.ceil(W / MC) + 2, MH2 = Math.ceil(H / MC) + 2;
+    var mot = new Float32Array(MW2 * MH2);
+    for (var j = 0; j < mot.length; j++) mot[j] = (trnd() - .5) * 14;
+    for (y = 0, j = 0; y < H; y++) {
+      var my = y / MC, gy = my | 0, fy2 = my - gy, g0 = gy * MW2, g1 = g0 + MW2;
+      for (x = 0; x < W; x++, j += 4) {
+        var mx2 = x / MC, gx = mx2 | 0, fx2 = mx2 - gx;
+        var mo = (mot[g0 + gx] * (1 - fx2) + mot[g0 + gx + 1] * fx2) * (1 - fy2)
+               + (mot[g1 + gx] * (1 - fx2) + mot[g1 + gx + 1] * fx2) * fy2;
+        var v = 237 + rowJ[y] + colJ[x] + mo + (trnd() - .5) * 5;
+        px2[j] = v + 6; px2[j + 1] = v + 1; px2[j + 2] = v - 9; px2[j + 3] = 255;
+      }
+    }
+    g.putImageData(gd, 0, 0);
+    var vig = g.createRadialGradient(W / 2, H / 2, H * .28, W / 2, H / 2, H * .72);
+    vig.addColorStop(0, 'rgba(120,100,70,0)');
+    vig.addColorStop(1, 'rgba(120,100,70,.12)');
+    g.fillStyle = vig; g.fillRect(0, 0, W, H);
+    g.strokeStyle = 'rgba(26,30,23,.10)'; g.lineWidth = 2;
+    g.strokeRect(36, 36, W - 72, H - 72);
+    g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+    var logo = document.getElementById('logoimg');
+    if (logo && logo.complete && logo.naturalWidth) {
+      var lh = 46, lw = logo.naturalWidth * lh / logo.naturalHeight;
+      g.drawImage(logo, MX, 72, lw, lh);
+      g.fillStyle = '#1A1E17'; g.font = '700 34px ' + SERIF;
+      g.fillText('KMTY', MX + lw + 18, 108);
+    } else {
+      g.fillStyle = '#1A1E17'; g.font = '700 34px ' + SERIF;
+      g.fillText('KMTY', MX, 108);
+    }
+    g.fillStyle = '#1A1E17'; g.font = '600 50px ' + SERIF;
+    var zk = '星空';
+    g.fillText(zk, W - MX - g.measureText(zk).width, 116);
+    g.fillStyle = '#98989b'; g.font = '500 15px ' + SANS;
+    tracked('CONSTELLATION', W - MX, 146, 8, true);
+    g.drawImage(canvas, 190, 176, 700, 700);
+    g.fillStyle = '#1A1E17'; g.font = '600 52px ' + SERIF;
+    var no = document.getElementById('mixno').textContent;
+    g.fillText(no, MX, 968);
+    g.fillStyle = '#98989b'; g.font = '500 19px ' + SANS;
+    tracked('你的独一无二 · ONE-OF-ONE', W - MX, 960, 5, true);
+    var grad = g.createLinearGradient(MX, 0, W - MX, 0);
+    grad.addColorStop(0, 'rgba(47,93,58,.45)'); grad.addColorStop(.5, 'rgba(198,149,47,.45)'); grad.addColorStop(1, 'rgba(212,140,176,.45)');
+    g.fillStyle = grad; g.fillRect(MX, 1002, W - 2 * MX, 2);
+    var total = sel.reduce(function (t, k) { return t + (weights[k] || 1); }, 0);
+    var shares = sel.map(function (k) { return Math.round((weights[k] || 1) / total * 100); });
+    shares[shares.indexOf(Math.max.apply(null, shares))] += 100 - shares.reduce(function (a, b) { return a + b; }, 0);
+    sel.forEach(function (k, r) {
+      var yy = 1064 + r * 58;
+      g.fillStyle = COLORS[k].hex;
+      g.beginPath(); g.arc(MX + 15, yy - 10, 15, 0, 7); g.fill();
+      g.strokeStyle = 'rgba(26,30,23,.18)'; g.lineWidth = 2; g.stroke();
+      g.fillStyle = '#2A2D26'; g.font = '600 27px ' + SANS;
+      var nm = COLORS[k].zh + ' ' + COLORS[k].en;
+      g.fillText(nm, MX + 52, yy);
+      var nameEnd = MX + 52 + g.measureText(nm).width;
+      g.font = '500 34px ' + SERIF;
+      var pct = shares[r] + '%';
+      var pctX = W - MX - g.measureText(pct).width;
+      g.fillStyle = '#1A1E17'; g.fillText(pct, pctX, yy + 1);
+      g.fillStyle = 'rgba(26,30,23,.22)';
+      for (var dx = nameEnd + 22; dx < pctX - 22; dx += 10) {
+        g.beginPath(); g.arc(dx, yy - 8, 1.3, 0, 7); g.fill();
+      }
+    });
+    var disc = '仅供参考。每一株星空艺术兰均为手工制作，实物与花色设计可能与预览图有所差异。';
+    g.fillStyle = '#a7a39b'; g.font = '400 16px ' + SANS;
+    var maxW = W - 2 * MX, line = '', ly = 1256;
+    for (var ci = 0; ci < disc.length; ci++) {
+      var ch2 = disc[ci];
+      if (g.measureText(line + ch2).width > maxW && line) { g.fillText(line, MX, ly); line = ch2; ly += 25; }
+      else line += ch2;
+    }
+    if (line) g.fillText(line, MX, ly);
+    g.fillStyle = '#b0aca4'; g.font = '500 17px ' + SANS;
+    tracked('KMTYORCHID.COM', MX, H - 40, 4);
+    tracked('HAND-FINISHED · SONGMING, YUNNAN', W - MX, H - 40, 4, true);
+    return card;
+  }
+
+  /* ---------- order flow: overlay tuned for WeChat ---------- */
+  var isWeChat = /MicroMessenger/i.test(navigator.userAgent);
+  var ovl = document.getElementById('ovl');
+  var toastEl = document.getElementById('toast'), toastT = 0;
+  var toast = function (msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastT); toastT = setTimeout(function () { toastEl.classList.remove('show'); }, 2200);
+  };
+  var orderText = function () {
+    var total = sel.reduce(function (t, k) { return t + (weights[k] || 1); }, 0);
+    var shares = sel.map(function (k) { return Math.round((weights[k] || 1) / total * 100); });
+    shares[shares.indexOf(Math.max.apply(null, shares))] += 100 - shares.reduce(function (a, b) { return a + b; }, 0);
+    var mix = sel.map(function (k, i) { return COLORS[k].zh + ' ' + COLORS[k].en + ' ' + shares[i] + '%'; }).join(' · ');
+    var link = location.origin + location.pathname + '#m=' + seed + '.' +
+      sel.map(function (k) { return k + '-' + (weights[k] || 30); }).join('.');
+    return '【星空 Constellation 定制】' + document.getElementById('mixno').textContent +
+           '\n配色: ' + mix + '\n复原链接: ' + link;
+  };
+  document.getElementById('order').addEventListener('click', function () {
+    if (!bloom.complete || !bloom.naturalWidth) return;
+    if (transRAF) { cancelTransition(); mctx.clearRect(0, 0, SIZE, SIZE); mctx.drawImage(nextCv, 0, 0); }
+    var card = buildCard();
+    var url = card.toDataURL('image/png');
+    document.getElementById('cardimg').src = url;
+    var send = document.getElementById('sendhint');
+    send.innerHTML = WECHAT_ID
+      ? '将图片发送到我们的销售微信 <b>' + WECHAT_ID + '</b>，即可下单'
+      : '将图片发送给我们的销售顾问，即可下单' +
+        (CONTACT_EMAIL ? '<br>或发送至邮箱 <b>' + CONTACT_EMAIL + '</b>' : '');
+    document.getElementById('ordernote').textContent = ORDER_NOTE || '';
+    document.getElementById('savehint').textContent = isWeChat ? '长按图片，保存到相册' : '长按（或右键）图片保存';
+    var dl = document.getElementById('dlbtn');
+    if (!isWeChat) {
+      dl.style.display = 'inline-flex';
+      dl.href = url;
+      dl.download = 'kmty-constellation-' + document.getElementById('mixno').textContent.replace(/\D/g, '') + '.png';
+    } else dl.style.display = 'none';
+    ovl.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  });
+  document.getElementById('ovlx').addEventListener('click', function () {
+    ovl.classList.remove('open');
+    document.body.style.overflow = '';
+  });
+  document.getElementById('copybtn').addEventListener('click', function () {
+    var txt = orderText();
+    var done = function () { toast('已复制订单文字 ✓'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(done, function () { fallbackCopy(txt, done); });
+    } else fallbackCopy(txt, done);
+  });
+  function fallbackCopy(txt, done) {
+    var ta = document.createElement('textarea');
+    ta.value = txt;
+    ta.style.cssText = 'position:fixed;left:-999px;top:0;';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) { toast('复制失败，请手动截图'); }
+    document.body.removeChild(ta);
+  }
+
+  rebuildSwatches(); rebuildSliders();
+})();
+</script>
+</body>
+</html>
