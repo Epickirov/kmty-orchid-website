@@ -1837,13 +1837,17 @@ class Component extends DCLogic {
         const MC = 90, MW2 = Math.ceil(W / MC) + 2, MH2 = Math.ceil(H / MC) + 2;
         const mot = new Float32Array(MW2 * MH2);
         for (let j = 0; j < mot.length; j++) mot[j] = (trnd() - .5) * 14;
+        const GRID = 68, LW = 4;               // woven grid, matching the page & order card
         for (let y = 0, j = 0; y < H; y++) {
           const my = y / MC, gy = my | 0, fy = my - gy, g0 = gy * MW2, g1 = g0 + MW2;
+          const onH = (y % GRID) < LW;
           for (let x = 0; x < W; x++, j += 4) {
             const mx2 = x / MC, gx = mx2 | 0, fx = mx2 - gx;
             const mo = (mot[g0 + gx] * (1 - fx) + mot[g0 + gx + 1] * fx) * (1 - fy)
                      + (mot[g1 + gx] * (1 - fx) + mot[g1 + gx + 1] * fx) * fy;
-            const v = 237 + rowJ[y] + colJ[x] + mo + (trnd() - .5) * 5;
+            let v = 237 + rowJ[y] + colJ[x] + mo + (trnd() - .5) * 5;
+            if (onH) v -= 7;
+            if ((x % GRID) < LW) v -= 9;
             px2[j] = v + 6; px2[j + 1] = v + 1; px2[j + 2] = v - 9; px2[j + 3] = 255;
           }
         }
