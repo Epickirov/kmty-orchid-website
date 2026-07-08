@@ -14,8 +14,11 @@ const JSON_HEADERS = {
 };
 const j = (body, status) => new Response(JSON.stringify(body), { status: status || 200, headers: JSON_HEADERS });
 
-// clean URLs -> the file they serve (address bar keeps the short path)
+// path -> the asset that serves it (address bar keeps the short path). Root is
+// mapped explicitly because Cloudflare's automatic index/.html handling is
+// turned off (html_handling:"none" in wrangler.jsonc) to avoid redirect loops.
 const REWRITES = {
+  '/': '/index.html',
   '/order': '/constellation.html',
   '/constellation': '/constellation.html',
   '/stock': '/stock.html',
