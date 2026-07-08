@@ -74,7 +74,6 @@
   [data-mix-again]:active{transform:scale(.955);}
   [data-mix-swatches] button{width:34px;height:34px;border-radius:50%;border:2px solid rgba(243,238,228,.35);cursor:pointer;padding:0;transition:transform .2s ease,box-shadow .2s ease,opacity .2s ease;}
   [data-mix-swatches] button.on{box-shadow:0 0 0 3px #141018,0 0 0 5px #E7B7CF;transform:scale(1.08);}
-  [data-mix-swatches] button.off{opacity:.32;}
   [data-mix-swatches] button:hover{transform:scale(1.12);}
   [data-mix-sliders] .mixrow{display:flex;align-items:center;gap:10px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12px;color:rgba(243,238,228,.85);}
   [data-mix-sliders] .mixrow i{flex:none;width:13px;height:13px;border-radius:50%;border:1px solid rgba(255,255,255,.4);}
@@ -1770,12 +1769,11 @@ class Component extends DCLogic {
         PAL.forEach((c, k) => {
           const b = document.createElement('button');
           b.type = 'button'; b.title = c[0]; b.style.background = c[1];
-          b.className = sel.includes(k) ? 'on' : (sel.length >= 3 ? 'off' : '');
+          b.className = sel.includes(k) ? 'on' : '';   // no dimming — colours never disappear
           b.addEventListener('click', () => {
             const at = sel.indexOf(k);
             if (at >= 0) { if (sel.length > 1) sel.splice(at, 1); }
-            else if (sel.length < 3) { sel.push(k); if (!weights[k]) weights[k] = 30; }
-            else return;
+            else { if (sel.length >= 3) sel.shift(); sel.push(k); if (!weights[k]) weights[k] = 30; }
             rebuildSwatches(); rebuildSliders(); queueRender();
           });
           swWrap.appendChild(b);
