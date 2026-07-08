@@ -4,10 +4,14 @@
 // NOT compile a functions/ directory, but it DOES run a root _worker.js. So the
 // persistent colour/stock backend lives here instead of functions/api/config.js.
 //
-// It intercepts ONLY /api/config and a few clean-URL aliases; every other
-// request (including "/", the customer order page) is passed straight through to
-// the uploaded static files via env.ASSETS.fetch — so the live order page cannot
-// be affected by anything in here.
+// Routing rule (IMPORTANT): this worker must NEVER rewrite a request to a
+// ".html" path. Pages' html_handling auto-redirects "/admin.html" → "/admin"
+// (extension hiding); if the worker rewrote "/admin" → "/admin.html", the two
+// bounce forever (ERR_TOO_MANY_REDIRECTS). Instead we let Pages serve the pretty
+// URLs itself ("/admin" → admin.html, "/stock" → stock.html, "/constellation" →
+// constellation.html) and pass everything through untouched. The only alias is
+// "/order", rewritten to "/" (the root order page) — a target that is always a
+// 200 and can never trigger the extension-drop redirect.
 //
 // Dashboard bindings to switch on persistence (Settings → the project):
 //   • KV namespace binding  KMTY_CONFIG  — stores the config JSON
@@ -94,20 +98,20 @@ export default {
       return json({ error: 'method not allowed' }, 405);
     }
 
-    // ---- clean-URL aliases → serve the matching .html static asset ----
-    // (these never include "/", so the bare order-page URL is untouched)
-    let rewrite = null;
-    if (p === '/order' || p === '/constellation') rewrite = '/constellation.html';
-    else if (p === '/admin') rewrite = '/admin.html';
-    else if (p === '/stock') rewrite = '/stock.html';
-
-    if (rewrite) {
+    // ---- '/order' → the root order page ('/') ----
+    // Rewrite to the ROOT, never to '/index.html' or any '.html' path, so Pages'
+    // extension-drop redirect can never fire. Query string (?oos=…&add=…) is
+    // preserved because we only change the pathname.
+    if (p === '/order') {
       const dest = new URL(url.toString());
-      dest.pathname = rewrite;
+      dest.pathname = '/';
       return env.ASSETS.fetch(new Request(dest.toString(), request));
     }
 
-    // ---- everything else (/, /index.html, /*.html, /images/…) → static ----
+    // ---- everything else → static, untouched ----
+    // Pages serves the pretty URLs itself: '/' → index.html, '/admin' →
+    // admin.html, '/stock' → stock.html, '/constellation' → constellation.html,
+    // plus every real file. The worker rewrites nothing here, so no loop.
     return env.ASSETS.fetch(request);
   },
 };
