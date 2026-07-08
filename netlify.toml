@@ -1,0 +1,44 @@
+# Netlify configuration — KMTY Orchid site + standalone Constellation order page.
+# This is a plain static site: no build step, published straight from the repo
+# root. Connect the repo once at app.netlify.com and every push to `main`
+# redeploys automatically.
+
+[build]
+  publish = "."
+  # no build command — nothing to compile
+
+# ── clean, WeChat-friendly paths for the Constellation order page ──
+# Both serve constellation.html without the “.html”; status 200 = rewrite, so
+# the address bar keeps the short URL (nice to paste into WeChat).
+[[redirects]]
+  from = "/order"
+  to = "/constellation.html"
+  status = 200
+
+[[redirects]]
+  from = "/constellation"
+  to = "/constellation.html"
+  status = 200
+
+# ── caching ──
+# HTML is always revalidated, so a push goes live immediately — no stale CDN
+# copy the way githack served old versions. Static assets cache hard.
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+[[headers]]
+  for = "/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/vendor/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

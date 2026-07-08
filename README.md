@@ -70,6 +70,30 @@ https://raw.githack.com/Epickirov/kmty-orchid-website/main/constellation.html
 - The page reuses the site's images but shares no code with the site — editing
   it cannot affect the main website.
 
+## Deploy on Netlify (recommended — free, no throttling, auto-updates)
+
+The repo is Netlify-ready (`netlify.toml`): static, no build step, published
+from the root. Connect it once and every push to `main` redeploys.
+
+1. Sign in at **app.netlify.com** (the *Log in with GitHub* button is easiest).
+2. **Add new site → Import an existing project → GitHub**, authorise, and pick
+   `Epickirov/kmty-orchid-website`.
+3. Branch **`main`**; leave the build command **empty**; publish directory **`.`**
+   (Netlify reads these from `netlify.toml` — just click **Deploy**).
+4. **Site configuration → Change site name** → e.g. `kmty`, giving `kmty.netlify.app`.
+
+Resulting URLs:
+
+| Page | URL |
+|------|-----|
+| Full marketing site | `https://kmty.netlify.app/` |
+| Constellation order page (share on WeChat) | `https://kmty.netlify.app/order` |
+
+`/order` and `/constellation` both serve `constellation.html` (clean, no
+`.html` suffix). HTML is served `must-revalidate`, so edits appear immediately —
+no hard-refresh dance. A custom domain can be added later under *Domain
+management*.
+
 ## Local preview
 
 Any static file server works:
