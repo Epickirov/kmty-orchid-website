@@ -77,41 +77,48 @@ https://raw.githack.com/Epickirov/kmty-orchid-website/main/constellation.html
 - The page reuses the site's images but shares no code with the site — editing
   it cannot affect the main website.
 
-## Deploy on Cloudflare Pages (persistent colour/stock settings)
+## Deploy on Cloudflare Workers (persistent colour/stock settings)
 
-Cloudflare Pages hosts the static site **and** runs the `/api/config` Function
-that stores the live colour/stock catalogue in Cloudflare **KV** — so `/admin`
-edits stick for every customer with no redeploy. All the code is in the repo
-(`functions/api/config.js`, `admin.html`, `wrangler.toml`, `_redirects`); the
-account steps below are done once in the Cloudflare dashboard.
+Cloudflare now offers **Workers** (not classic Pages) for new projects. This
+repo is set up for the Workers **Static Assets** model: `worker.js` serves the
+whole static site, rewrites the clean URLs, and backs `/api/config` with
+Cloudflare **KV** — so `/admin` edits stick for every customer. Config:
+`worker.js` + `wrangler.jsonc` (`main` = worker, `assets` = repo root).
 
-1. **dash.cloudflare.com** → *Workers & Pages* → **Create** → **Pages** →
-   **Connect to Git** → pick `Epickirov/kmty-orchid-website`.
-2. Build settings: framework preset **None**, build command **empty**, output
-   directory **`.`** → **Save and Deploy**.
-3. Create the storage: *Storage & Databases* → **KV** → **Create** a namespace
-   named e.g. `kmty-config`.
-4. Bind it: your Pages project → *Settings → Functions (or Bindings) → KV
-   namespace bindings* → **Add** → variable name **`KMTY_CONFIG`** → select that
-   namespace. (Add it for **Production**.)
-5. Set the admin password: *Settings → Variables and Secrets* → **Add** →
-   **`ADMIN_PASS`** = a password you choose (mark it a **Secret**).
-6. **Retry deployment** (or push any commit) so the binding + variable take
-   effect.
+**Phase 1 — get it live (no persistence yet):**
 
-Resulting URLs (rename the project under *Settings* to change the subdomain):
+1. **dash.cloudflare.com** → *Workers & Pages* → **Create** → **Workers** →
+   **Import a repository** → pick `Epickirov/kmty-orchid-website`.
+2. Project name **`kmty-orchid`** (must match `name` in `wrangler.jsonc`).
+   Deploy command: **`npx wrangler deploy`**. Build command: empty. Deploy.
+   The build reads `wrangler.jsonc`, bundles `worker.js`, and uploads the site.
+
+At this point the site + order page work; `/admin` loads but **saving** returns
+"storage not bound" until KV is added.
+
+**Phase 2 — switch on persistence:**
+
+3. Create the store: *Storage & Databases* → **KV** → **Create** a namespace
+   (e.g. `kmty-config`). Copy its **Namespace ID**.
+4. Put that ID in `wrangler.jsonc` — uncomment the `kv_namespaces` block and
+   paste the ID for binding **`KMTY_CONFIG`** — then commit/push (redeploys).
+5. Set the admin password: your Worker → *Settings → Variables and Secrets* →
+   **Add** → **`ADMIN_PASS`** = a password you choose → type **Secret**. (Secrets
+   survive redeploys; the KV binding must live in `wrangler.jsonc`.)
+6. Push once more (or **Retry**) so the binding + secret are live.
+
+Resulting URLs (`<name>.<account>.workers.dev`, or add a custom domain):
 
 | Page | URL |
 |------|-----|
-| Full marketing site | `https://kmty-orchid.pages.dev/` |
-| Order page (share on WeChat) | `https://kmty-orchid.pages.dev/order` |
-| Staff control panel (private) | `https://kmty-orchid.pages.dev/admin` |
+| Full marketing site | `https://kmty-orchid.<account>.workers.dev/` |
+| Order page (share on WeChat) | `…/order` |
+| Staff control panel (private) | `…/admin` |
 
 Notes: the order page reads `/api/config` on load and falls back to the baked
-`PALETTE` if that request is ever blocked, so it never breaks. A custom domain
-can be added under *Custom domains*. Cloudflare's network is weaker inside
-mainland China, but the order customers are overseas, so this is fine for the
-order tool; keep the main marketing site on a China-friendly host if needed.
+`PALETTE` if that request is ever blocked, so it never breaks. Cloudflare's
+network is weaker inside mainland China, but the order customers are overseas,
+so this is fine for the order tool.
 
 ## Deploy on Netlify (alternative — static only, no persistent settings)
 
