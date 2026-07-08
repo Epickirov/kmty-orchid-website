@@ -1,0 +1,6 @@
+# Clean URLs for Cloudflare Pages (200 = rewrite, address bar keeps the short
+# path). /api/* is served by the Pages Function in functions/api/.
+/order          /constellation.html   200
+/constellation  /constellation.html   200
+/stock          /stock.html           200
+/admin          /admin.html           200
