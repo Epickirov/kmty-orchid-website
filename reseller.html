@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>经销商门户 · Reseller — KMTY</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;background:#141018;color:#F3EEE4;
+       font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans SC',system-ui,sans-serif;
+       -webkit-font-smoothing:antialiased;padding:env(safe-area-inset-top) env(safe-area-inset-right) 60px env(safe-area-inset-left);
+       background-image:radial-gradient(circle at 84% -4%,rgba(212,140,176,.12),transparent 46%),radial-gradient(circle at 6% 26%,rgba(46,78,158,.10),transparent 40%);}
+  .wrap{max-width:640px;margin:0 auto;padding:20px 18px;}
+  .mark{font-family:Georgia,'Songti SC','Noto Serif SC',serif;font-size:22px;font-weight:700;}
+  .mark b{color:#E7B7CF;} .tag{font-size:11px;letter-spacing:.22em;color:#9b93a4;margin-left:8px;}
+  .head{display:flex;align-items:center;gap:12px;}
+  .head img{height:40px;max-width:120px;object-fit:contain;}
+  h1{margin:18px 0 4px;font-size:20px;font-weight:600;}
+  .lead{margin:0 0 10px;font-size:13px;line-height:1.7;color:#bfb8c6;}
+  .linkcard{margin:14px 0;padding:14px;border-radius:14px;background:rgba(212,140,176,.09);border:1px solid rgba(212,140,176,.28);}
+  .linkcard .h{font-size:11px;letter-spacing:.14em;color:#E7B7CF;margin:0 0 8px;}
+  .linkcard .url{font-family:ui-monospace,Menlo,monospace;font-size:13px;word-break:break-all;color:#F3EEE4;background:rgba(0,0,0,.28);border-radius:9px;padding:10px;}
+  .obar{display:flex;gap:10px;align-items:center;margin:16px 0 6px;flex-wrap:wrap;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:500;padding:11px 18px;border:1px solid rgba(243,238,228,.34);background:rgba(243,238,228,.06);color:#F3EEE4;text-decoration:none;}
+  .btn.solid{background:#B0552F;border:none;}
+  .ord{padding:12px 14px;border-radius:14px;margin:10px 0;background:rgba(243,238,228,.045);border:1px solid rgba(243,238,228,.14);}
+  .ord .who{font-weight:600;font-size:15px;} .ord .meta{font-size:12px;color:#9b93a4;margin-top:3px;}
+  .ord .rec{font-size:13px;color:#cfc8d5;margin-top:6px;} .ord a{color:#8FB7E0;font-size:12px;text-decoration:none;display:inline-block;margin-top:8px;}
+  .muted{color:#8d8596;font-size:13px;text-align:center;padding:22px;}
+  .co{font-size:12px;color:#8d8596;}
+  .gate{position:fixed;inset:0;z-index:40;background:#141018;display:flex;align-items:center;justify-content:center;padding:24px;}
+  .gate .box{max-width:340px;width:100%;text-align:center;}
+  .gate h2{font-family:Georgia,'Songti SC',serif;font-size:26px;margin:0 0 6px;}
+  .gate p{font-size:13px;color:#9b93a4;margin:0 0 18px;}
+  .gate input{font-family:inherit;font-size:16px;color:#F3EEE4;background:rgba(243,238,228,.06);border:1px solid rgba(243,238,228,.24);
+       border-radius:12px;padding:14px;outline:none;width:100%;text-align:center;-webkit-appearance:none;margin-bottom:10px;}
+  .gate button{margin-top:6px;width:100%;padding:15px;border-radius:999px;border:none;background:#B0552F;color:#F3EEE4;font-family:inherit;font-size:15px;font-weight:500;cursor:pointer;}
+  .gate .err{color:#e79b9b;font-size:12.5px;margin-top:12px;min-height:16px;}
+  [hidden]{display:none !important;}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);z-index:60;background:#F3EEE4;color:#1A1E17;font-size:13px;padding:11px 20px;border-radius:999px;opacity:0;pointer-events:none;transition:.3s;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="gate" id="gate">
+  <div class="box">
+    <div class="mark">KMTY <b>星空</b></div>
+    <h2>经销商登录</h2>
+    <p>输入你的代号和密码</p>
+    <input id="gid" type="text" autocapitalize="none" autocomplete="username" placeholder="代号 · ID（如 acme）">
+    <input id="gpass" type="password" autocomplete="current-password" placeholder="密码 · Password" enterkeyhint="go">
+    <button id="enter" type="button">登录</button>
+    <div class="err" id="gateErr"></div>
+  </div>
+</div>
+
+<div class="wrap" id="app" hidden>
+  <div class="head" id="head"><span class="mark">KMTY <b>星空</b></span><span class="tag">经销商 · RESELLER</span></div>
+  <div class="linkcard">
+    <p class="h">你的下单链接 · YOUR LINK（发给你的客户）</p>
+    <div class="url" id="mylink"></div>
+    <div class="obar"><button class="btn solid" id="copy" type="button">复制链接</button><a class="btn" id="open" target="_blank" rel="noopener">打开</a><button class="btn" id="logout" type="button">退出</button></div>
+  </div>
+  <h1>你的订单 <span class="co" id="ocount"></span></h1>
+  <p class="lead">你只看到通过<b>你的链接</b>下的单。</p>
+  <div id="olist"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var rid = '', rpass = '';
+  try { rid = sessionStorage.getItem('kmty-rs-id') || ''; rpass = sessionStorage.getItem('kmty-rs-pass') || ''; } catch (e) {}
+  var toastEl = $('toast'), toastT = 0;
+  function toast(m) { toastEl.textContent = m; toastEl.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(function () { toastEl.classList.remove('show'); }, 2000); }
+  function esc(s) { return String(s == null ? '' : s); }
+
+  var gate = $('gate'), app = $('app');
+  function relock(msg) { try { sessionStorage.removeItem('kmty-rs-id'); sessionStorage.removeItem('kmty-rs-pass'); } catch (e) {} rid = rpass = ''; app.hidden = true; gate.hidden = false; if (msg) $('gateErr').textContent = msg; }
+  $('logout').addEventListener('click', function () { relock(''); $('gid').value = ''; $('gpass').value = ''; });
+
+  function enter() {
+    var i = ($('gid').value || '').toLowerCase().replace(/[^a-z0-9_-]/g, ''), p = $('gpass').value || '';
+    if (!i || !p) { $('gateErr').textContent = '请输入代号和密码'; return; }
+    rid = i; rpass = p; login();
+  }
+  $('enter').addEventListener('click', enter);
+  $('gpass').addEventListener('keydown', function (e) { if (e.key === 'Enter') enter(); });
+  $('gid').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('gpass').focus(); });
+
+  function login() {
+    $('gateErr').textContent = '登录中…';
+    fetch('/api/orders', { headers: { 'x-reseller-id': rid, 'x-reseller-pass': rpass } })
+      .then(function (r) {
+        if (r.status === 401) { relock('代号或密码错误'); return null; }
+        return r.json();
+      })
+      .then(function (j) {
+        if (!j) return;
+        try { sessionStorage.setItem('kmty-rs-id', rid); sessionStorage.setItem('kmty-rs-pass', rpass); } catch (e) {}
+        gate.hidden = true; app.hidden = false;
+        setupHeader(); renderOrders(j.orders || []);
+      })
+      .catch(function () { $('gateErr').textContent = '网络错误，请重试'; });
+  }
+
+  function setupHeader() {
+    var link = location.origin + '/r/' + rid;
+    $('mylink').textContent = link; $('open').href = link;
+    // pull the reseller's own branding for the header
+    fetch('/api/reseller?id=' + encodeURIComponent(rid)).then(function (r) { return r.ok ? r.json() : null; }).then(function (b) {
+      if (!b || !b.name) return;
+      var h = $('head'); h.innerHTML = '';
+      if (b.logo) { var im = document.createElement('img'); im.src = b.logo; im.alt = b.name; h.appendChild(im); }
+      var sp = document.createElement('span'); sp.className = 'mark'; sp.textContent = b.name; h.appendChild(sp);
+      var tg = document.createElement('span'); tg.className = 'tag'; tg.textContent = '经销商门户'; h.appendChild(tg);
+      document.title = b.name + ' · 门户';
+    }).catch(function () {});
+  }
+  $('copy').addEventListener('click', function () { var t = $('mylink').textContent; if (navigator.clipboard) navigator.clipboard.writeText(t); toast('已复制链接'); });
+
+  function renderOrders(list) {
+    $('ocount').textContent = list.length + ' 单';
+    var el = $('olist'); el.innerHTML = '';
+    if (!list.length) { el.innerHTML = '<div class="muted">还没有订单。把你的链接发给客户即可开始。</div>'; return; }
+    list.forEach(function (o) {
+      var d = document.createElement('div'); d.className = 'ord';
+      var who = document.createElement('div'); who.className = 'who'; who.textContent = esc(o.name) + ' × ' + (o.qty || 1);
+      var meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = esc(o.date || '') + ' · ' + esc(o.phone || '');
+      var rec = document.createElement('div'); rec.className = 'rec'; rec.textContent = esc(o.recipe || '—');
+      var a = document.createElement('a'); a.href = location.origin + '/r/' + rid + (o.m ? '#m=' + o.m : ''); a.target = '_blank'; a.rel = 'noopener'; a.textContent = '↗ 查看配色';
+      d.appendChild(who); d.appendChild(meta); d.appendChild(rec); d.appendChild(a); el.appendChild(d);
+    });
+  }
+
+  if (rid && rpass) login();
+})();
+</script>
+</body>
+</html>

@@ -5,20 +5,22 @@
 <title>控制台 · 星空艺术兰 — KMTY（内部）</title>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<link rel="icon" type="image/png" href="images/favicon.png">
 <style>
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   body{margin:0;background:#141018;color:#F3EEE4;
        font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans SC',system-ui,sans-serif;
-       -webkit-font-smoothing:antialiased;
-       padding:env(safe-area-inset-top) env(safe-area-inset-right) 120px env(safe-area-inset-left);
+       -webkit-font-smoothing:antialiased;padding:env(safe-area-inset-top) env(safe-area-inset-right) 60px env(safe-area-inset-left);
        background-image:radial-gradient(circle at 84% -4%,rgba(212,140,176,.12),transparent 46%),radial-gradient(circle at 6% 26%,rgba(46,78,158,.10),transparent 40%);}
-  .wrap{max-width:640px;margin:0 auto;padding:22px 20px;}
+  .wrap{max-width:680px;margin:0 auto;padding:20px 18px;}
   .mark{font-family:Georgia,'Songti SC','Noto Serif SC',serif;font-size:22px;font-weight:700;}
   .mark b{color:#E7B7CF;} .tag{font-size:11px;letter-spacing:.22em;color:#9b93a4;margin-left:8px;}
-  .co{margin:10px 0 0;font-size:12px;color:#8d8596;}
-  h1{margin:22px 0 6px;font-size:22px;font-weight:600;}
-  .lead{margin:0 0 8px;font-size:13.5px;line-height:1.7;color:#bfb8c6;}
+  .co{margin:8px 0 0;font-size:12px;color:#8d8596;}
+  .tabs{display:flex;gap:8px;margin:20px 0 18px;border-bottom:1px solid rgba(243,238,228,.14);}
+  .tabs button{flex:1 1 auto;background:none;border:none;color:#9b93a4;font-family:inherit;font-size:14px;font-weight:600;
+       padding:12px 6px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;}
+  .tabs button.on{color:#E7B7CF;border-bottom-color:#E7B7CF;}
+  h1{margin:6px 0 6px;font-size:20px;font-weight:600;}
+  .lead{margin:0 0 14px;font-size:13px;line-height:1.7;color:#bfb8c6;}
   .lead b{color:#E7B7CF;font-weight:600;}
   .row{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:14px;margin:10px 0;
        background:rgba(243,238,228,.045);border:1px solid rgba(243,238,228,.14);}
@@ -27,37 +29,48 @@
   .row .names{display:flex;flex-direction:column;gap:6px;flex:1 1 auto;min-width:0;}
   .row .names input{font-family:inherit;font-size:14px;color:#F3EEE4;background:rgba(243,238,228,.06);
        border:1px solid rgba(243,238,228,.2);border-radius:9px;padding:8px 10px;outline:none;width:100%;-webkit-appearance:none;}
-  .row .names input:focus{border-color:#E7B7CF;}
-  .row .names input::placeholder{color:#6f6879;}
-  .row .st{flex:0 0 auto;font-size:12px;font-weight:600;letter-spacing:.03em;padding:8px 12px;border-radius:999px;cursor:pointer;border:none;font-family:inherit;}
-  .row .st.in{background:rgba(120,190,140,.16);color:#9ad3a8;}
-  .row .st.out{background:rgba(231,155,155,.16);color:#e79b9b;}
-  .row .rm{flex:0 0 auto;width:34px;height:34px;border-radius:50%;border:1px solid rgba(231,155,155,.4);background:none;color:#e79b9b;font-size:16px;cursor:pointer;line-height:1;}
+  .row .names input:focus,.fld input:focus{border-color:#E7B7CF;}
+  .row .st{flex:0 0 auto;font-size:12px;font-weight:600;padding:8px 12px;border-radius:999px;cursor:pointer;border:none;font-family:inherit;}
+  .row .st.in{background:rgba(120,190,140,.16);color:#9ad3a8;} .row .st.out{background:rgba(231,155,155,.16);color:#e79b9b;}
+  .row .rm,.rslist .rm{flex:0 0 auto;width:34px;height:34px;border-radius:50%;border:1px solid rgba(231,155,155,.4);background:none;color:#e79b9b;font-size:16px;cursor:pointer;line-height:1;}
   .add{margin:14px 0 0;padding:13px;width:100%;border-radius:12px;border:1px dashed rgba(243,238,228,.32);
        background:rgba(243,238,228,.03);color:#cfc8d5;font-family:inherit;font-size:14px;cursor:pointer;}
-  .add:active{transform:scale(.99);}
-  .bar{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:14px 20px calc(14px + env(safe-area-inset-bottom));
-       background:linear-gradient(180deg,rgba(20,16,24,0),rgba(20,16,24,.96) 30%);display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;}
-  .bar .inner{max-width:640px;width:100%;display:flex;gap:12px;align-items:center;}
   .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;cursor:pointer;
-       font-family:inherit;font-size:15px;font-weight:500;padding:15px 22px;border:none;}
-  .btn.save{flex:1 1 auto;background:#2F5D3A;color:#F3EEE4;}
-  .btn.save:disabled{opacity:.5;}
+       font-family:inherit;font-size:15px;font-weight:500;padding:14px 22px;border:none;}
+  .btn.save{background:#2F5D3A;color:#F3EEE4;width:100%;margin-top:16px;} .btn.save:disabled{opacity:.5;}
+  .btn.sm{padding:9px 16px;font-size:13px;}
   .btn.ghost{border:1px solid rgba(243,238,228,.34);background:rgba(243,238,228,.06);color:#F3EEE4;text-decoration:none;}
-  .status{font-size:12.5px;color:#9ad3a8;min-height:16px;text-align:center;flex-basis:100%;}
-  .status.err{color:#e79b9b;}
-  .hint{margin:16px 0 0;font-size:12px;line-height:1.7;color:#8d8596;}
-  /* gate */
+  .status{font-size:12.5px;color:#9ad3a8;min-height:16px;text-align:center;margin-top:10px;} .status.err{color:#e79b9b;}
+  .fld{display:flex;flex-direction:column;gap:6px;font-size:11px;letter-spacing:.03em;color:#9b93a4;margin:10px 0;}
+  .fld input{font-family:inherit;font-size:15px;color:#F3EEE4;background:rgba(243,238,228,.06);
+       border:1px solid rgba(243,238,228,.24);border-radius:11px;padding:12px 13px;outline:none;width:100%;-webkit-appearance:none;}
+  .frow{display:flex;gap:10px;flex-wrap:wrap;} .frow .fld{flex:1 1 130px;}
+  .card{background:rgba(243,238,228,.04);border:1px solid rgba(243,238,228,.14);border-radius:16px;padding:16px;margin:14px 0;}
+  .card h2{margin:0 0 4px;font-size:15px;font-weight:600;color:#E7B7CF;}
+  .logoprev{height:44px;max-width:150px;object-fit:contain;background:rgba(255,255,255,.06);border-radius:8px;padding:4px;vertical-align:middle;}
+  .rslist .r{display:flex;align-items:center;gap:10px;padding:12px;border-radius:14px;margin:10px 0;background:rgba(243,238,228,.045);border:1px solid rgba(243,238,228,.14);flex-wrap:wrap;}
+  .rslist .r img{height:34px;max-width:70px;object-fit:contain;flex:0 0 auto;}
+  .rslist .r .nm{flex:1 1 140px;min-width:0;} .rslist .r .nm b{display:block;font-size:14px;} .rslist .r .nm .lk{font-size:11px;color:#8FB7E0;word-break:break-all;font-family:ui-monospace,Menlo,monospace;}
+  .obar{display:flex;gap:10px;align-items:center;margin:10px 0;flex-wrap:wrap;}
+  select{font-family:inherit;font-size:14px;color:#F3EEE4;background:rgba(243,238,228,.06);border:1px solid rgba(243,238,228,.24);border-radius:10px;padding:9px 12px;}
+  .ord{padding:12px 14px;border-radius:14px;margin:10px 0;background:rgba(243,238,228,.045);border:1px solid rgba(243,238,228,.14);}
+  .ord .top{display:flex;justify-content:space-between;gap:10px;align-items:baseline;}
+  .ord .who{font-weight:600;font-size:15px;} .ord .meta{font-size:12px;color:#9b93a4;margin-top:3px;}
+  .ord .rec{font-size:13px;color:#cfc8d5;margin-top:6px;} .ord .rs{font-size:11px;color:#E7B7CF;letter-spacing:.05em;flex:0 0 auto;}
+  .ord a{color:#8FB7E0;font-size:12px;text-decoration:none;display:inline-block;margin-top:8px;}
+  .muted{color:#8d8596;font-size:13px;text-align:center;padding:20px;}
+  .hint{margin:12px 0 0;font-size:12px;line-height:1.7;color:#8d8596;}
   .gate{position:fixed;inset:0;z-index:40;background:#141018;display:flex;align-items:center;justify-content:center;padding:24px;}
   .gate .box{max-width:340px;width:100%;text-align:center;}
   .gate h2{font-family:Georgia,'Songti SC',serif;font-size:26px;margin:0 0 6px;}
   .gate p{font-size:13px;color:#9b93a4;margin:0 0 18px;}
   .gate input{font-family:inherit;font-size:16px;color:#F3EEE4;background:rgba(243,238,228,.06);border:1px solid rgba(243,238,228,.24);
        border-radius:12px;padding:14px;outline:none;width:100%;text-align:center;-webkit-appearance:none;}
-  .gate input:focus{border-color:#E7B7CF;}
   .gate button{margin-top:12px;width:100%;padding:15px;border-radius:999px;border:none;background:#B0552F;color:#F3EEE4;font-family:inherit;font-size:15px;font-weight:500;cursor:pointer;}
   .gate .err{color:#e79b9b;font-size:12.5px;margin-top:12px;min-height:16px;}
   [hidden]{display:none !important;}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);z-index:60;background:#F3EEE4;color:#1A1E17;font-size:13px;padding:11px 20px;border-radius:999px;opacity:0;pointer-events:none;transition:.3s;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
 </head>
 <body>
@@ -66,7 +79,7 @@
     <div class="mark">KMTY <b>星空</b></div>
     <h2>控制台</h2>
     <p>请输入管理密码</p>
-    <input id="pass" type="password" inputmode="text" autocomplete="current-password" placeholder="管理密码" enterkeyhint="go">
+    <input id="pass" type="password" autocomplete="current-password" placeholder="管理密码" enterkeyhint="go">
     <button id="enter" type="button">进入</button>
     <div class="err" id="gateErr"></div>
   </div>
@@ -75,141 +88,228 @@
 <div class="wrap" id="app" hidden>
   <div><span class="mark">KMTY <b>星空</b></span><span class="tag">控制台 · ADMIN</span></div>
   <p class="co">昆明统一生物科技有限公司 · 内部工具（请勿分享此页）</p>
-  <h1>颜色与库存</h1>
-  <p class="lead">在这里改动会<b>立即对所有客户生效</b> — 无需改代码、无需分享特殊链接。<br>点<b>有货 / 缺货</b>切换库存，改中文名 / English / 色块可编辑颜色，最下方可加新颜色。改完记得点<b>保存并发布</b>。</p>
-  <div id="rows"></div>
-  <button class="add" id="add" type="button">＋ 添加一个颜色</button>
-  <p class="hint">提示：改动保存后，客户下次打开下单页即可看到最新颜色与库存。缺货的颜色仍然显示，但会置灰、不可选。</p>
+
+  <div class="tabs">
+    <button data-tab="colours" class="on" type="button">颜色</button>
+    <button data-tab="resellers" type="button">经销商</button>
+    <button data-tab="orders" type="button">订单</button>
+  </div>
+
+  <section id="tab-colours">
+    <h1>颜色与库存</h1>
+    <p class="lead">改动<b>立即对所有客户生效</b>。点<b>有货 / 缺货</b>切换库存，改名字 / 色块可编辑，最下方加新颜色。</p>
+    <div id="rows"></div>
+    <button class="add" id="add" type="button">＋ 添加一个颜色</button>
+    <button class="btn save" id="saveColours" type="button">保存并发布</button>
+    <div class="status" id="cStatus"></div>
+  </section>
+
+  <section id="tab-resellers" hidden>
+    <h1>经销商 · 白牌</h1>
+    <p class="lead">为每个批发客户建一个链接。他们的客户打开时看到<b>他们的名字和 Logo</b>，下单仍进你的后台。经销商可用自己的密码登录 <b>/reseller</b> 查看自己的订单。</p>
+    <div class="rslist" id="rslist"></div>
+    <div class="card">
+      <h2 id="rformTitle">添加经销商</h2>
+      <div class="frow">
+        <label class="fld">链接代号 · ID（英文/数字）<input id="rid" type="text" placeholder="如 acme" maxlength="32"></label>
+        <label class="fld">显示名称 · Name<input id="rname" type="text" placeholder="如 Acme Flowers" maxlength="40"></label>
+      </div>
+      <label class="fld">公司全称 · Company（中文）<input id="rcompany" type="text" placeholder="如 爱美花艺有限公司" maxlength="60"></label>
+      <label class="fld">公司英文名 · Company (EN, 选填)<input id="rcompanyen" type="text" placeholder="Acme Flowers Co., Ltd." maxlength="80"></label>
+      <div class="frow">
+        <label class="fld">卡片页脚 · Footer（选填）<input id="rfooter" type="text" placeholder="如 ACMEFLOWERS.COM" maxlength="40"></label>
+        <label class="fld">登录密码 · Password<input id="rpass" type="text" placeholder="经销商登录用" maxlength="60"></label>
+      </div>
+      <label class="fld">Logo（选填，自动缩小）<input id="rlogo" type="file" accept="image/*"></label>
+      <div id="rlogoWrap" style="display:none;margin:4px 0 8px;"><img id="rlogoPrev" class="logoprev" alt=""> <button class="btn ghost sm" id="rlogoClear" type="button">移除 Logo</button></div>
+      <button class="btn save" id="saveReseller" type="button">保存经销商</button>
+      <button class="btn ghost sm" id="rformReset" type="button" style="width:100%;margin-top:8px;">清空表单 / 新建</button>
+      <div class="status" id="rStatus"></div>
+    </div>
+    <p class="hint">代号一旦分享请勿更改（改了旧链接会失效）。编辑时密码留空 = 不修改。</p>
+  </section>
+
+  <section id="tab-orders" hidden>
+    <h1>订单</h1>
+    <div class="obar">
+      <select id="ofilter"><option value="">全部经销商</option></select>
+      <button class="btn ghost sm" id="oRefresh" type="button">刷新</button>
+      <span class="co" id="oCount"></span>
+    </div>
+    <div id="olist"></div>
+  </section>
 </div>
 
-<div class="bar" id="bar" hidden>
-  <div class="inner">
-    <button class="btn save" id="save" type="button">保存并发布</button>
-    <a class="btn ghost" id="open" href="/order" target="_blank" rel="noopener">下单页</a>
-  </div>
-  <div class="status" id="status"></div>
-</div>
+<div class="toast" id="toast"></div>
 
 <script>
 (function () {
   'use strict';
-  var pass = '';
-  try { pass = sessionStorage.getItem('kmty-admin-pass') || ''; } catch (e) {}
-  var rowsEl = document.getElementById('rows');
-  var statusEl = document.getElementById('status');
-  var COLORS = [];
-
+  var pass = ''; try { pass = sessionStorage.getItem('kmty-admin-pass') || ''; } catch (e) {}
+  var $ = function (id) { return document.getElementById(id); };
+  var toastEl = $('toast'), toastT = 0;
+  function toast(m) { toastEl.textContent = m; toastEl.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(function () { toastEl.classList.remove('show'); }, 2000); }
   function esc(s) { return String(s == null ? '' : s); }
-
-  // ---- gate ----
-  var gate = document.getElementById('gate'), app = document.getElementById('app'), bar = document.getElementById('bar');
-  function openApp() { gate.hidden = true; app.hidden = false; bar.hidden = false; load(); }
-  function enter() {
-    var v = document.getElementById('pass').value || '';
-    if (!v) { document.getElementById('gateErr').textContent = '请输入密码'; return; }
-    pass = v; try { sessionStorage.setItem('kmty-admin-pass', v); } catch (e) {}
-    openApp();
+  function st(id, msg, err) { var e = $(id); e.textContent = msg; e.className = 'status' + (err ? ' err' : ''); }
+  function api(path, opts) {
+    opts = opts || {}; opts.headers = Object.assign({ 'x-admin-pass': pass }, opts.headers || {});
+    return fetch(path, opts).then(function (r) {
+      if (r.status === 401) { relock(); throw new Error('401'); }
+      return r.json().then(function (j) { return { status: r.status, ok: r.ok, j: j }; });
+    });
   }
-  document.getElementById('enter').addEventListener('click', enter);
-  document.getElementById('pass').addEventListener('keydown', function (e) { if (e.key === 'Enter') enter(); });
+
+  var gate = $('gate'), app = $('app');
+  function openApp() { gate.hidden = true; app.hidden = false; loadColours(); loadResellers(); }
+  function relock() { try { sessionStorage.removeItem('kmty-admin-pass'); } catch (e) {} pass = ''; app.hidden = true; gate.hidden = false; $('gateErr').textContent = '密码错误，请重试'; $('pass').value = ''; }
+  function enter() { var v = $('pass').value || ''; if (!v) { $('gateErr').textContent = '请输入密码'; return; } pass = v; try { sessionStorage.setItem('kmty-admin-pass', v); } catch (e) {} openApp(); }
+  $('enter').addEventListener('click', enter);
+  $('pass').addEventListener('keydown', function (e) { if (e.key === 'Enter') enter(); });
   if (pass) openApp();
 
-  // ---- load current config (or bootstrap from the order page's palette) ----
-  function load() {
-    fetch('/api/config', { cache: 'no-store' })
-      .then(function (r) { return r.json(); })
-      .then(function (cfg) {
-        if (cfg && Array.isArray(cfg.colors) && cfg.colors.length) { COLORS = cfg.colors; render(); }
-        else bootstrap();
-      })
-      .catch(bootstrap);
+  var tabBtns = document.querySelectorAll('.tabs button');
+  tabBtns.forEach(function (b) { b.addEventListener('click', function () {
+    tabBtns.forEach(function (x) { x.classList.remove('on'); }); b.classList.add('on');
+    ['colours', 'resellers', 'orders'].forEach(function (t) { $('tab-' + t).hidden = (t !== b.dataset.tab); });
+    if (b.dataset.tab === 'orders') loadOrders();
+  }); });
+
+  /* ---- COLOURS ---- */
+  var COLORS = [];
+  function loadColours() {
+    fetch('/api/config', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (cfg) {
+      if (cfg && cfg.colors && cfg.colors.length) { COLORS = cfg.colors; renderColours(); } else bootstrap();
+    }).catch(bootstrap);
   }
   function bootstrap() {
-    // first run: seed the editor from the palette baked into the order page
-    fetch('/constellation.html', { cache: 'no-store' })
-      .then(function (r) { return r.text(); })
-      .then(function (txt) {
-        var m = txt.match(/var PALETTE\s*=\s*\[([\s\S]*?)\];/);
-        COLORS = [];
-        if (m) {
-          var re = /\[\s*'([^']*)'\s*,\s*'([^']*)'\s*,\s*'(#[0-9A-Fa-f]{3,8})'\s*,\s*(true|false)\s*\]/g, mm;
-          while ((mm = re.exec(m[1]))) COLORS.push({ zh: mm[2], en: mm[1], hex: mm[3], stock: mm[4] === 'true' });
-        }
-        render();
-      })
-      .catch(function () { COLORS = []; render(); });
+    fetch('/constellation.html', { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (txt) {
+      var m = txt.match(/var PALETTE\s*=\s*\[([\s\S]*?)\];/); COLORS = [];
+      if (m) { var re = /\[\s*'([^']*)'\s*,\s*'([^']*)'\s*,\s*'(#[0-9A-Fa-f]{3,8})'\s*,\s*(true|false)\s*\]/g, mm; while ((mm = re.exec(m[1]))) COLORS.push({ zh: mm[2], en: mm[1], hex: mm[3], stock: mm[4] === 'true' }); }
+      renderColours();
+    }).catch(function () { COLORS = []; renderColours(); });
   }
-
-  // ---- render editable rows ----
-  function render() {
-    rowsEl.innerHTML = '';
-    COLORS.forEach(function (c, i) { rowsEl.appendChild(rowEl(c, i)); });
-  }
-  function rowEl(c, i) {
-    var row = document.createElement('div');
-    row.className = 'row' + (c.stock === false ? ' out' : '');
+  function renderColours() { var el = $('rows'); el.innerHTML = ''; COLORS.forEach(function (c, i) { el.appendChild(colourRow(c, i)); }); }
+  function colourRow(c, i) {
+    var row = document.createElement('div'); row.className = 'row' + (c.stock === false ? ' out' : '');
     var hex = /^#[0-9A-Fa-f]{6}$/.test(c.hex || '') ? c.hex : '#CCCCCC';
-
-    var col = document.createElement('input'); col.type = 'color'; col.value = hex;
-    col.addEventListener('input', function () { COLORS[i].hex = col.value; });
-
+    var col = document.createElement('input'); col.type = 'color'; col.value = hex; col.addEventListener('input', function () { COLORS[i].hex = col.value; });
     var names = document.createElement('div'); names.className = 'names';
-    var zh = document.createElement('input'); zh.type = 'text'; zh.placeholder = '中文名'; zh.maxLength = 20; zh.value = esc(c.zh);
-    zh.addEventListener('input', function () { COLORS[i].zh = zh.value; });
-    var en = document.createElement('input'); en.type = 'text'; en.placeholder = 'English'; en.maxLength = 30; en.value = esc(c.en);
-    en.addEventListener('input', function () { COLORS[i].en = en.value; });
+    var zh = document.createElement('input'); zh.type = 'text'; zh.placeholder = '中文名'; zh.maxLength = 20; zh.value = esc(c.zh); zh.addEventListener('input', function () { COLORS[i].zh = zh.value; });
+    var en = document.createElement('input'); en.type = 'text'; en.placeholder = 'English'; en.maxLength = 30; en.value = esc(c.en); en.addEventListener('input', function () { COLORS[i].en = en.value; });
     names.appendChild(zh); names.appendChild(en);
-
-    var st = document.createElement('button'); st.type = 'button';
-    var paint = function () {
-      var inStock = COLORS[i].stock !== false;
-      st.className = 'st ' + (inStock ? 'in' : 'out');
-      st.textContent = inStock ? '有货' : '缺货';
-      row.className = 'row' + (inStock ? '' : ' out');
-    };
-    st.addEventListener('click', function () { COLORS[i].stock = COLORS[i].stock === false; paint(); });
-    paint();
-
-    var rm = document.createElement('button'); rm.type = 'button'; rm.className = 'rm'; rm.textContent = '×'; rm.title = '删除';
-    rm.addEventListener('click', function () { COLORS.splice(i, 1); render(); });
-
-    row.appendChild(col); row.appendChild(names); row.appendChild(st); row.appendChild(rm);
-    return row;
+    var stb = document.createElement('button'); stb.type = 'button';
+    var paint = function () { var s = COLORS[i].stock !== false; stb.className = 'st ' + (s ? 'in' : 'out'); stb.textContent = s ? '有货' : '缺货'; row.className = 'row' + (s ? '' : ' out'); };
+    stb.addEventListener('click', function () { COLORS[i].stock = COLORS[i].stock === false; paint(); }); paint();
+    var rm = document.createElement('button'); rm.type = 'button'; rm.className = 'rm'; rm.textContent = '×'; rm.addEventListener('click', function () { COLORS.splice(i, 1); renderColours(); });
+    row.appendChild(col); row.appendChild(names); row.appendChild(stb); row.appendChild(rm); return row;
   }
-
-  document.getElementById('add').addEventListener('click', function () {
-    COLORS.push({ zh: '', en: '', hex: '#E7B7CF', stock: true });
-    render();
-    var last = rowsEl.lastElementChild;
-    if (last) { last.scrollIntoView({ block: 'center' }); var f = last.querySelector('input[type=text]'); if (f) f.focus(); }
+  $('add').addEventListener('click', function () { COLORS.push({ zh: '', en: '', hex: '#E7B7CF', stock: true }); renderColours(); var l = $('rows').lastElementChild; if (l) { l.scrollIntoView({ block: 'center' }); var f = l.querySelector('input[type=text]'); if (f) f.focus(); } });
+  $('saveColours').addEventListener('click', function () {
+    var clean = COLORS.filter(function (c) { return (c.zh || '').trim() || (c.en || '').trim(); }).map(function (c) { return { zh: (c.zh || '').trim(), en: (c.en || '').trim(), hex: c.hex, stock: c.stock !== false }; });
+    if (!clean.length) { st('cStatus', '至少保留一个颜色', 1); return; }
+    var b = $('saveColours'); b.disabled = true; st('cStatus', '保存中…');
+    api('/api/config', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ colors: clean }) }).then(function (r) {
+      b.disabled = false; if (r.ok && r.j.colors) { COLORS = r.j.colors; renderColours(); st('cStatus', '已保存 ✓ · 已对所有客户生效'); } else st('cStatus', (r.j && r.j.error) || '保存失败', 1);
+    }).catch(function () { b.disabled = false; });
   });
 
-  // ---- save to KV ----
-  function setStatus(msg, err) { statusEl.textContent = msg; statusEl.className = 'status' + (err ? ' err' : ''); }
-  document.getElementById('save').addEventListener('click', function () {
-    var clean = COLORS.filter(function (c) { return (c.zh || '').trim() || (c.en || '').trim(); })
-      .map(function (c) { return { zh: (c.zh || '').trim(), en: (c.en || '').trim(), hex: c.hex, stock: c.stock !== false }; });
-    if (!clean.length) { setStatus('至少保留一个颜色', true); return; }
-    var btn = document.getElementById('save'); btn.disabled = true; setStatus('保存中…');
-    fetch('/api/config', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-admin-pass': pass },
-      body: JSON.stringify({ colors: clean }),
-    }).then(function (r) {
-      btn.disabled = false;
-      if (r.status === 401) {
-        try { sessionStorage.removeItem('kmty-admin-pass'); } catch (e) {}
-        pass = ''; app.hidden = true; bar.hidden = true; gate.hidden = false;
-        document.getElementById('gateErr').textContent = '密码错误，请重试';
-        document.getElementById('pass').value = '';
-        return;
-      }
-      return r.json().then(function (res) {
-        if (r.ok && res.colors) { COLORS = res.colors; render(); setStatus('已保存 ✓ · 已对所有客户生效'); }
-        else setStatus((res && res.error) || '保存失败', true);
-      });
-    }).catch(function () { btn.disabled = false; setStatus('网络错误，请重试', true); });
+  /* ---- RESELLERS ---- */
+  var editingId = null, newLogo = undefined;
+  function loadResellers() { api('/api/resellers').then(function (r) { renderResellers(r.j.resellers || []); fillFilter(r.j.resellers || []); }).catch(function () {}); }
+  function renderResellers(list) {
+    var el = $('rslist'); el.innerHTML = '';
+    if (!list.length) { el.innerHTML = '<div class="muted">还没有经销商。在下方添加第一个。</div>'; return; }
+    list.forEach(function (rs) {
+      var d = document.createElement('div'); d.className = 'r';
+      var link = location.origin + '/r/' + rs.id;
+      if (rs.hasLogo) { var im = document.createElement('img'); im.src = '/api/reseller-logo?id=' + rs.id; im.alt = ''; d.appendChild(im); }
+      var nm = document.createElement('div'); nm.className = 'nm';
+      var bb = document.createElement('b'); bb.textContent = rs.name; var lk = document.createElement('span'); lk.className = 'lk'; lk.textContent = link;
+      nm.appendChild(bb); nm.appendChild(lk); d.appendChild(nm);
+      var copy = document.createElement('button'); copy.className = 'btn ghost sm'; copy.textContent = '复制链接';
+      copy.addEventListener('click', function () { if (navigator.clipboard) navigator.clipboard.writeText(link); toast('已复制 ' + rs.name + ' 的链接'); });
+      var ed = document.createElement('button'); ed.className = 'btn ghost sm'; ed.textContent = '编辑'; ed.addEventListener('click', function () { editReseller(rs); });
+      var rm = document.createElement('button'); rm.className = 'rm'; rm.textContent = '×'; rm.title = '删除';
+      rm.addEventListener('click', function () { if (confirm('删除经销商 ' + rs.name + '？其链接将失效。')) api('/api/resellers', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ op: 'delete', id: rs.id }) }).then(loadResellers); });
+      d.appendChild(copy); d.appendChild(ed); d.appendChild(rm); el.appendChild(d);
+    });
+  }
+  function editReseller(rs) {
+    editingId = rs.id; newLogo = undefined;
+    $('rformTitle').textContent = '编辑：' + rs.name;
+    $('rid').value = rs.id; $('rid').disabled = true;
+    $('rname').value = rs.name || ''; $('rcompany').value = rs.company || '';
+    $('rcompanyen').value = rs.companyEn || ''; $('rfooter').value = ''; $('rpass').value = '';
+    if (rs.hasLogo) { $('rlogoPrev').src = '/api/reseller-logo?id=' + rs.id; $('rlogoWrap').style.display = 'block'; } else { $('rlogoWrap').style.display = 'none'; }
+    $('rformTitle').scrollIntoView({ block: 'center' });
+  }
+  $('rformReset').addEventListener('click', function () {
+    editingId = null; newLogo = undefined; $('rformTitle').textContent = '添加经销商';
+    ['rid', 'rname', 'rcompany', 'rcompanyen', 'rfooter', 'rpass'].forEach(function (id) { $(id).value = ''; });
+    $('rid').disabled = false; $('rlogoWrap').style.display = 'none'; $('rlogo').value = ''; st('rStatus', '');
   });
+  $('rlogoClear').addEventListener('click', function () { newLogo = ''; $('rlogoWrap').style.display = 'none'; $('rlogo').value = ''; });
+  $('rlogo').addEventListener('change', function () {
+    var f = this.files && this.files[0]; if (!f) return;
+    var fr = new FileReader(); fr.onload = function () {
+      var img = new Image(); img.onload = function () {
+        var maxH = 120, sc = Math.min(1, maxH / img.height), w = Math.round(img.width * sc), h = Math.round(img.height * sc);
+        var c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(img, 0, 0, w, h);
+        newLogo = c.toDataURL('image/png'); $('rlogoPrev').src = newLogo; $('rlogoWrap').style.display = 'block';
+      }; img.onerror = function () { toast('图片无法读取'); }; img.src = fr.result;
+    }; fr.readAsDataURL(f);
+  });
+  $('saveReseller').addEventListener('click', function () {
+    var id = ($('rid').value || '').toLowerCase().replace(/[^a-z0-9_-]/g, '');
+    var name = ($('rname').value || '').trim();
+    if (!id) { st('rStatus', '请填写链接代号（英文/数字）', 1); return; }
+    if (!name) { st('rStatus', '请填写显示名称', 1); return; }
+    var passv = ($('rpass').value || '').trim();
+    if (!editingId && !passv) { st('rStatus', '新经销商需要设置登录密码', 1); return; }
+    var body = { op: 'upsert', id: id, name: name, company: ($('rcompany').value || '').trim(), companyEn: ($('rcompanyen').value || '').trim(), footer: ($('rfooter').value || '').trim() };
+    if (passv) body.pass = passv;
+    if (newLogo !== undefined) body.logo = newLogo; else if (editingId) body.logo = '__keep__';
+    var b = $('saveReseller'); b.disabled = true; st('rStatus', '保存中…');
+    api('/api/resellers', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }).then(function (r) {
+      b.disabled = false;
+      if (r.ok && r.j.ok) { st('rStatus', '已保存 ✓'); $('rformReset').click(); loadResellers(); }
+      else st('rStatus', (r.j && r.j.error) || '保存失败', 1);
+    }).catch(function () { b.disabled = false; });
+  });
+
+  /* ---- ORDERS ---- */
+  function fillFilter(list) {
+    var sel = $('ofilter'); var cur = sel.value; sel.innerHTML = '<option value="">全部经销商</option><option value="_">直接下单（无经销商）</option>';
+    list.forEach(function (rs) { var o = document.createElement('option'); o.value = rs.id; o.textContent = rs.name; sel.appendChild(o); });
+    sel.value = cur;
+  }
+  $('ofilter').addEventListener('change', renderOrders);
+  $('oRefresh').addEventListener('click', loadOrders);
+  var ALLORDERS = [];
+  function loadOrders() {
+    $('olist').innerHTML = '<div class="muted">加载中…</div>';
+    api('/api/orders').then(function (r) { ALLORDERS = (r.j.orders || []); renderOrders(); }).catch(function () { $('olist').innerHTML = '<div class="muted">加载失败</div>'; });
+  }
+  function renderOrders() {
+    var f = $('ofilter').value, list = f ? ALLORDERS.filter(function (o) { return (o.reseller || '_') === f; }) : ALLORDERS;
+    $('oCount').textContent = list.length + ' 单';
+    var el = $('olist'); el.innerHTML = '';
+    if (!list.length) { el.innerHTML = '<div class="muted">还没有订单。</div>'; return; }
+    var rmap = {}; document.querySelectorAll('#ofilter option').forEach(function (o) { rmap[o.value] = o.textContent; });
+    list.forEach(function (o) {
+      var d = document.createElement('div'); d.className = 'ord';
+      var who = (o.reseller && o.reseller !== '_') ? (rmap[o.reseller] || o.reseller) : '直接下单';
+      var link = location.origin + (o.reseller && o.reseller !== '_' ? '/r/' + o.reseller : '/') + (o.m ? '#m=' + o.m : '');
+      var top = document.createElement('div'); top.className = 'top';
+      var who1 = document.createElement('span'); who1.className = 'who'; who1.textContent = esc(o.name) + ' × ' + (o.qty || 1);
+      var rs = document.createElement('span'); rs.className = 'rs'; rs.textContent = who;
+      top.appendChild(who1); top.appendChild(rs);
+      var meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = esc(o.date || '') + ' · ' + esc(o.phone || '');
+      var rec = document.createElement('div'); rec.className = 'rec'; rec.textContent = esc(o.recipe || '—');
+      var a = document.createElement('a'); a.href = link; a.target = '_blank'; a.rel = 'noopener'; a.textContent = '↗ 查看配色';
+      d.appendChild(top); d.appendChild(meta); d.appendChild(rec); d.appendChild(a); el.appendChild(d);
+    });
+  }
 })();
 </script>
 </body>

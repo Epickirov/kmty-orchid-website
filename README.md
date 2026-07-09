@@ -91,11 +91,29 @@ bare project URL *is* the order page), plus the staff pages and the backend:
 ```
 index.html          ← copy of constellation.html (served at /)
 constellation.html   ← same file again (admin/stock read its PALETTE)
-admin.html           ← password control panel  → /admin
+admin.html           ← KMTY control panel: colours · resellers · orders → /admin
+reseller.html        ← reseller portal (each reseller sees only their orders) → /reseller
 stock.html           ← per-batch link generator → /stock
-_worker.js           ← Pages "advanced mode" Worker: /api/config + clean URLs
+_worker.js           ← Pages "advanced mode" Worker: all /api/* + clean URLs
 bloom-fallback.png   ← full-quality bloom for old iOS (the inlined bloom is WebP)
 ```
+
+### White-label resellers & order capture
+
+The same KV namespace + `ADMIN_PASS` (no new bindings) also power a multi-tenant
+layer:
+
+- **`/admin` → 经销商 (Resellers):** KMTY adds each wholesale customer (name,
+  company, logo upload, a login password). Each gets a branded link
+  **`/r/<id>`** — opened by *their* customers it shows *their* name + logo (page
+  **and** saved card), while orders still flow to KMTY. Data: `rs:<id>` in KV.
+- **Order capture:** the order page POSTs each order to `/api/order`
+  (`ord:<reseller>:<ts>` in KV) — customer, phone, qty, date, recipe, reseller.
+  The WeChat card flow is unchanged; this just records it too.
+- **`/admin` → 订单 (Orders):** KMTY sees every order, filterable by reseller.
+- **`/reseller`:** a reseller logs in with their id + password and sees **only
+  their own** orders. Isolation is enforced server-side in `_worker.js`
+  (per-reseller KV prefix + SHA-256 password check).
 
 The bloom is inlined as **WebP** (small + smooth); browsers without WebP support
 (iOS < 14) hit `bloom.onerror` and load `/bloom-fallback.png` instead, so every
