@@ -185,6 +185,28 @@ async function ordersGet(request, env) {
   return json({ orders: out, scope: scope, count: out.length });
 }
 
+// reseller changes their OWN password (needs the current one) → KMTY no longer knows it
+async function resellerPassword(request, env) {
+  if (!env.KMTY_CONFIG) return json({ error: 'storage not bound' }, 500);
+  const rid = safeId(request.headers.get('x-reseller-id'));
+  const cur = request.headers.get('x-reseller-pass') || '';
+  if (!rid) return json({ error: 'unauthorized' }, 401);
+  let raw = null; try { raw = await env.KMTY_CONFIG.get('rs:' + rid); } catch (e) {}
+  if (!raw) return json({ error: 'unauthorized' }, 401);
+  const r = JSON.parse(raw);
+  if ((await sha256(cur)) !== r.passHash) return json({ error: 'unauthorized' }, 401);
+  let d; try { d = await request.json(); } catch (e) { return json({ error: 'bad json' }, 400); }
+  const np = String(d.newPass || '');
+  if (np.length < 4) return json({ error: 'new password must be at least 4 characters' }, 400);
+  r.passHash = await sha256(np);
+  try {
+    await env.KMTY_CONFIG.put('rs:' + rid, JSON.stringify(r), {
+      metadata: { name: r.name, company: r.company, hasLogo: !!r.logo, hasPass: true, created: r.created },
+    });
+  } catch (e) { return json({ error: 'save failed' }, 500); }
+  return json({ ok: true });
+}
+
 function corsOptions() {
   return new Response(null, { headers: {
     'access-control-allow-origin': '*',
@@ -208,6 +230,7 @@ export default {
       if (p === '/api/resellers') return (m === 'GET' || m === 'POST') ? resellersAdmin(request, env) : json({ error: 'method' }, 405);
       if (p === '/api/order') return m === 'POST' ? orderPost(request, env) : json({ error: 'method' }, 405);
       if (p === '/api/orders') return m === 'GET' ? ordersGet(request, env) : json({ error: 'method' }, 405);
+      if (p === '/api/reseller-password') return m === 'POST' ? resellerPassword(request, env) : json({ error: 'method' }, 405);
       return json({ error: 'not found' }, 404);
     }
 

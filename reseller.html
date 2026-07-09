@@ -29,6 +29,9 @@
   .ord .rec{font-size:13px;color:#cfc8d5;margin-top:6px;} .ord a{color:#8FB7E0;font-size:12px;text-decoration:none;display:inline-block;margin-top:8px;}
   .muted{color:#8d8596;font-size:13px;text-align:center;padding:22px;}
   .co{font-size:12px;color:#8d8596;}
+  #pwForm input{font-family:inherit;font-size:15px;color:#F3EEE4;background:rgba(0,0,0,.22);border:1px solid rgba(243,238,228,.24);border-radius:10px;padding:12px;outline:none;width:100%;margin-bottom:8px;-webkit-appearance:none;}
+  #pwForm input:focus{border-color:#9ad3a8;}
+  #pwStatus{font-size:12.5px;min-height:16px;text-align:center;margin-top:4px;color:#9ad3a8;}
   .gate{position:fixed;inset:0;z-index:40;background:#141018;display:flex;align-items:center;justify-content:center;padding:24px;}
   .gate .box{max-width:340px;width:100%;text-align:center;}
   .gate h2{font-family:Georgia,'Songti SC',serif;font-size:26px;margin:0 0 6px;}
@@ -62,6 +65,18 @@
     <div class="url" id="mylink"></div>
     <div class="obar"><button class="btn solid" id="copy" type="button">复制链接</button><a class="btn" id="open" target="_blank" rel="noopener">打开</a><button class="btn" id="logout" type="button">退出</button></div>
   </div>
+  <div class="linkcard" style="background:rgba(120,190,140,.08);border-color:rgba(120,190,140,.3);">
+    <button class="btn" id="pwToggle" type="button" style="width:100%;">🔒 修改密码 · Change your password</button>
+    <div id="pwForm" style="display:none;margin-top:12px;">
+      <p class="lead" style="margin:0 0 10px;">改密码后，只有你知道 — KMTY 无法用你的账号登录查看。</p>
+      <input id="pwCur" type="password" autocomplete="current-password" placeholder="当前密码 · Current password">
+      <input id="pwNew" type="password" autocomplete="new-password" placeholder="新密码 · New password（至少 4 位）">
+      <input id="pwNew2" type="password" autocomplete="new-password" placeholder="确认新密码 · Confirm new password" enterkeyhint="go">
+      <button class="btn solid" id="pwSave" type="button" style="width:100%;">保存新密码</button>
+      <div id="pwStatus"></div>
+    </div>
+  </div>
+
   <h1>你的订单 <span class="co" id="ocount"></span></h1>
   <p class="lead">你只看到通过<b>你的链接</b>下的单。</p>
   <div id="olist"></div>
@@ -136,6 +151,28 @@
       d.appendChild(who); d.appendChild(meta); d.appendChild(rec); d.appendChild(a); el.appendChild(d);
     });
   }
+
+  // ---- self-service password change (KMTY won't know the new one) ----
+  function pwSt(m, err) { var e = $('pwStatus'); e.textContent = m; e.style.color = err ? '#e79b9b' : '#9ad3a8'; }
+  $('pwToggle').addEventListener('click', function () { var f = $('pwForm'); f.style.display = f.style.display === 'none' ? 'block' : 'none'; if (f.style.display === 'block') $('pwCur').focus(); });
+  $('pwNew2').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('pwSave').click(); });
+  $('pwSave').addEventListener('click', function () {
+    var cur = $('pwCur').value || '', np = $('pwNew').value || '', np2 = $('pwNew2').value || '';
+    if (np.length < 4) { pwSt('新密码至少 4 位', 1); return; }
+    if (np !== np2) { pwSt('两次新密码不一致', 1); return; }
+    var b = $('pwSave'); b.disabled = true; pwSt('保存中…');
+    fetch('/api/reseller-password', { method: 'POST', headers: { 'content-type': 'application/json', 'x-reseller-id': rid, 'x-reseller-pass': cur }, body: JSON.stringify({ newPass: np }) })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, status: r.status, j: j }; }); })
+      .then(function (r) {
+        b.disabled = false;
+        if (r.ok && r.j.ok) {
+          rpass = np; try { sessionStorage.setItem('kmty-rs-pass', np); } catch (e) {}
+          $('pwCur').value = $('pwNew').value = $('pwNew2').value = '';
+          pwSt('密码已修改 ✓ 请牢记新密码'); setTimeout(function () { $('pwForm').style.display = 'none'; pwSt(''); }, 1800);
+        } else if (r.status === 401) pwSt('当前密码不正确', 1);
+        else pwSt((r.j && r.j.error) || '修改失败', 1);
+      }).catch(function () { b.disabled = false; pwSt('网络错误，请重试', 1); });
+  });
 
   if (rid && rpass) login();
 })();
