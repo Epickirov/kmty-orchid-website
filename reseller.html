@@ -77,8 +77,9 @@
     </div>
   </div>
 
-  <h1>你的订单 <span class="co" id="ocount"></span></h1>
-  <p class="lead">你只看到通过<b>你的链接</b>下的单。</p>
+  <div id="summary" class="linkcard" style="display:none;"></div>
+  <h1>你的客户 <span class="co" id="ocount"></span></h1>
+  <p class="lead">按客户（手机号）分组。首次通过<b>你的链接</b>下单的客户，以后所有订单（含直接下单）都算你的佣金。</p>
   <div id="olist"></div>
 </div>
 
@@ -121,7 +122,7 @@
         if (!j) return;
         try { sessionStorage.setItem('kmty-rs-id', rid); sessionStorage.setItem('kmty-rs-pass', rpass); } catch (e) {}
         gate.hidden = true; app.hidden = false;
-        setupHeader(); renderOrders(j.orders || []);
+        setupHeader(); renderDashboard(j.orders || [], j.self);
       })
       .catch(function () { $('gateErr').textContent = '网络错误，请重试'; });
   }
@@ -141,17 +142,37 @@
   }
   $('copy').addEventListener('click', function () { var t = $('mylink').textContent; if (navigator.clipboard) navigator.clipboard.writeText(t); toast('已复制链接'); });
 
-  function renderOrders(list) {
-    $('ocount').textContent = list.length + ' 单';
+  function money(n) { return '¥' + (Math.round((+n || 0) * 100) / 100).toFixed(2); }
+  function he(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function renderDashboard(list, self) {
+    self = self || { rate: 0, price: 0 };
+    var rate = self.rate || 0, price = self.price || 0;
+    var byPhone = {}; list.forEach(function (o) { var p = o.phone || '(无)'; (byPhone[p] = byPhone[p] || []).push(o); });
+    var phones = Object.keys(byPhone), totPlants = 0, totVal = 0;
+    list.forEach(function (o) { var q = +o.qty || 0; totPlants += q; totVal += q * price; });
+    var totCom = totVal * rate / 100;
+    $('ocount').textContent = phones.length + ' 位客户 · ' + list.length + ' 单';
+    var sm = $('summary');
+    if (list.length) {
+      sm.style.display = 'block';
+      sm.innerHTML = '<p class="h">佣金结算 · COMMISSION</p>' +
+        '<div style="font-size:14px;line-height:1.9;">佣金比例 <b>' + rate + '%</b> · 参考单价 <b>¥' + price + '/株</b><br>' +
+        list.length + ' 单 · ' + totPlants + ' 株 · 货值 <b>' + money(totVal) + '</b><br>' +
+        '<span style="color:#9ad3a8;font-size:18px;font-weight:700;">应得佣金 ' + money(totCom) + '</span></div>' +
+        (rate ? '' : '<p class="co" style="margin:8px 0 0;">（佣金比例由 KMTY 设置后显示）</p>');
+    } else sm.style.display = 'none';
     var el = $('olist'); el.innerHTML = '';
     if (!list.length) { el.innerHTML = '<div class="muted">还没有订单。把你的链接发给客户即可开始。</div>'; return; }
-    list.forEach(function (o) {
+    phones.forEach(function (p) {
+      var os = byPhone[p].slice().sort(function (a, b) { return (a.ts || 0) - (b.ts || 0); });
+      var plants = 0, value = 0; os.forEach(function (o) { var q = +o.qty || 0; plants += q; value += q * price; });
+      var commission = value * rate / 100, latest = os[os.length - 1], nm = latest.name || '—';
       var d = document.createElement('div'); d.className = 'ord';
-      var who = document.createElement('div'); who.className = 'who'; who.textContent = esc(o.name) + ' × ' + (o.qty || 1);
-      var meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = esc(o.date || '') + ' · ' + esc(o.phone || '');
-      var rec = document.createElement('div'); rec.className = 'rec'; rec.textContent = esc(o.recipe || '—');
-      var a = document.createElement('a'); a.href = SHARE_BASE + '/r/' + rid + (o.m ? '#m=' + o.m : ''); a.target = '_blank'; a.rel = 'noopener'; a.textContent = '↗ 查看配色';
-      d.appendChild(who); d.appendChild(meta); d.appendChild(rec); d.appendChild(a); el.appendChild(d);
+      d.innerHTML = '<div class="who">' + he(nm) + ' <span class="co">' + he(p) + '</span></div>' +
+        '<div class="meta">' + os.length + ' 单 · ' + plants + ' 株 · 货值 ' + money(value) + ' · <b style="color:#9ad3a8;">佣金 ' + money(commission) + '</b></div>' +
+        '<div class="rec">最近：' + he(latest.recipe || '—') + ' · ' + he(latest.date || '') + '</div>';
+      var a = document.createElement('a'); a.href = SHARE_BASE + '/r/' + rid + (latest.m ? '#m=' + latest.m : ''); a.target = '_blank'; a.rel = 'noopener'; a.textContent = '↗ 查看最近配色';
+      d.appendChild(a); el.appendChild(d);
     });
   }
 

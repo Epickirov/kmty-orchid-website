@@ -93,6 +93,7 @@
     <button data-tab="colours" class="on" type="button">颜色</button>
     <button data-tab="resellers" type="button">经销商</button>
     <button data-tab="orders" type="button">订单</button>
+    <button data-tab="commissions" type="button">佣金</button>
   </div>
 
   <section id="tab-colours">
@@ -120,6 +121,10 @@
         <label class="fld">卡片页脚 · Footer（选填）<input id="rfooter" type="text" placeholder="如 ACMEFLOWERS.COM" maxlength="40"></label>
         <label class="fld">登录密码 · Password<input id="rpass" type="text" placeholder="经销商登录用" maxlength="60"></label>
       </div>
+      <div class="frow">
+        <label class="fld">佣金 · Commission %<input id="rrate" type="number" min="0" max="100" step="0.5" placeholder="如 10"></label>
+        <label class="fld">参考单价 · Price / plant<input id="rprice" type="number" min="0" step="0.01" placeholder="如 50"></label>
+      </div>
       <label class="fld">Logo（选填，自动缩小）<input id="rlogo" type="file" accept="image/*"></label>
       <div id="rlogoWrap" style="display:none;margin:4px 0 8px;"><img id="rlogoPrev" class="logoprev" alt=""> <button class="btn ghost sm" id="rlogoClear" type="button">移除 Logo</button></div>
       <button class="btn save" id="saveReseller" type="button">保存经销商</button>
@@ -137,6 +142,13 @@
       <span class="co" id="oCount"></span>
     </div>
     <div id="olist"></div>
+  </section>
+
+  <section id="tab-commissions" hidden>
+    <h1>佣金 · Commissions</h1>
+    <p class="lead">按<b>首触归属</b>（手机号）：谁第一个带来这个客户，客户以后所有订单（含直接下单）都算给他。<br>佣金 = 数量 × 参考单价 × 佣金%。在<b>经销商</b>标签里设置每人的佣金% 和单价。</p>
+    <div class="obar"><button class="btn ghost sm" id="cRefresh" type="button">刷新</button><span class="co" id="cTotals"></span></div>
+    <div id="clist"></div>
   </section>
 </div>
 
@@ -176,6 +188,7 @@
     tabBtns.forEach(function (x) { x.classList.remove('on'); }); b.classList.add('on');
     ['colours', 'resellers', 'orders'].forEach(function (t) { $('tab-' + t).hidden = (t !== b.dataset.tab); });
     if (b.dataset.tab === 'orders') loadOrders();
+    if (b.dataset.tab === 'commissions') loadCommissions();
   }); });
 
   /* ---- COLOURS ---- */
@@ -218,8 +231,9 @@
   });
 
   /* ---- RESELLERS ---- */
+  var RESELLERS = [];
   var editingId = null, newLogo = undefined;
-  function loadResellers() { api('/api/resellers').then(function (r) { renderResellers(r.j.resellers || []); fillFilter(r.j.resellers || []); }).catch(function () {}); }
+  function loadResellers() { api('/api/resellers').then(function (r) { RESELLERS = r.j.resellers || []; renderResellers(RESELLERS); fillFilter(RESELLERS); }).catch(function () {}); }
   function renderResellers(list) {
     var el = $('rslist'); el.innerHTML = '';
     if (!list.length) { el.innerHTML = '<div class="muted">还没有经销商。在下方添加第一个。</div>'; return; }
@@ -228,7 +242,7 @@
       var link = SHARE_BASE + '/r/' + rs.id;
       if (rs.hasLogo) { var im = document.createElement('img'); im.src = '/api/reseller-logo?id=' + rs.id; im.alt = ''; d.appendChild(im); }
       var nm = document.createElement('div'); nm.className = 'nm';
-      var bb = document.createElement('b'); bb.textContent = rs.name; var lk = document.createElement('span'); lk.className = 'lk'; lk.textContent = link;
+      var bb = document.createElement('b'); bb.textContent = rs.name + (rs.rate ? ' · ' + rs.rate + '% · ¥' + (rs.price || 0) + '/株' : ''); var lk = document.createElement('span'); lk.className = 'lk'; lk.textContent = link;
       nm.appendChild(bb); nm.appendChild(lk); d.appendChild(nm);
       var copy = document.createElement('button'); copy.className = 'btn ghost sm'; copy.textContent = '复制链接';
       copy.addEventListener('click', function () { if (navigator.clipboard) navigator.clipboard.writeText(link); toast('已复制 ' + rs.name + ' 的链接'); });
@@ -244,12 +258,13 @@
     $('rid').value = rs.id; $('rid').disabled = true;
     $('rname').value = rs.name || ''; $('rcompany').value = rs.company || '';
     $('rcompanyen').value = rs.companyEn || ''; $('rfooter').value = ''; $('rpass').value = '';
+    $('rrate').value = rs.rate || ''; $('rprice').value = rs.price || '';
     if (rs.hasLogo) { $('rlogoPrev').src = '/api/reseller-logo?id=' + rs.id; $('rlogoWrap').style.display = 'block'; } else { $('rlogoWrap').style.display = 'none'; }
     $('rformTitle').scrollIntoView({ block: 'center' });
   }
   $('rformReset').addEventListener('click', function () {
     editingId = null; newLogo = undefined; $('rformTitle').textContent = '添加经销商';
-    ['rid', 'rname', 'rcompany', 'rcompanyen', 'rfooter', 'rpass'].forEach(function (id) { $(id).value = ''; });
+    ['rid', 'rname', 'rcompany', 'rcompanyen', 'rfooter', 'rpass', 'rrate', 'rprice'].forEach(function (id) { $(id).value = ''; });
     $('rid').disabled = false; $('rlogoWrap').style.display = 'none'; $('rlogo').value = ''; st('rStatus', '');
   });
   $('rlogoClear').addEventListener('click', function () { newLogo = ''; $('rlogoWrap').style.display = 'none'; $('rlogo').value = ''; });
@@ -270,7 +285,7 @@
     if (!name) { st('rStatus', '请填写显示名称', 1); return; }
     var passv = ($('rpass').value || '').trim();
     if (!editingId && !passv) { st('rStatus', '新经销商需要设置登录密码', 1); return; }
-    var body = { op: 'upsert', id: id, name: name, company: ($('rcompany').value || '').trim(), companyEn: ($('rcompanyen').value || '').trim(), footer: ($('rfooter').value || '').trim() };
+    var body = { op: 'upsert', id: id, name: name, company: ($('rcompany').value || '').trim(), companyEn: ($('rcompanyen').value || '').trim(), footer: ($('rfooter').value || '').trim(), rate: $('rrate').value, price: $('rprice').value };
     if (passv) body.pass = passv;
     if (newLogo !== undefined) body.logo = newLogo; else if (editingId) body.logo = '__keep__';
     var b = $('saveReseller'); b.disabled = true; st('rStatus', '保存中…');
@@ -295,15 +310,16 @@
     api('/api/orders').then(function (r) { ALLORDERS = (r.j.orders || []); renderOrders(); }).catch(function () { $('olist').innerHTML = '<div class="muted">加载失败</div>'; });
   }
   function renderOrders() {
-    var f = $('ofilter').value, list = f ? ALLORDERS.filter(function (o) { return (o.reseller || '_') === f; }) : ALLORDERS;
+    var f = $('ofilter').value, list = f ? ALLORDERS.filter(function (o) { return (o.credited || o.reseller || '_') === f; }) : ALLORDERS;
     $('oCount').textContent = list.length + ' 单';
     var el = $('olist'); el.innerHTML = '';
     if (!list.length) { el.innerHTML = '<div class="muted">还没有订单。</div>'; return; }
     var rmap = {}; document.querySelectorAll('#ofilter option').forEach(function (o) { rmap[o.value] = o.textContent; });
     list.forEach(function (o) {
       var d = document.createElement('div'); d.className = 'ord';
-      var who = (o.reseller && o.reseller !== '_') ? (rmap[o.reseller] || o.reseller) : '直接下单';
-      var link = SHARE_BASE + (o.reseller && o.reseller !== '_' ? '/r/' + o.reseller : '/') + (o.m ? '#m=' + o.m : '');
+      var cred = o.credited || o.reseller || '_';
+      var who = (cred !== '_') ? (rmap[cred] || cred) : '直接下单';
+      var link = SHARE_BASE + (cred !== '_' ? '/r/' + cred : '/') + (o.m ? '#m=' + o.m : '');
       var top = document.createElement('div'); top.className = 'top';
       var who1 = document.createElement('span'); who1.className = 'who'; who1.textContent = esc(o.name) + ' × ' + (o.qty || 1);
       var rs = document.createElement('span'); rs.className = 'rs'; rs.textContent = who;
@@ -312,6 +328,59 @@
       var rec = document.createElement('div'); rec.className = 'rec'; rec.textContent = esc(o.recipe || '—');
       var a = document.createElement('a'); a.href = link; a.target = '_blank'; a.rel = 'noopener'; a.textContent = '↗ 查看配色';
       d.appendChild(top); d.appendChild(meta); d.appendChild(rec); d.appendChild(a); el.appendChild(d);
+    });
+  }
+
+  /* ---- COMMISSIONS + per-reseller customer database ---- */
+  function he(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function money(n) { return '¥' + (Math.round((+n || 0) * 100) / 100).toFixed(2); }
+  $('cRefresh').addEventListener('click', loadCommissions);
+  function loadCommissions() {
+    $('clist').innerHTML = '<div class="muted">加载中…</div>';
+    api('/api/resellers').then(function (r) { RESELLERS = r.j.resellers || []; return api('/api/orders'); })
+      .then(function (r) { ALLORDERS = r.j.orders || []; renderCommissions(); })
+      .catch(function () { $('clist').innerHTML = '<div class="muted">加载失败</div>'; });
+  }
+  function groupByPhone(orders) { var m = {}; orders.forEach(function (o) { var p = o.phone || '(无)'; (m[p] = m[p] || []).push(o); }); return m; }
+  function renderCommissions() {
+    var rmap = {}; RESELLERS.forEach(function (rs) { rmap[rs.id] = rs; });
+    var groups = {};
+    ALLORDERS.forEach(function (o) { var c = o.credited || o.reseller || '_'; (groups[c] = groups[c] || []).push(o); });
+    var ids = Object.keys(groups).sort(function (a, b) { if (a === '_') return 1; if (b === '_') return -1; return ((rmap[a] && rmap[a].name) || a).localeCompare((rmap[b] && rmap[b].name) || b); });
+    var el = $('clist'); el.innerHTML = ''; var gVal = 0, gCom = 0;
+    if (!ids.length) { el.innerHTML = '<div class="muted">还没有订单。</div>'; $('cTotals').textContent = ''; return; }
+    ids.forEach(function (cid) {
+      var orders = groups[cid], rs = rmap[cid];
+      var rate = rs ? (rs.rate || 0) : 0, price = rs ? (rs.price || 0) : 0;
+      var plants = 0, value = 0; orders.forEach(function (o) { var q = +o.qty || 0; plants += q; value += q * price; });
+      var commission = value * rate / 100; gVal += value; gCom += commission;
+      var custs = groupByPhone(orders), nCust = Object.keys(custs).length;
+      var block = document.createElement('div'); block.className = 'ord';
+      var nm = cid === '_' ? '直接下单（无归属）' : (rs ? rs.name : cid);
+      var badge = cid === '_' ? '无佣金' : (rate + '% · ¥' + price + '/株');
+      block.innerHTML =
+        '<div class="top"><span class="who">' + he(nm) + '</span><span class="rs">' + he(badge) + '</span></div>' +
+        '<div class="meta">' + orders.length + ' 单 · ' + plants + ' 株 · ' + nCust + ' 位客户 · 货值 ' + money(value) + (cid === '_' ? '' : ' · <b style="color:#9ad3a8;">佣金 ' + money(commission) + '</b>') + '</div>';
+      if (cid !== '_') {
+        var toggle = document.createElement('a'); toggle.href = 'javascript:void 0'; toggle.style.cssText = 'margin-top:8px;display:inline-block;'; toggle.textContent = '▸ 查看客户 (' + nCust + ')';
+        var wrap = document.createElement('div'); wrap.style.cssText = 'display:none;margin-top:8px;';
+        renderCustomers(wrap, custs, rate, price, cid);
+        toggle.addEventListener('click', function (e) { e.preventDefault(); var open = wrap.style.display !== 'none'; wrap.style.display = open ? 'none' : 'block'; toggle.textContent = (open ? '▸' : '▾') + ' 查看客户 (' + nCust + ')'; });
+        block.appendChild(toggle); block.appendChild(wrap);
+      }
+      el.appendChild(block);
+    });
+    $('cTotals').textContent = '总货值 ' + money(gVal) + ' · 总佣金 ' + money(gCom);
+  }
+  function renderCustomers(wrap, custs, rate, price, cid) {
+    Object.keys(custs).forEach(function (p) {
+      var os = custs[p].slice().sort(function (a, b) { return (a.ts || 0) - (b.ts || 0); });
+      var plants = 0, value = 0; os.forEach(function (o) { var q = +o.qty || 0; plants += q; value += q * price; });
+      var commission = value * rate / 100, nm = os[os.length - 1].name || '—';
+      var c = document.createElement('div'); c.style.cssText = 'padding:9px 11px;border-radius:10px;margin:6px 0;background:rgba(243,238,228,.04);border:1px solid rgba(243,238,228,.08);';
+      c.innerHTML = '<div style="font-size:13.5px;font-weight:600;">' + he(nm) + ' <span class="co">' + he(p) + '</span></div>' +
+        '<div class="co" style="margin-top:3px;">' + os.length + ' 单 · ' + plants + ' 株 · 货值 ' + money(value) + ' · 佣金 ' + money(commission) + ' · 首单 ' + he(os[0].date || '') + '</div>';
+      wrap.appendChild(c);
     });
   }
 })();

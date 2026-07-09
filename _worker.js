@@ -87,7 +87,7 @@ async function resellersAdmin(request, env) {
     const out = []; let cursor;
     do {
       const l = await env.KMTY_CONFIG.list({ prefix: 'rs:', cursor: cursor, limit: 1000 });
-      l.keys.forEach(function (k) { const m = k.metadata || {}; out.push({ id: k.name.slice(3), name: m.name || '', company: m.company || '', hasLogo: !!m.hasLogo, hasPass: !!m.hasPass, created: m.created || '' }); });
+      l.keys.forEach(function (k) { const m = k.metadata || {}; out.push({ id: k.name.slice(3), name: m.name || '', company: m.company || '', hasLogo: !!m.hasLogo, hasPass: !!m.hasPass, created: m.created || '', rate: m.rate || 0, price: m.price || 0 }); });
       cursor = l.list_complete ? null : l.cursor;
     } while (cursor);
     out.sort(function (a, b) { return (a.name || '').localeCompare(b.name || ''); });
@@ -114,17 +114,23 @@ async function resellersAdmin(request, env) {
     else if (d.logo.slice(0, 11) === 'data:image/' && d.logo.length < 400000) logo = d.logo;
     else if (d.logo === '__keep__') logo = existing ? (existing.logo || '') : '';
   }
+  const num = function (v, prev, max) {
+    if (v === undefined || v === '' || v === null) return prev || 0;
+    let n = parseFloat(v); if (!(n >= 0)) n = 0; if (max !== undefined && n > max) n = max; return n;
+  };
   const rec = {
     id: id, name: name, company: clean(d.company, 60), companyEn: clean(d.companyEn, 80),
     footer: clean(d.footer, 40) || name.toUpperCase(), logo: logo, passHash: passHash,
+    rate: num(d.rate, existing && existing.rate, 100),      // commission %
+    price: num(d.price, existing && existing.price),         // reference price per plant
     created: existing ? existing.created : new Date().toISOString(),
   };
   try {
     await env.KMTY_CONFIG.put('rs:' + id, JSON.stringify(rec), {
-      metadata: { name: rec.name, company: rec.company, hasLogo: !!rec.logo, hasPass: !!rec.passHash, created: rec.created },
+      metadata: { name: rec.name, company: rec.company, hasLogo: !!rec.logo, hasPass: !!rec.passHash, created: rec.created, rate: rec.rate, price: rec.price },
     });
   } catch (e) { return json({ error: 'save failed' }, 500); }
-  return json({ ok: true, reseller: { id: rec.id, name: rec.name, company: rec.company, companyEn: rec.companyEn, footer: rec.footer, hasLogo: !!rec.logo } });
+  return json({ ok: true, reseller: { id: rec.id, name: rec.name, company: rec.company, companyEn: rec.companyEn, footer: rec.footer, hasLogo: !!rec.logo, rate: rec.rate, price: rec.price } });
 }
 
 /* ---------------- orders ---------------- */
@@ -136,8 +142,18 @@ async function orderPost(request, env) {
   if (!name) return json({ error: 'name required' }, 400);
   if (phone.replace(/\D/g, '').length < 6) return json({ error: 'phone required' }, 400);
   let qty = parseInt(d.qty, 10); if (!(qty >= 1)) qty = 1; if (qty > 9999) qty = 9999;
-  let reseller = safeId(d.reseller) || '_';
-  if (reseller !== '_') { let raw = null; try { raw = await env.KMTY_CONFIG.get('rs:' + reseller); } catch (e) {} if (!raw) reseller = '_'; }
+  let linkReseller = safeId(d.reseller) || '_';
+  if (linkReseller !== '_') { let raw = null; try { raw = await env.KMTY_CONFIG.get('rs:' + linkReseller); } catch (e) {} if (!raw) linkReseller = '_'; }
+  // First-touch referral: the first reseller to refer a phone keeps commission
+  // credit for that customer forever — even on later direct orders.
+  const phoneKey = phone.replace(/\D/g, '');
+  let credited = linkReseller;
+  if (phoneKey.length >= 6) {
+    let refRaw = null; try { refRaw = await env.KMTY_CONFIG.get('ref:' + phoneKey); } catch (e) {}
+    if (refRaw) { try { credited = JSON.parse(refRaw).reseller || linkReseller; } catch (e) {} }
+    else if (linkReseller !== '_') { try { await env.KMTY_CONFIG.put('ref:' + phoneKey, JSON.stringify({ reseller: linkReseller, name: name, ts: Date.now() })); } catch (e) {} }
+    else { credited = '_'; }
+  }
   const recipe = Array.isArray(d.recipe) ? d.recipe.slice(0, 3).map(function (c) {
     return { zh: clean(c && c.zh, 20), en: clean(c && c.en, 30), pct: Math.max(0, Math.min(100, parseInt(c && c.pct, 10) || 0)) };
   }) : [];
@@ -150,11 +166,11 @@ async function orderPost(request, env) {
   const ts = Date.now();
   const id = (crypto.randomUUID ? crypto.randomUUID().slice(0, 8) : (ts.toString(36) + Math.floor(ts % 9973).toString(36)));
   const summary = recipe.map(function (c) { return (c.zh || c.en) + ' ' + c.pct + '%'; }).join(' · ');
-  const key = 'ord:' + reseller + ':' + ts + '-' + id;
-  const full = { id: id, reseller: reseller, name: name, phone: phone, qty: qty, date: clean(d.date, 12), ts: ts, recipe: recipe, mix: mix, m: m };
+  const key = 'ord:' + credited + ':' + ts + '-' + id;
+  const full = { id: id, reseller: linkReseller, credited: credited, name: name, phone: phone, qty: qty, date: clean(d.date, 12), ts: ts, recipe: recipe, mix: mix, m: m };
   try {
     await env.KMTY_CONFIG.put(key, JSON.stringify(full), {
-      metadata: { name: name, phone: phone, qty: qty, date: full.date, ts: ts, reseller: reseller, recipe: summary.slice(0, 120), m: m },
+      metadata: { name: name, phone: phone, qty: qty, date: full.date, ts: ts, reseller: linkReseller, credited: credited, recipe: summary.slice(0, 120), m: m },
     });
   } catch (e) { return json({ error: 'save failed' }, 500); }
   return json({ ok: true, id: id });
@@ -165,14 +181,14 @@ async function ordersGet(request, env) {
   const adminPass = request.headers.get('x-admin-pass') || '';
   const rid = safeId(request.headers.get('x-reseller-id'));
   const rpass = request.headers.get('x-reseller-pass') || '';
-  let prefix, scope;
+  let prefix, scope, self = null;
   if (env.ADMIN_PASS && adminPass === env.ADMIN_PASS) { prefix = 'ord:'; scope = 'admin'; }
   else if (rid) {
     let raw = null; try { raw = await env.KMTY_CONFIG.get('rs:' + rid); } catch (e) {}
     if (!raw) return json({ error: 'unauthorized' }, 401);
     const r = JSON.parse(raw);
     if ((await sha256(rpass)) !== r.passHash) return json({ error: 'unauthorized' }, 401);
-    prefix = 'ord:' + rid + ':'; scope = rid;
+    prefix = 'ord:' + rid + ':'; scope = rid; self = { name: r.name, rate: r.rate || 0, price: r.price || 0 };
   } else return json({ error: 'unauthorized' }, 401);
 
   const out = []; let cursor;
@@ -182,7 +198,7 @@ async function ordersGet(request, env) {
     cursor = l.list_complete ? null : l.cursor;
   } while (cursor && out.length < 5000);
   out.sort(function (a, b) { return (b.ts || 0) - (a.ts || 0); });
-  return json({ orders: out, scope: scope, count: out.length });
+  return json({ orders: out, scope: scope, count: out.length, self: self });
 }
 
 // reseller changes their OWN password (needs the current one) → KMTY no longer knows it

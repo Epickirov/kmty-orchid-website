@@ -112,8 +112,20 @@ layer:
   The WeChat card flow is unchanged; this just records it too.
 - **`/admin` → 订单 (Orders):** KMTY sees every order, filterable by reseller.
 - **`/reseller`:** a reseller logs in with their id + password and sees **only
-  their own** orders. Isolation is enforced server-side in `_worker.js`
-  (per-reseller KV prefix + SHA-256 password check).
+  their own** customers/orders. Isolation is enforced server-side in `_worker.js`
+  (per-reseller KV prefix + SHA-256 password check). They can change their own
+  password (`/api/reseller-password`), so KMTY can't sign in as them.
+- **First-touch referral + commissions.** Each customer (by phone) is recorded
+  in `ref:<phone>` the first time they order through a reseller link; that
+  reseller keeps commission credit for that customer **forever** — later direct
+  orders included. Orders are keyed by the *credited* reseller. Each reseller
+  has a **commission %** and a **reference price/plant**; commission =
+  qty × price × rate%. `/admin → 佣金` shows a per-reseller payout tally plus a
+  phone-grouped **customer database**; `/reseller` shows the same for that one
+  reseller. Rates/prices are internal — never sent to the public order page.
+- **Shareable links** (`/r/<id>`, portal) are pinned to `SHARE_ORIGIN`
+  (the WeChat-safe custom domain) in `admin.html`/`reseller.html`, so they never
+  come out as `*.pages.dev` regardless of which host the panel is opened on.
 
 The bloom is inlined as **WebP** (small + smooth); browsers without WebP support
 (iOS < 14) hit `bloom.onerror` and load `/bloom-fallback.png` instead, so every
