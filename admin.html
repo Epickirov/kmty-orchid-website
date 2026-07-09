@@ -145,6 +145,10 @@
 <script>
 (function () {
   'use strict';
+  // Public domain used in every shareable link — keep this your WeChat-safe custom
+  // domain so links never come out as *.pages.dev. Blank it to use the current origin.
+  var SHARE_ORIGIN = 'https://order.kmtyorchid.com';
+  var SHARE_BASE = SHARE_ORIGIN || location.origin;
   var pass = ''; try { pass = sessionStorage.getItem('kmty-admin-pass') || ''; } catch (e) {}
   var $ = function (id) { return document.getElementById(id); };
   var toastEl = $('toast'), toastT = 0;
@@ -221,7 +225,7 @@
     if (!list.length) { el.innerHTML = '<div class="muted">还没有经销商。在下方添加第一个。</div>'; return; }
     list.forEach(function (rs) {
       var d = document.createElement('div'); d.className = 'r';
-      var link = location.origin + '/r/' + rs.id;
+      var link = SHARE_BASE + '/r/' + rs.id;
       if (rs.hasLogo) { var im = document.createElement('img'); im.src = '/api/reseller-logo?id=' + rs.id; im.alt = ''; d.appendChild(im); }
       var nm = document.createElement('div'); nm.className = 'nm';
       var bb = document.createElement('b'); bb.textContent = rs.name; var lk = document.createElement('span'); lk.className = 'lk'; lk.textContent = link;
@@ -299,7 +303,7 @@
     list.forEach(function (o) {
       var d = document.createElement('div'); d.className = 'ord';
       var who = (o.reseller && o.reseller !== '_') ? (rmap[o.reseller] || o.reseller) : '直接下单';
-      var link = location.origin + (o.reseller && o.reseller !== '_' ? '/r/' + o.reseller : '/') + (o.m ? '#m=' + o.m : '');
+      var link = SHARE_BASE + (o.reseller && o.reseller !== '_' ? '/r/' + o.reseller : '/') + (o.m ? '#m=' + o.m : '');
       var top = document.createElement('div'); top.className = 'top';
       var who1 = document.createElement('span'); who1.className = 'who'; who1.textContent = esc(o.name) + ' × ' + (o.qty || 1);
       var rs = document.createElement('span'); rs.className = 'rs'; rs.textContent = who;

@@ -87,6 +87,9 @@
 <script>
 (function () {
   'use strict';
+  // WeChat-safe custom domain used for the link shown to the reseller. Blank ⇒ current origin.
+  var SHARE_ORIGIN = 'https://order.kmtyorchid.com';
+  var SHARE_BASE = SHARE_ORIGIN || location.origin;
   var $ = function (id) { return document.getElementById(id); };
   var rid = '', rpass = '';
   try { rid = sessionStorage.getItem('kmty-rs-id') || ''; rpass = sessionStorage.getItem('kmty-rs-pass') || ''; } catch (e) {}
@@ -124,7 +127,7 @@
   }
 
   function setupHeader() {
-    var link = location.origin + '/r/' + rid;
+    var link = SHARE_BASE + '/r/' + rid;
     $('mylink').textContent = link; $('open').href = link;
     // pull the reseller's own branding for the header
     fetch('/api/reseller?id=' + encodeURIComponent(rid)).then(function (r) { return r.ok ? r.json() : null; }).then(function (b) {
@@ -147,7 +150,7 @@
       var who = document.createElement('div'); who.className = 'who'; who.textContent = esc(o.name) + ' × ' + (o.qty || 1);
       var meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = esc(o.date || '') + ' · ' + esc(o.phone || '');
       var rec = document.createElement('div'); rec.className = 'rec'; rec.textContent = esc(o.recipe || '—');
-      var a = document.createElement('a'); a.href = location.origin + '/r/' + rid + (o.m ? '#m=' + o.m : ''); a.target = '_blank'; a.rel = 'noopener'; a.textContent = '↗ 查看配色';
+      var a = document.createElement('a'); a.href = SHARE_BASE + '/r/' + rid + (o.m ? '#m=' + o.m : ''); a.target = '_blank'; a.rel = 'noopener'; a.textContent = '↗ 查看配色';
       d.appendChild(who); d.appendChild(meta); d.appendChild(rec); d.appendChild(a); el.appendChild(d);
     });
   }
