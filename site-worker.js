@@ -73,11 +73,15 @@ async function sendLeadMail(env, lead, trace, hostOverride, portOverride) {
     r = await s.cmd('DATA', 3, 'DATA'); tr('DATA', r);
     const body =
       'Wholesale catalog request from the website.\r\n\r\n' +
+      'Company:      ' + (lead.company || '-') + '\r\n' +
+      'Contact:      ' + (lead.name || '-') + '\r\n' +
       'Buyer email:  ' + lead.email + '\r\n' +
+      'Phone:        ' + (lead.tel || '-') + '\r\n' +
       'Language:     ' + lead.lang + '\r\n' +
       'Page:         ' + lead.page + '\r\n' +
       'Time (UTC):   ' + new Date().toISOString() + '\r\n' +
       'Visitor IP:   ' + lead.ip + '\r\n\r\n' +
+      'Message:\r\n' + (lead.message || '(none)').replace(/\n/g, '\r\n') + '\r\n\r\n' +
       'Reply to this mail to answer the buyer directly (Reply-To is set).\r\n';
     const msg =
       'From: KMTY Website <' + user + '>\r\n' +
@@ -102,16 +106,21 @@ async function sendViaResend(env, lead) {
   const to = env.MAIL_TO || 'office@kmtybio.com';
   const text =
     'Wholesale catalog request from the website.\n\n' +
+    'Company:      ' + (lead.company || '—') + '\n' +
+    'Contact:      ' + (lead.name || '—') + '\n' +
     'Buyer email:  ' + lead.email + '\n' +
+    'Phone:        ' + (lead.tel || '—') + '\n' +
     'Language:     ' + lead.lang + '\n' +
     'Page:         ' + lead.page + '\n' +
     'Time (UTC):   ' + new Date().toISOString() + '\n' +
     'Visitor IP:   ' + lead.ip + '\n\n' +
+    'Message:\n' + (lead.message || '(none)') + '\n\n' +
     'Reply to this mail to answer the buyer directly (Reply-To is set).\n';
+  const subject = 'Catalog request: ' + (lead.company || lead.email);
   const r = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { 'authorization': 'Bearer ' + env.RESEND_API_KEY, 'content-type': 'application/json' },
-    body: JSON.stringify({ from: from, to: [to], reply_to: lead.email, subject: 'Catalog request - ' + lead.email, text: text }),
+    body: JSON.stringify({ from: from, to: [to], reply_to: lead.email, subject: subject, text: text }),
     signal: AbortSignal.timeout(10000),
   });
   if (!r.ok) { let t = ''; try { t = await r.text(); } catch (e) {} throw new Error('resend ' + r.status + ': ' + t.slice(0, 140)); }
@@ -120,6 +129,15 @@ async function sendViaResend(env, lead) {
 /* ---------- /api/lead ---------- */
 const EMAIL_RE = /^[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]{1,255}\.[A-Za-z]{2,24}$/;
 
+// single-line field: fold CR/LF/tab to space, drop angle brackets, collapse whitespace, cap length
+function clean(v, max) {
+  return String(v == null ? '' : v).replace(/[\r\n\t]+/g, ' ').replace(/[<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, max);
+}
+// message: normalize newlines, neutralize angle brackets, cap length (kept for the email body)
+function cleanMsg(v, max) {
+  return String(v == null ? '' : v).replace(/\r\n?/g, '\n').replace(/</g, '‹').replace(/>/g, '›').slice(0, max).trim();
+}
+
 async function handleLead(request, env) {
   let d; try { d = await request.json(); } catch (e) { return json({ ok: false, error: 'bad json' }, 400); }
   if (d && typeof d.hp === 'string' && d.hp !== '') return json({ ok: true });   // honeypot: swallow silently
@@ -127,6 +145,10 @@ async function handleLead(request, env) {
   if (!EMAIL_RE.test(email)) return json({ ok: false, error: 'invalid email' }, 400);
   const lang = String((d && d.lang) || 'en').toLowerCase().replace(/[^a-z]/g, '').slice(0, 5) || 'en';
   const page = String((d && d.page) || '').slice(0, 200).replace(/[\r\n<>]/g, '');
+  const company = clean(d && d.company, 120);
+  const name = clean(d && d.name, 80);
+  const tel = clean(d && d.tel, 40);
+  const message = cleanMsg(d && d.message, 4000);
   const ip = request.headers.get('cf-connecting-ip') || '';
 
   // soft per-IP rate limit (KV is eventually consistent — good enough here)
@@ -139,12 +161,19 @@ async function handleLead(request, env) {
     } catch (e) {}
   }
 
-  const lead = { email: email, lang: lang, page: page, ip: ip, ts: Date.now() };
-  // ledger first (never lose a lead even if SMTP hiccups)
+  const lead = { email: email, company: company, name: name, tel: tel, message: message, lang: lang, page: page, ip: ip, ts: Date.now() };
+  // ledger first (never lose a lead even if the mail send hiccups). Short fields
+  // (+ a message preview) go into metadata so the admin 留言 list can show them
+  // from a single list() call; the full message stays in the stored value.
   if (env.LEADS) {
     try {
+      const meta = { email: email, lang: lang, ts: lead.ts };
+      if (company) meta.company = company.slice(0, 60);
+      if (name) meta.name = name.slice(0, 40);
+      if (tel) meta.tel = tel.slice(0, 30);
+      if (message) meta.msg = message.replace(/\n/g, ' ').slice(0, 160);
       await env.LEADS.put('lead:' + lead.ts + '-' + Math.floor(Math.random() * 1e6).toString(36),
-        JSON.stringify(lead), { metadata: { email: email, lang: lang, ts: lead.ts } });
+        JSON.stringify(lead), { metadata: meta });
     } catch (e) {}
   }
   try {

@@ -154,7 +154,7 @@
 
   <section id="tab-leads" hidden>
     <h1>目录索取 · Catalog leads</h1>
-    <p class="lead">官网 “Request catalog” 表单收集的买家邮箱 — 即使通知邮件发送失败，这里也<b>不会丢</b>。点邮箱可复制。</p>
+    <p class="lead">官网 “Request catalog” 表单收集的询盘 — 公司、联系人、邮箱、电话和留言。即使通知邮件发送失败，这里也<b>不会丢</b>。点邮箱可复制。</p>
     <div class="obar"><button class="btn ghost sm" id="lRefresh" type="button">刷新</button><span class="co" id="lCount"></span></div>
     <div id="llist"></div>
   </section>
@@ -393,13 +393,23 @@
     if (!list.length) { el.innerHTML = '<div class="muted">还没有留言。</div>'; return; }
     list.forEach(function (o) {
       var d = document.createElement('div'); d.className = 'ord';
-      var w = document.createElement('div'); w.className = 'who'; w.textContent = o.email || '—';
-      w.style.cursor = 'pointer'; w.title = '点击复制';
-      w.addEventListener('click', function () { if (navigator.clipboard) navigator.clipboard.writeText(o.email || ''); toast('已复制 ' + (o.email || '')); });
-      var mt = document.createElement('div'); mt.className = 'meta';
+      // headline: contact name + company, falling back to the email
+      var head = [o.name, o.company].filter(Boolean).join(' · ');
+      var w = document.createElement('div'); w.className = 'who'; w.textContent = head || o.email || '—';
+      d.appendChild(w);
+      // email (click to copy) + phone
+      var em = document.createElement('div'); em.className = 'meta';
+      em.style.cursor = 'pointer'; em.title = '点击复制邮箱';
+      em.textContent = '✉ ' + (o.email || '—') + (o.tel ? '　·　☎ ' + o.tel : '');
+      em.addEventListener('click', function () { if (navigator.clipboard) navigator.clipboard.writeText(o.email || ''); toast('已复制 ' + (o.email || '')); });
+      d.appendChild(em);
+      // message preview (from metadata; full text is in the email)
+      if (o.msg) { var mg = document.createElement('div'); mg.className = 'lead'; mg.style.margin = '6px 0 0'; mg.style.whiteSpace = 'pre-wrap'; mg.textContent = o.msg; d.appendChild(mg); }
+      // timestamp + language
+      var mt = document.createElement('div'); mt.className = 'meta'; mt.style.marginTop = '5px';
       var dt = o.ts ? new Date(o.ts) : null;
       mt.textContent = (dt ? dt.toISOString().slice(0, 16).replace('T', ' ') + ' UTC' : '') + (o.lang ? ' · ' + o.lang : '');
-      d.appendChild(w); d.appendChild(mt); el.appendChild(d);
+      d.appendChild(mt); el.appendChild(d);
     });
   }
 
