@@ -91,6 +91,17 @@ DNS; apex/email stay at 凡科 — never touch MX). Upload folder = `index.html`
 npx wrangler pages deploy <folder> --project-name=kmty-site --branch=main
 ```
 
+`site-worker.js` (deployed as `_worker.js` in the kmty-site folder) adds
+POST `/api/lead` for the catalog-request form: honeypot + per-IP rate limit,
+every lead stored in the shared KV namespace (`lead:<ts>` keys, binding
+`LEADS`), then an SMTP send to office@kmtybio.com via the company's Netease
+mailbox (secrets `SMTP_HOST/USER/PASS` on the project). NOTE: Netease
+tarpits foreign-datacenter SMTP after the first connection, so sending is
+gated behind `SMTP_ENABLED=1` and currently OFF — the page falls back to a
+prefilled mailto instantly and the KV ledger still captures every lead.
+Options for a working sender: an HTTP mail API (e.g. Resend) or Gmail SMTP
+with an app password.
+
 ## Deploy the order page on Cloudflare Pages (Direct Upload — works in China)
 
 This is the path that's actually in production. **Direct Upload** (dashboard
