@@ -55,7 +55,7 @@ async function sendLeadMail(env, lead, trace, hostOverride, portOverride) {
   const t0 = Date.now();
   const tr = (step, r) => { if (trace) trace.push({ step: step, ms: Date.now() - t0, code: r && r.code, text: r && String(r.text).slice(0, 90) }); };
   const sock = connect(host + ':' + port, { secureTransport: 'on', allowHalfOpen: false });
-  const s = new Smtp(sock, Date.now() + 50000);
+  const s = new Smtp(sock, Date.now() + 12000);
   try {
     tr('connect');
     let r = await s.resp(); tr('greeting', r);                   // 220 greeting
