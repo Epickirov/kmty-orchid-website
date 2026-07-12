@@ -1086,11 +1086,11 @@
         <h2 style="font-family:'Fraunces','Playfair Display','Noto Serif SC',serif;font-weight:480;font-size:clamp(38px,6vw,80px);line-height:1.03;letter-spacing:-.01em;color:#F7F3EA;margin:16px 0 0;" data-t-html="c.h2">Let's grow something<br><span style="color:#E7B7CF;font-style:italic;">beautiful</span> together.</h2>
         <p style="font-size:16px;line-height:1.6;color:rgba(243,238,228,.76);margin:20px auto 0;max-width:460px;font-weight:300;" data-t="c.sub">Request the current wholesale catalog — varieties, grades, carton counts and lead times for your market.</p>
         <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:520px;margin:30px auto 0;">
-          <input type="email" placeholder="Your work email" data-t-ph="c.ph" style="flex:1 1 240px;min-width:0;padding:16px 20px;border-radius:999px;border:1px solid rgba(243,238,228,.3);background:rgba(243,238,228,.07);color:#F3EEE4;font-size:15px;font-family:inherit;outline:none;"/>
-          <button style="padding:16px 28px;border-radius:999px;border:none;background:#B0552F;color:#F3EEE4;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:14px;font-weight:500;cursor:pointer;" data-t="nav.cta">Request catalog</button>
+          <input type="email" data-catmail placeholder="Your work email" data-t-ph="c.ph" style="flex:1 1 240px;min-width:0;padding:16px 20px;border-radius:999px;border:1px solid rgba(243,238,228,.3);background:rgba(243,238,228,.07);color:#F3EEE4;font-size:15px;font-family:inherit;outline:none;"/>
+          <button data-catcta style="padding:16px 28px;border-radius:999px;border:none;background:#B0552F;color:#F3EEE4;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:14px;font-weight:500;cursor:pointer;" data-t="nav.cta">Request catalog</button>
         </div>
         <div data-ctameta style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px 22px;margin-top:26px;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:12.5px;color:rgba(243,238,228,.62);">
-          <span data-t="c.addr">Xiaojie, Songming County, Kunming</span><span data-dot style="color:#E7B7CF;">·</span><span>kmtyorchid.com</span><span data-dot style="color:#E7B7CF;">·</span><span data-t="c.langs">EN / 中文</span>
+          <span data-t="c.addr">Xiaojie, Songming County, Kunming</span><span data-dot style="color:#E7B7CF;">·</span><a href="mailto:office@kmtybio.com" style="color:inherit;text-decoration:none;">office@kmtybio.com</a><span data-dot style="color:#E7B7CF;">·</span><span>kmtyorchid.com</span><span data-dot style="color:#E7B7CF;">·</span><span data-t="c.langs">EN / 中文</span>
         </div>
       </div>
     </div>
@@ -2206,6 +2206,21 @@ class Component extends DCLogic {
     if (this._cio) this._cio.disconnect();
   }
 }
+</script>
+<script>
+(function () {
+  var b = document.querySelector('[data-catcta]');
+  if (!b) return;
+  b.addEventListener('click', function () {
+    var inp = document.querySelector('[data-catmail]');
+    var typed = inp && inp.value ? inp.value.trim() : '';
+    var body = 'Hello KMTY,\r\nPlease send the current wholesale catalog.\r\n\r\n' +
+               'Work email: ' + (typed || '') + '\r\nCompany: \r\nMarket / country: \r\n';
+    location.href = 'mailto:office@kmtybio.com?subject=' +
+      encodeURIComponent('Wholesale catalog request — KMTY Orchid') +
+      '&body=' + encodeURIComponent(body);
+  });
+})();
 </script>
 </body>
 </html>
