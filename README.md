@@ -77,6 +77,20 @@ https://raw.githack.com/Epickirov/kmty-orchid-website/main/constellation.html
 - The page reuses the site's images but shares no code with the site — editing
   it cannot affect the main website.
 
+## Main marketing site on Cloudflare Pages (project `kmty-site`)
+
+The full site is deployed as Pages project **`kmty-site`** → `kmty-site.pages.dev`,
+custom domain **www.kmtyorchid.com** (CNAME `www` → `kmty-site.pages.dev` in 凡科
+DNS; apex/email stay at 凡科 — never touch MX). Upload folder = `index.html`
+(renamed from `KMTY Orchid v5.dc.html`, og:image pointed at www.kmtyorchid.com)
++ `i18n.js` `support.js` `image-slot.js` `terroir-geo.json` `_headers` + `fonts/`
+`vendor/` + only the ~76 images the page references (17 MB total, not the full
+94 MB images/ tree). Deploys are Direct Upload (dashboard drag-and-drop) or:
+
+```bash
+npx wrangler pages deploy <folder> --project-name=kmty-site --branch=main
+```
+
 ## Deploy the order page on Cloudflare Pages (Direct Upload — works in China)
 
 This is the path that's actually in production. **Direct Upload** (dashboard
