@@ -520,7 +520,7 @@
         </div>
         <div data-vinestage style="position:relative;display:flex;flex-wrap:wrap-reverse;flex-direction:row-reverse;align-items:center;gap:clamp(20px,3.5vw,54px);padding:clamp(10px,1.5vw,18px) 0;">
           <div data-reveal data-clip style="opacity:0;transform:translateY(26px);transition:opacity .9s ease,transform .9s ease;flex:1.05 1 360px;min-width:290px;">
-            <div style="position:relative;aspect-ratio:5/4;display:flex;align-items:center;justify-content:center;"><video data-bgvideo autoplay muted loop playsinline preload="auto" aria-label="Time-lapse of a Phalaenopsis bloom opening on the page itself" style="height:104%;max-width:100%;object-fit:contain;display:block;filter:drop-shadow(0 24px 38px rgba(26,30,23,.20));"><source src="images/web/bloom-alpha.webm" type="video/webm"></video></div>
+            <div style="position:relative;aspect-ratio:5/4;display:flex;align-items:center;justify-content:center;"><img data-bloomimg src="images/web/bloom-alpha.webp" loading="lazy" alt="Time-lapse of a Phalaenopsis bloom opening on the page itself" style="height:104%;max-width:100%;object-fit:contain;display:block;filter:drop-shadow(0 24px 38px rgba(26,30,23,.20));"/></div>
           </div>
           <div data-reveal style="opacity:0;transform:translateY(26px);transition:opacity .9s ease .1s,transform .9s ease .1s;flex:1 1 340px;min-width:280px;display:flex;flex-direction:column;align-items:flex-end;text-align:right;">
             <div style="display:inline-flex;align-items:center;gap:9px;padding:7px 15px;border-radius:999px;background:rgba(212,140,176,.16);font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:11.5px;font-weight:500;color:#a4487c;" data-t="g.s4.chip">Months 16–18 · 第 16–18 月</div>
@@ -1265,48 +1265,11 @@ class Component extends DCLogic {
     window.addEventListener('scroll', setNav, { passive: true });
     this._setNav = setNav;
 
-    /* background video — force muted autoplay across engines */
-    $$('[data-bgvideo]').forEach(v => {
-      v.muted = true; v.defaultMuted = true; v.loop = true;
-      const tryPlay = () => { try { const p = v.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} };
-      tryPlay();
-      v.addEventListener('canplay', tryPlay, { once: true });
-      v.addEventListener('loadeddata', tryPlay, { once: true });
-    });
-    /* the bloom timelapse ships with true alpha (webm). Engines that can't play
-       it fall back to the H.264 file and would show its black studio backdrop —
-       key the black out live onto a canvas so the bloom floats there too. One
-       persistent sweep, because the runtime re-creates these nodes after mount
-       (see heal() in i18n.js): the loop re-finds the live video and re-attaches
-       its canvas whenever the node is swapped. Idle cost on the webm path is a
-       DOM scan every ~600ms. */
-    (() => {
-      // The bloom ships as an alpha WebM (crisp, efficient) for engines that can
-      // play it. Safari/iOS can't play alpha WebM and would fall back to a black
-      // studio backdrop — so on those engines swap the <video> for the animated
-      // alpha WebP, which iOS renders transparently. Persistent because the
-      // runtime re-creates these nodes after mount (see heal() in i18n.js).
-      if (document.createElement('video').canPlayType('video/webm; codecs="vp8, vp9"')) return;
-      const swap = () => {
-        document.querySelectorAll('video[data-bgvideo]').forEach(v => {
-          if (!v.querySelector('source[src*="bloom-alpha"]')) return;
-          const stage = v.parentElement;
-          if (!stage) return;
-          if (!stage.querySelector('img[data-bloomimg]')) {
-            const img = document.createElement('img');
-            img.setAttribute('data-bloomimg', '');
-            img.src = 'images/web/bloom-alpha.webp';
-            img.loading = 'lazy';
-            img.setAttribute('aria-label', v.getAttribute('aria-label') || '');
-            img.style.cssText = v.getAttribute('style') || '';
-            stage.appendChild(img);
-          }
-          v.remove();
-        });
-      };
-      swap();
-      setInterval(swap, 700);
-    })();
+    /* The bloom timelapse is an animated alpha WebP <img> in the static markup
+       (images/web/bloom-alpha.webp). WebP alpha is transparent on every engine
+       we target — Safari/iOS, Android Chrome, and WeChat's X5/WKWebView — with
+       no black-backdrop video to key out and no capability sniffing to be fooled
+       by. Nothing to wire up here. */
 
     /* reveal + clip + count */
     const els = $$('[data-reveal]');
