@@ -3,13 +3,18 @@
 // caused a redirect loop once; everything except /api/* goes straight to
 // env.ASSETS), plus POST /api/lead: the catalog-request form endpoint.
 //
-// /api/lead sends the lead by real SMTP (TLS :465) through the company's own
-// Netease enterprise mailbox to office@kmtybio.com, and writes a backup copy
-// into KV. Config on the Pages project:
+// /api/lead writes every lead into KV first (never lose one), then emails it to
+// office@kmtybio.com. Primary sender is the Resend HTTP API — shared Worker
+// egress IPs get tarpitted by Netease's SMTP, so raw SMTP (below) is kept only
+// as a dormant fallback. Config on the Pages project:
+//   RESEND_API_KEY (secret)  Resend sending key            — primary path
+//   MAIL_FROM      (plain)   KMTY Website <website@kmtyorchid.com>
+//   MAIL_TO        (plain)   office@kmtybio.com
+//   LEADS          (KV)      lead ledger + soft per-IP rate limit
+// Dormant SMTP fallback (only if RESEND_API_KEY unset and SMTP_ENABLED='1'):
 //   SMTP_HOST (plain)  smtp.qiye.163.com
 //   SMTP_USER (plain)  office@kmtybio.com     — auth user AND From AND To
 //   SMTP_PASS (secret) Netease client authorization code (授权码)
-//   LEADS     (KV)     lead ledger + soft per-IP rate limit
 import { connect } from 'cloudflare:sockets';
 
 const JH = { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' };
@@ -91,6 +96,27 @@ async function sendLeadMail(env, lead, trace, hostOverride, portOverride) {
   }
 }
 
+/* ---------- Resend HTTP sender (primary) ---------- */
+async function sendViaResend(env, lead) {
+  const from = env.MAIL_FROM || 'KMTY Website <website@kmtyorchid.com>';
+  const to = env.MAIL_TO || 'office@kmtybio.com';
+  const text =
+    'Wholesale catalog request from the website.\n\n' +
+    'Buyer email:  ' + lead.email + '\n' +
+    'Language:     ' + lead.lang + '\n' +
+    'Page:         ' + lead.page + '\n' +
+    'Time (UTC):   ' + new Date().toISOString() + '\n' +
+    'Visitor IP:   ' + lead.ip + '\n\n' +
+    'Reply to this mail to answer the buyer directly (Reply-To is set).\n';
+  const r = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { 'authorization': 'Bearer ' + env.RESEND_API_KEY, 'content-type': 'application/json' },
+    body: JSON.stringify({ from: from, to: [to], reply_to: lead.email, subject: 'Catalog request - ' + lead.email, text: text }),
+    signal: AbortSignal.timeout(10000),
+  });
+  if (!r.ok) { let t = ''; try { t = await r.text(); } catch (e) {} throw new Error('resend ' + r.status + ': ' + t.slice(0, 140)); }
+}
+
 /* ---------- /api/lead ---------- */
 const EMAIL_RE = /^[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]{1,255}\.[A-Za-z]{2,24}$/;
 
@@ -121,9 +147,11 @@ async function handleLead(request, env) {
         JSON.stringify(lead), { metadata: { email: email, lang: lang, ts: lead.ts } });
     } catch (e) {}
   }
-  if (env.SMTP_ENABLED !== '1') return json({ ok: false, error: 'sender disabled (lead recorded)' }, 502);
-  try { await sendLeadMail(env, lead); }
-  catch (e) { return json({ ok: false, error: 'mail send failed: ' + String(e && e.message || e).slice(0, 120) }, 502); }
+  try {
+    if (env.RESEND_API_KEY) await sendViaResend(env, lead);
+    else if (env.SMTP_ENABLED === '1') await sendLeadMail(env, lead);
+    else return json({ ok: false, error: 'sender disabled (lead recorded)' }, 502);
+  } catch (e) { return json({ ok: false, error: 'mail send failed: ' + String(e && e.message || e).slice(0, 120) }, 502); }
   return json({ ok: true });
 }
 

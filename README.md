@@ -94,13 +94,22 @@ npx wrangler pages deploy <folder> --project-name=kmty-site --branch=main
 `site-worker.js` (deployed as `_worker.js` in the kmty-site folder) adds
 POST `/api/lead` for the catalog-request form: honeypot + per-IP rate limit,
 every lead stored in the shared KV namespace (`lead:<ts>` keys, binding
-`LEADS`), then an SMTP send to office@kmtybio.com via the company's Netease
-mailbox (secrets `SMTP_HOST/USER/PASS` on the project). NOTE: Netease
-tarpits foreign-datacenter SMTP after the first connection, so sending is
-gated behind `SMTP_ENABLED=1` and currently OFF — the page falls back to a
-prefilled mailto instantly and the KV ledger still captures every lead.
-Options for a working sender: an HTTP mail API (e.g. Resend) or Gmail SMTP
-with an app password.
+`LEADS`), then an email to office@kmtybio.com. The lead is written to KV
+*before* the send, so a lead is never lost even if mail fails; the `/admin`
+留言 tab lists every captured lead regardless.
+
+Sender: **Resend HTTP API** is primary (secret `RESEND_API_KEY`, plus plain
+`MAIL_FROM`/`MAIL_TO`), sending from `website@kmtyorchid.com`. Raw SMTP over
+`cloudflare:sockets` to the company's Netease mailbox is kept in the file as a
+dormant fallback but is OFF — Netease tarpits Cloudflare's shared egress IPs
+(greets, then goes silent at AUTH), which is structural and unfixable from a
+Worker. A controlled test confirmed Gmail SMTP answers those same IPs in ~34ms
+while Netease stalls, so this is IP-reputation blocking, not a config bug.
+The dormant SMTP path only runs if `RESEND_API_KEY` is unset *and*
+`SMTP_ENABLED=1`; otherwise the page falls back to a prefilled mailto and the
+KV ledger still captures the lead. Resend requires the sending domain to be
+verified (DKIM `resend._domainkey`, SPF `send` TXT, MX `send` — all added at
+the domain's DNS).
 
 ## Deploy the order page on Cloudflare Pages (Direct Upload — works in China)
 
