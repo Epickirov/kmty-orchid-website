@@ -223,6 +223,21 @@ async function resellerPassword(request, env) {
   return json({ ok: true });
 }
 
+// admin: catalog-request leads (written into the same KV by the kmty-site worker)
+async function leadsGet(request, env) {
+  const pass = request.headers.get('x-admin-pass') || '';
+  if (!env.ADMIN_PASS || pass !== env.ADMIN_PASS) return json({ error: 'unauthorized' }, 401);
+  if (!env.KMTY_CONFIG) return json({ error: 'storage not bound' }, 500);
+  const out = []; let cursor;
+  do {
+    const l = await env.KMTY_CONFIG.list({ prefix: 'lead:', cursor: cursor, limit: 1000 });
+    l.keys.forEach(function (k) { const m = k.metadata || {}; m.key = k.name; out.push(m); });
+    cursor = l.list_complete ? null : l.cursor;
+  } while (cursor && out.length < 5000);
+  out.sort(function (a, b) { return (b.ts || 0) - (a.ts || 0); });
+  return json({ leads: out, count: out.length });
+}
+
 function corsOptions() {
   return new Response(null, { headers: {
     'access-control-allow-origin': '*',
@@ -247,6 +262,7 @@ export default {
       if (p === '/api/order') return m === 'POST' ? orderPost(request, env) : json({ error: 'method' }, 405);
       if (p === '/api/orders') return m === 'GET' ? ordersGet(request, env) : json({ error: 'method' }, 405);
       if (p === '/api/reseller-password') return m === 'POST' ? resellerPassword(request, env) : json({ error: 'method' }, 405);
+      if (p === '/api/leads') return m === 'GET' ? leadsGet(request, env) : json({ error: 'method' }, 405);
       return json({ error: 'not found' }, 404);
     }
 

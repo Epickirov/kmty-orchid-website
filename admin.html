@@ -94,6 +94,7 @@
     <button data-tab="resellers" type="button">经销商</button>
     <button data-tab="orders" type="button">订单</button>
     <button data-tab="commissions" type="button">佣金</button>
+    <button data-tab="leads" type="button">留言</button>
   </div>
 
   <section id="tab-colours">
@@ -150,6 +151,13 @@
     <div class="obar"><button class="btn ghost sm" id="cRefresh" type="button">刷新</button><span class="co" id="cTotals"></span></div>
     <div id="clist"></div>
   </section>
+
+  <section id="tab-leads" hidden>
+    <h1>目录索取 · Catalog leads</h1>
+    <p class="lead">官网 “Request catalog” 表单收集的买家邮箱 — 即使通知邮件发送失败，这里也<b>不会丢</b>。点邮箱可复制。</p>
+    <div class="obar"><button class="btn ghost sm" id="lRefresh" type="button">刷新</button><span class="co" id="lCount"></span></div>
+    <div id="llist"></div>
+  </section>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -186,9 +194,10 @@
   var tabBtns = document.querySelectorAll('.tabs button');
   tabBtns.forEach(function (b) { b.addEventListener('click', function () {
     tabBtns.forEach(function (x) { x.classList.remove('on'); }); b.classList.add('on');
-    ['colours', 'resellers', 'orders'].forEach(function (t) { $('tab-' + t).hidden = (t !== b.dataset.tab); });
+    ['colours', 'resellers', 'orders', 'leads'].forEach(function (t) { $('tab-' + t).hidden = (t !== b.dataset.tab); });
     if (b.dataset.tab === 'orders') loadOrders();
     if (b.dataset.tab === 'commissions') loadCommissions();
+    if (b.dataset.tab === 'leads') loadLeads();
   }); });
 
   /* ---- COLOURS ---- */
@@ -372,6 +381,28 @@
     });
     $('cTotals').textContent = '总货值 ' + money(gVal) + ' · 总佣金 ' + money(gCom);
   }
+  /* ---- LEADS (catalog requests from the marketing site) ---- */
+  $('lRefresh').addEventListener('click', loadLeads);
+  function loadLeads() {
+    $('llist').innerHTML = '<div class="muted">加载中…</div>';
+    api('/api/leads').then(function (r) { renderLeads(r.j.leads || []); }).catch(function () { $('llist').innerHTML = '<div class="muted">加载失败</div>'; });
+  }
+  function renderLeads(list) {
+    $('lCount').textContent = list.length + ' 条';
+    var el = $('llist'); el.innerHTML = '';
+    if (!list.length) { el.innerHTML = '<div class="muted">还没有留言。</div>'; return; }
+    list.forEach(function (o) {
+      var d = document.createElement('div'); d.className = 'ord';
+      var w = document.createElement('div'); w.className = 'who'; w.textContent = o.email || '—';
+      w.style.cursor = 'pointer'; w.title = '点击复制';
+      w.addEventListener('click', function () { if (navigator.clipboard) navigator.clipboard.writeText(o.email || ''); toast('已复制 ' + (o.email || '')); });
+      var mt = document.createElement('div'); mt.className = 'meta';
+      var dt = o.ts ? new Date(o.ts) : null;
+      mt.textContent = (dt ? dt.toISOString().slice(0, 16).replace('T', ' ') + ' UTC' : '') + (o.lang ? ' · ' + o.lang : '');
+      d.appendChild(w); d.appendChild(mt); el.appendChild(d);
+    });
+  }
+
   function renderCustomers(wrap, custs, rate, price, cid) {
     Object.keys(custs).forEach(function (p) {
       var os = custs[p].slice().sort(function (a, b) { return (a.ts || 0) - (b.ts || 0); });
