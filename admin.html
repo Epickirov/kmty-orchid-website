@@ -403,6 +403,12 @@
       em.textContent = '✉ ' + (o.email || '—') + (o.tel ? '　·　☎ ' + o.tel : '');
       em.addEventListener('click', function () { if (navigator.clipboard) navigator.clipboard.writeText(o.email || ''); toast('已复制 ' + (o.email || '')); });
       d.appendChild(em);
+      // product interest: type + specification (from the dropdowns)
+      if (o.type || o.spec) {
+        var pr = document.createElement('div'); pr.className = 'meta'; pr.style.marginTop = '3px'; pr.style.color = '#E7B7CF';
+        pr.textContent = '🏷 ' + [o.type, o.spec].filter(Boolean).join(' · ');
+        d.appendChild(pr);
+      }
       // message preview (from metadata; full text is in the email)
       if (o.msg) { var mg = document.createElement('div'); mg.className = 'lead'; mg.style.margin = '6px 0 0'; mg.style.whiteSpace = 'pre-wrap'; mg.textContent = o.msg; d.appendChild(mg); }
       // timestamp + language

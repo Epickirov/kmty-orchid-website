@@ -105,18 +105,21 @@ async function sendViaResend(env, lead) {
   const from = env.MAIL_FROM || 'KMTY Website <website@kmtyorchid.com>';
   const to = env.MAIL_TO || 'office@kmtybio.com';
   const text =
-    'Wholesale catalog request from the website.\n\n' +
-    'Company:      ' + (lead.company || '—') + '\n' +
-    'Contact:      ' + (lead.name || '—') + '\n' +
-    'Buyer email:  ' + lead.email + '\n' +
-    'Phone:        ' + (lead.tel || '—') + '\n' +
-    'Language:     ' + lead.lang + '\n' +
-    'Page:         ' + lead.page + '\n' +
-    'Time (UTC):   ' + new Date().toISOString() + '\n' +
-    'Visitor IP:   ' + lead.ip + '\n\n' +
+    'Wholesale inquiry from the website.\n\n' +
+    'Company:       ' + (lead.company || '—') + '\n' +
+    'Contact:       ' + (lead.name || '—') + '\n' +
+    'Buyer email:   ' + lead.email + '\n' +
+    'Phone:         ' + (lead.tel || '—') + '\n' +
+    'Type:          ' + (lead.type || '—') + '\n' +
+    'Specification: ' + (lead.spec || '—') + '\n' +
+    'Language:      ' + lead.lang + '\n' +
+    'Page:          ' + lead.page + '\n' +
+    'Time (UTC):    ' + new Date().toISOString() + '\n' +
+    'Visitor IP:    ' + lead.ip + '\n\n' +
     'Message:\n' + (lead.message || '(none)') + '\n\n' +
     'Reply to this mail to answer the buyer directly (Reply-To is set).\n';
-  const subject = 'Catalog request: ' + (lead.company || lead.email);
+  const subject = 'Inquiry: ' + (lead.company || lead.email) +
+    (lead.type ? ' · ' + lead.type + (lead.spec ? ' ' + lead.spec : '') : '');
   const r = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { 'authorization': 'Bearer ' + env.RESEND_API_KEY, 'content-type': 'application/json' },
@@ -148,6 +151,8 @@ async function handleLead(request, env) {
   const company = clean(d && d.company, 120);
   const name = clean(d && d.name, 80);
   const tel = clean(d && d.tel, 40);
+  const type = clean(d && d.type, 40);
+  const spec = clean(d && d.spec, 20);
   const message = cleanMsg(d && d.message, 4000);
   const ip = request.headers.get('cf-connecting-ip') || '';
 
@@ -161,7 +166,7 @@ async function handleLead(request, env) {
     } catch (e) {}
   }
 
-  const lead = { email: email, company: company, name: name, tel: tel, message: message, lang: lang, page: page, ip: ip, ts: Date.now() };
+  const lead = { email: email, company: company, name: name, tel: tel, type: type, spec: spec, message: message, lang: lang, page: page, ip: ip, ts: Date.now() };
   // ledger first (never lose a lead even if the mail send hiccups). Short fields
   // (+ a message preview) go into metadata so the admin 留言 list can show them
   // from a single list() call; the full message stays in the stored value.
@@ -171,6 +176,8 @@ async function handleLead(request, env) {
       if (company) meta.company = company.slice(0, 60);
       if (name) meta.name = name.slice(0, 40);
       if (tel) meta.tel = tel.slice(0, 30);
+      if (type) meta.type = type;
+      if (spec) meta.spec = spec;
       if (message) meta.msg = message.replace(/\n/g, ' ').slice(0, 160);
       await env.LEADS.put('lead:' + lead.ts + '-' + Math.floor(Math.random() * 1e6).toString(36),
         JSON.stringify(lead), { metadata: meta });
