@@ -715,17 +715,11 @@ window.addEventListener('scroll', function () {
   requestAnimationFrame(function () { healPending = false; heal(); });
 }, { passive: true });
 
-/* ---- texture lab (experiment): swap the fabric behind the light sections ---- */
+/* ---- woven linen texture behind the light sections ---- */
 var FABRICS = {
-  linen:    { url: 'images/web/linen.webp',            size: '300px', label: '亚麻 Linen' },
-  brocade:  { url: 'images/web/fabric-brocade.webp',   size: '192px', label: '织锦 Brocade' },
-  tiedye:   { url: 'images/web/fabric-tiedye.webp',    size: '480px', label: '扎染 Tie-dye' },
-  water:    { url: 'images/web/fabric-watercolor.webp', size: '560px', label: '水彩 Wash' },
-  none:     { url: '', size: '', label: 'None' }
+  linen: { url: 'images/web/linen.webp', size: '300px' }
 };
 var FAB = 'linen';
-try { FAB = localStorage.getItem('kmty-fabric') || 'linen'; } catch (e) {}
-if (!FABRICS[FAB]) FAB = 'linen';
 function applyFabric() {
   var f = FABRICS[FAB];
   document.querySelectorAll('[data-fabric]').forEach(function (el) {
@@ -733,45 +727,6 @@ function applyFabric() {
     el.style.backgroundSize = f.size || 'auto';
     el.style.backgroundRepeat = 'repeat';
   });
-  var w = document.getElementById('kmty-fabweb');
-  if (w) w.querySelectorAll('button').forEach(function (b) { b.classList.toggle('on', b.dataset.f === FAB); });
-}
-function fabricWidget() {
-  if (document.getElementById('kmty-fabweb')) return;
-  var w = document.createElement('div');
-  w.id = 'kmty-fabweb';
-  w.style.cssText = 'position:fixed;left:16px;bottom:16px;z-index:320;background:rgba(20,24,18,.88);backdrop-filter:blur(8px);border:1px solid rgba(243,238,228,.22);border-radius:999px;padding:7px 12px 7px 16px;display:flex;align-items:center;gap:8px;box-shadow:0 12px 34px rgba(0,0,0,.3);';
-  var lb = document.createElement('span');
-  lb.textContent = 'experiment · fabric';
-  lb.style.cssText = "font-family:'Fraunces','Playfair Display',serif;font-style:italic;font-size:12px;color:rgba(243,238,228,.75);margin-right:2px;";
-  w.appendChild(lb);
-  Object.keys(FABRICS).forEach(function (k) {
-    var b = document.createElement('button');
-    b.dataset.f = k;
-    b.textContent = FABRICS[k].label;
-    b.style.cssText = "border:none;border-radius:999px;padding:6px 11px;font-family:'Hanken Grotesk','Noto Sans SC',sans-serif;font-size:11px;cursor:pointer;background:transparent;color:rgba(243,238,228,.8);transition:all .25s ease;";
-    b.addEventListener('click', function () {
-      FAB = k;
-      try { localStorage.setItem('kmty-fabric', k); } catch (e) {}
-      applyFabric();
-    });
-    w.appendChild(b);
-  });
-  var st = document.createElement('style');
-  st.textContent = '#kmty-fabweb button.on{background:#F3EEE4;color:#1A1E17;}@media(max-width:820px){#kmty-fabweb{display:none !important;}}';
-  w.appendChild(st);
-  // live in the footer as a quiet easter egg rather than floating over the page
-  var mount = document.querySelector('[data-fabmount]');
-  if (mount) {
-    w.style.position = 'static';
-    w.style.display = 'inline-flex';
-    w.style.boxShadow = 'none';
-    w.style.background = 'rgba(243,238,228,.05)';
-    w.style.border = '1px solid rgba(243,238,228,.14)';
-    mount.appendChild(w);
-  } else {
-    document.body.appendChild(w);
-  }
 }
 
 function boot() {
@@ -779,7 +734,6 @@ function boot() {
   wire();
   MAP.render();
   heal();
-  fabricWidget();
   applyFabric();
   // own reveal fallback in case the runtime's intersection event raced past us
   var sec = document.getElementById('yunnan');
