@@ -1123,6 +1123,15 @@
     </div>
   </section>
 
+  <!-- WeChat can silently block both the Web-Share API and blob-URL downloads,
+       so "Save this mix" shows the rendered card full-size there instead —
+       long-press → Save Image is the pattern WeChat users already know. -->
+  <div data-mix-overlay style="position:fixed;inset:0;z-index:300;background:rgba(15,17,13,.92);display:none;align-items:center;justify-content:center;flex-direction:column;padding:24px;">
+    <button data-mix-overlay-close type="button" aria-label="Close" style="position:absolute;top:18px;right:18px;width:40px;height:40px;border-radius:999px;border:1px solid rgba(243,238,228,.4);background:rgba(243,238,228,.08);color:#F3EEE4;font-size:18px;line-height:1;cursor:pointer;">✕</button>
+    <img data-mix-overlay-img alt="" style="max-width:min(88vw,420px);max-height:68vh;width:auto;height:auto;border-radius:10px;box-shadow:0 30px 70px rgba(0,0,0,.5);"/>
+    <p data-t="mix.savehint" style="margin:18px 0 0;color:#F3EEE4;font-family:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;font-size:14px;text-align:center;max-width:320px;">Press and hold the image above, then choose Save Image.</p>
+  </div>
+
   <!-- FOOTER -->
   <footer style="background:#12140f;color:rgba(243,238,228,.6);padding:clamp(40px,6vw,60px) 0 34px;">
     <div style="max-width:1300px;margin:0 auto;padding:0 clamp(18px,4vw,44px);">
@@ -1753,7 +1762,14 @@ class Component extends DCLogic {
           swWrap.appendChild(b);
         });
       };
-      mix.querySelector('[data-mix-again]').addEventListener('click', () => {
+      // delegated on document (not bound to the button node directly): the
+      // runtime can replace nodes after mount, which orphans a directly-bound
+      // listener and leaves the button silently doing nothing on click — this
+      // bit us once already (see the contact-form submit handler for the same
+      // fix). closest() re-finds the live button at click time instead.
+      document.addEventListener('click', (ev) => {
+        const btn = ev.target && ev.target.closest && ev.target.closest('[data-mix-again]');
+        if (!btn) return;
         seed = (Math.random() * 1e9) >>> 0;
         const glyph = mix.querySelector('[data-mix-spin]');
         if (glyph && glyph.animate) glyph.animate(
@@ -1775,8 +1791,11 @@ class Component extends DCLogic {
           if (no && no.animate) no.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 450, easing: 'ease-out' });
         }));
       });
-      // save the mix: a specimen-sheet card in the site's letterbox language
-      mix.querySelector('[data-mix-save]').addEventListener('click', () => {
+      // save the mix: a specimen-sheet card in the site's letterbox language.
+      // Delegated on document for the same reason as swirl-again above.
+      document.addEventListener('click', (ev) => {
+        const saveBtn = ev.target && ev.target.closest && ev.target.closest('[data-mix-save]');
+        if (!saveBtn) return;
         if (!bloom.complete || !bloom.naturalWidth) return;
         if (transRAF) {                             // mid-transition: land on the finished pour
           cancelTransition();
@@ -1903,6 +1922,19 @@ class Component extends DCLogic {
         tracked('KMTYORCHID.COM', MX, H - 40, 4);
         tracked('HAND-FINISHED · SONGMING, YUNNAN', W - MX, H - 40, 4, true);
         const no = (noEl ? noEl.textContent.replace(/\D/g, '') : 'mix') || 'mix';
+        // WeChat's in-app browser blocks both navigator.share and blob-URL
+        // downloads without any error — the tap just does nothing. Show the
+        // card full-size instead so the user can long-press it, exactly like
+        // the order page's proven flow.
+        if (/MicroMessenger/i.test(navigator.userAgent)) {
+          const ov = document.querySelector('[data-mix-overlay]');
+          if (ov) {
+            ov.querySelector('[data-mix-overlay-img]').src = card.toDataURL('image/jpeg', 0.92);
+            ov.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+          }
+          return;
+        }
         card.toBlob((blob) => {
           const name = 'kmty-constellation-' + no + '.png';
           const download = () => {
@@ -1927,6 +1959,16 @@ class Component extends DCLogic {
         }, 'image/png');
       });
       rebuildSwatches(); rebuildSliders(); render();
+      const closeMixOverlay = () => {
+        const ov = document.querySelector('[data-mix-overlay]');
+        if (!ov) return;
+        ov.style.display = 'none';
+        document.body.style.overflow = '';
+      };
+      document.addEventListener('click', (ev) => {
+        if (ev.target && ev.target.closest && ev.target.closest('[data-mix-overlay-close]')) closeMixOverlay();
+        else if (ev.target && ev.target.hasAttribute && ev.target.hasAttribute('data-mix-overlay')) closeMixOverlay();
+      });
     }
 
     $$('[data-tilt]').forEach(card => {
