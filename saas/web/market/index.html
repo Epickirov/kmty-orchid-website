@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>蝴蝶兰批发市场 · KMTY 星商</title>
+<meta name="description" content="蝴蝶兰 B2B 批发市场 — 基地直发、规格齐全、在线询价">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#141018">
+<link rel="stylesheet" href="/assets/ui.css">
+<link rel="stylesheet" href="/assets/store.css">
+<style>
+  /* ---------- marketplace-specific layer ---------- */
+  .mhero{position:relative;overflow:hidden;isolation:isolate;min-height:392px;display:flex;align-items:flex-end}
+  .mhero .bg{position:absolute;inset:-4%;z-index:-2;background:url(/market/hero-m.jpg) center 32%/cover;
+    animation:kenburns 26s ease-in-out infinite alternate}
+  @media(min-width:760px){.mhero .bg{background-image:url(/market/hero.jpg)}}
+  @keyframes kenburns{from{transform:scale(1) translateY(0)}to{transform:scale(1.09) translateY(-1.6%)}}
+  @media(prefers-reduced-motion:reduce){.mhero .bg{animation:none}}
+  .mhero .bg::after{content:'';position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(18,14,22,.46),rgba(18,14,22,.28) 40%,#120e16 96%)}
+  .mhero .in{position:relative;max-width:1080px;margin:0 auto;padding:64px 20px 30px;width:100%}
+  .mhero .plat{font-size:11px;letter-spacing:.3em;color:#e6dcee;text-transform:uppercase}
+  .mhero h1{font-family:var(--display);font-weight:640;font-size:clamp(30px,6vw,44px);line-height:1.16;
+    margin:10px 0 8px;text-shadow:0 2px 30px rgba(0,0,0,.4)}
+  .mhero h1 b{color:var(--acc);font-weight:640}
+  .mhero .sub{color:#d8cee2;font-size:14px;max-width:520px;text-shadow:0 1px 12px rgba(0,0,0,.5)}
+  .searchbar{display:flex;gap:8px;margin-top:20px;max-width:560px}
+  .searchbar input{flex:1;font-size:16px;padding:14px 18px;border-radius:999px;border:1px solid rgba(243,238,228,.3);
+    background:rgba(10,7,13,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  .searchbar .go{flex:0 0 auto;border:none;cursor:pointer;font-family:inherit;font-size:15px;font-weight:650;
+    color:var(--acc-ink);border-radius:999px;padding:0 26px;background:linear-gradient(135deg,var(--acc),#c98cad);
+    box-shadow:0 8px 26px color-mix(in srgb,var(--acc) 40%,transparent)}
+  .statband{display:flex;gap:26px;margin-top:22px;flex-wrap:wrap}
+  .statband .st .n{font-family:var(--display);font-weight:620;font-size:23px;color:var(--ink)}
+  .statband .st .l{font-size:11px;letter-spacing:.14em;color:#b6abc2}
+
+  .mwrap{max-width:1080px;margin:0 auto;padding:0 16px 40px}
+  .sellerrail{display:flex;gap:14px;overflow-x:auto;padding:14px 0 6px;scroll-snap-type:x mandatory;scrollbar-width:none}
+  .sellerrail::-webkit-scrollbar{display:none}
+  .scard{flex:0 0 262px;scroll-snap-align:start;border-radius:18px;overflow:hidden;cursor:pointer;
+    border:1px solid rgba(243,238,228,.12);background:var(--panel);text-decoration:none;color:var(--ink);
+    transition:transform .25s cubic-bezier(.2,.7,.2,1),box-shadow .25s}
+  @media(hover:hover){.scard:hover{transform:translateY(-4px);box-shadow:var(--sh-2)}}
+  .scard .bn{height:96px;background-size:cover;background-position:center;position:relative}
+  .scard .bn::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,rgba(20,15,26,.9))}
+  .scard .bd{padding:0 14px 13px;margin-top:-20px;position:relative}
+  .scard .lg{width:44px;height:44px;border-radius:12px;object-fit:cover;border:2px solid #1d1725;background:#1d1725;box-shadow:var(--sh-1)}
+  .scard .lg.ph{display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:19px;color:var(--acc)}
+  .scard .nm{font-weight:650;font-size:15px;margin-top:7px}
+  .scard .tg{font-size:11.5px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .scard .mt{font-size:11px;color:#8d8298;margin-top:7px;display:flex;gap:10px}
+  .rfqband{margin:26px 0 4px;border-radius:18px;padding:20px;position:relative;overflow:hidden;
+    border:1px solid color-mix(in srgb,var(--acc) 30%,transparent);
+    background:radial-gradient(120% 160% at 100% 0%,color-mix(in srgb,var(--acc) 18%,transparent),transparent 55%),#1a1420}
+  .rfqband .t{font-family:var(--display);font-weight:640;font-size:18px}
+  .rfqband .s{color:#b9aec4;font-size:13px;margin:4px 0 12px}
+  .colorchips .chip i{margin-right:5px}
+  .mcardseller{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:11.5px;color:#a89db4}
+  .mcardseller .vv{color:var(--ok);font-size:10px}
+  .msticky{position:fixed;top:0;left:0;right:0;z-index:50;transform:translateY(-110%);
+    transition:transform .32s cubic-bezier(.2,.7,.2,1);border-bottom:1px solid var(--line);
+    background:color-mix(in srgb,#120e16 80%,transparent);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+  .msticky.show{transform:none}
+  .msticky .in{max-width:1080px;margin:0 auto;display:flex;gap:9px;align-items:center;
+    padding:8px 16px;padding-top:calc(8px + env(safe-area-inset-top))}
+  .msticky .mk{font-family:var(--display);font-weight:640;font-size:15px;white-space:nowrap}
+  .msticky input{flex:1;font-size:16px;padding:9px 15px;border-radius:999px;background:rgba(0,0,0,.3)}
+</style>
+</head>
+<body>
+<div id="app"><div class="skel" style="height:300px;margin:0 0 16px"></div><div class="skel" style="height:280px;margin:16px"></div></div>
+<script src="/assets/ui.js"></script>
+<script src="/assets/store.js"></script>
+<script src="/market/app.js"></script>
+</body>
+</html>

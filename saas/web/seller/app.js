@@ -198,6 +198,7 @@ async function renderHome() {
 /* ================= 商品 products ================= */
 
 const GRADES = ['特级', 'A级', 'B级', 'C级'];
+const COLORS = ['白', '粉', '玫红', '橙黄', '黄', '蓝紫', '复色'];
 const SIZES = ['1.7寸', '2.0寸', '2.5寸', '2.8寸', '3.0寸', '3.5寸', '3.8寸'];
 const STAGES = ['瓶苗', '中苗', '大苗', '开花株'];
 
@@ -284,7 +285,7 @@ function productRow(p) {
 
 function editorSheet(p) {
   const isNew = !p;
-  const d = p ? { ...p } : { title: '', descr: '', grade: '', sizeSpec: '', stage: '', flowerCount: 0, variety: '', colorFamily: '', qty: 0, price: null, tiers: [], priceDisplay: 'inherit', featured: false, media: [] };
+  const d = p ? { ...p } : { title: '', descr: '', grade: '', sizeSpec: '', stage: '', flowerCount: 0, variety: '', colorFamily: '', spikeLen: 0, qty: 0, price: null, tiers: [], priceDisplay: 'inherit', featured: false, media: [] };
   let productId = p ? p.id : null;
   let dirty = false;
 
@@ -307,6 +308,7 @@ function editorSheet(p) {
 
   f.title = h('input', { value: d.title, placeholder: '如：大辣椒 3.5寸 开花株 双梗' });
   f.variety = h('input', { value: d.variety, placeholder: '如：大辣椒 / 富乐夕阳 / V3' });
+  f.spikeLen = h('input', { type: 'number', inputmode: 'numeric', value: d.spikeLen || '', min: 0, max: 300, placeholder: '如 55' });
   f.qty = h('input', { type: 'number', inputmode: 'numeric', value: d.qty || '', min: 0, placeholder: '0' });
   f.flower = h('input', { type: 'number', inputmode: 'numeric', value: d.flowerCount || '', min: 0, max: 99, placeholder: '如 2' });
   f.price = h('input', { type: 'number', inputmode: 'decimal', step: '0.1', min: 0, value: d.price != null ? d.price : '', placeholder: '单价 ¥/株' });
@@ -402,7 +404,8 @@ function editorSheet(p) {
       title: f.title.value.trim(), variety: f.variety.value.trim(),
       qty: parseInt(f.qty.value || '0', 10), flowerCount: parseInt(f.flower.value || '0', 10),
       price: f.price.value === '' ? null : parseFloat(f.price.value),
-      descr: f.descr.value, grade: d.grade, sizeSpec: d.sizeSpec, stage: d.stage,
+      spikeLen: parseInt(f.spikeLen.value || '0', 10),
+      descr: f.descr.value, grade: d.grade, sizeSpec: d.sizeSpec, stage: d.stage, colorFamily: d.colorFamily,
       tiers: tiers.filter((t) => t.min > 0 && t.price > 0),
       priceDisplay, featured: feat.checked,
     };
@@ -436,7 +439,10 @@ function editorSheet(p) {
     field('盆径', chipSelect(SIZES, d.sizeSpec, (v) => { d.sizeSpec = v; })),
     h('div', { class: 'grid2' },
       field('品种', f.variety),
-      field('梗数（花剑）', f.flower)),
+      field('色系', chipSelect(COLORS, d.colorFamily, (v) => { d.colorFamily = v; }))),
+    h('div', { class: 'grid2' },
+      field('梗数（花剑）', f.flower),
+      field('梗长 cm（选填）', f.spikeLen)),
     h('div', { class: 'grid2' },
       field('现货数量（株）', f.qty),
       field('单价 ¥/株', f.price)),
@@ -491,10 +497,11 @@ async function renderOrders() {
 
 function orderCard(o, reload) {
   const snap = o.snap || {};
-  const what = o.kind === 'constellation'
-    ? '星空艺术兰 · ' + (o.recipe || '定制配色')
-    : (snap.title || '商品');
-  const priceLine = snap.unit != null ? money(snap.unit) + '/株 × ' + o.qty + ' = ' + money(snap.unit * o.qty) : o.qty + ' 株';
+  const isRfq = o.kind === 'rfq';
+  const what = isRfq ? '📋 批量求购 · ' + ((snap.rows || []).length) + ' 项' + (snap.region ? ' · 到货 ' + snap.region : '')
+    : (o.kind === 'constellation' ? '星空艺术兰 · ' + (o.recipe || '定制配色') : (snap.title || '商品'));
+  const priceLine = isRfq ? '合计 ' + o.qty + ' 株'
+    : (snap.unit != null ? money(snap.unit) + '/株 × ' + o.qty + ' = ' + money(snap.unit * o.qty) : o.qty + ' 株');
   const actions = h('div', { class: 'row', style: 'gap:6px;margin-top:10px' });
 
   function btn(label, cls, to, needDate) {
@@ -524,6 +531,8 @@ function orderCard(o, reload) {
         h('span', null, what)),
       h('div', { class: 'small muted', style: 'margin-top:4px' },
         priceLine + (o.wishDate ? ' · 期望 ' + o.wishDate : '') + (o.deliveryDate ? ' · 送达 ' + o.deliveryDate : '') + ' · ' + relTime(o.created)),
+      isRfq && (snap.rows || []).length ? h('div', { class: 'small', style: 'margin-top:6px;background:rgba(0,0,0,.2);border-radius:8px;padding:7px 10px' },
+        snap.rows.map((r) => h('div', null, '· ' + r.what + (r.spec ? ' ' + r.spec : '') + ' × ' + r.qty.toLocaleString('zh-CN')))) : null,
       o.note ? h('div', { class: 'small', style: 'margin-top:6px;color:var(--ink);background:rgba(0,0,0,.2);border-radius:8px;padding:7px 10px' }, '留言：' + o.note) : null,
       actions));
 }

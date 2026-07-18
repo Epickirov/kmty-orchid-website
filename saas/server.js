@@ -88,12 +88,13 @@ const server = http.createServer(async (req, res) => {
     }
 
     // app shells
+    if (p === '/market' || p === '/market/') return sendShell(res, path.join(ROOT, 'web/market/index.html'));
     if (p === '/seller' || p === '/seller/') return sendShell(res, path.join(ROOT, 'web/seller/index.html'));
     if (p === '/reseller' || p === '/reseller/') { res.writeHead(301, { location: '/seller' }); return res.end(); }
     if (p === '/admin' || p === '/admin/') return sendShell(res, path.join(ROOT, 'web/admin/index.html'));
 
     // static files of the new UIs (/assets/*, /seller/app.js, /shop/*, /admin/*)
-    const uiMatch = /^\/(assets|seller|shop|admin)\/(.+)$/.exec(p);
+    const uiMatch = /^\/(assets|seller|shop|admin|market)\/(.+)$/.exec(p);
     if (uiMatch) {
       const abs = safeJoin(path.join(ROOT, 'web', uiMatch[1]), uiMatch[2]);
       if (!abs) { res.writeHead(400); return res.end(); }

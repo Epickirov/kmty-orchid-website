@@ -238,6 +238,7 @@ function readProductFields(d, existing) {
     stage: d.stage !== undefined ? (STAGES.includes(d.stage) ? d.stage : C.clean(d.stage, 12)) : (p.stage || ''),
     variety: d.variety !== undefined ? C.clean(d.variety, 40) : (p.variety || ''),
     color_family: d.colorFamily !== undefined ? C.clean(d.colorFamily, 20) : (p.color_family || ''),
+    spike_len: d.spikeLen !== undefined ? (C.int(d.spikeLen, 0, 300, 0) || 0) : (p.spike_len || 0),
     qty: d.qty !== undefined ? (C.int(d.qty, 0, 9999999, 0) || 0) : (p.qty || 0),
     price: d.price !== undefined ? C.num(d.price, 0, 9999999, null) : (p.price != null ? p.price : null),
     tiers: JSON.stringify(tiers),
@@ -254,6 +255,7 @@ function listProducts(req, res, ctx) {
     products: rows.map((p) => ({
       id: p.id, title: p.title, descr: p.descr, grade: p.grade, sizeSpec: p.size_spec,
       flowerCount: p.flower_count, stage: p.stage, variety: p.variety, colorFamily: p.color_family,
+      spikeLen: p.spike_len || 0,
       qty: p.qty, price: p.price, tiers: parseJson(p.tiers, []), priceDisplay: p.price_display,
       status: p.status, featured: !!p.featured, created: p.created, updated: p.updated,
       media: productMedia(ctx.db, p.id, false),
@@ -271,9 +273,9 @@ async function createProduct(req, res, ctx) {
   const f = readProductFields(d, null);
   if (!f.title) return C.err(res, 400, '请填写商品名称');
   const id = 'p_' + C.hexId(8);
-  ctx.db.prepare(`INSERT INTO products (id,tenant_id,title,descr,grade,size_spec,flower_count,stage,variety,color_family,qty,price,tiers,price_display,featured,created,updated)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
-    .run(id, S.tenant.id, f.title, f.descr, f.grade, f.size_spec, f.flower_count, f.stage, f.variety, f.color_family, f.qty, f.price, f.tiers, f.price_display, f.featured, C.now(), C.now());
+  ctx.db.prepare(`INSERT INTO products (id,tenant_id,title,descr,grade,size_spec,flower_count,stage,variety,color_family,spike_len,qty,price,tiers,price_display,featured,created,updated)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+    .run(id, S.tenant.id, f.title, f.descr, f.grade, f.size_spec, f.flower_count, f.stage, f.variety, f.color_family, f.spike_len, f.qty, f.price, f.tiers, f.price_display, f.featured, C.now(), C.now());
   C.audit(ctx.db, { tenantId: S.tenant.id, userId: S.user && S.user.id, actor: S.actor, action: 'product_create', target: id, detail: f.title, ip: C.ipOf(req) });
   C.json(res, { ok: true, id });
 }
@@ -286,8 +288,8 @@ async function updateProduct(req, res, ctx, m) {
   const d = await C.readJson(req);
   const f = readProductFields(d, p);
   if (!f.title) return C.err(res, 400, '请填写商品名称');
-  ctx.db.prepare(`UPDATE products SET title=?,descr=?,grade=?,size_spec=?,flower_count=?,stage=?,variety=?,color_family=?,qty=?,price=?,tiers=?,price_display=?,featured=?,updated=? WHERE id = ?`)
-    .run(f.title, f.descr, f.grade, f.size_spec, f.flower_count, f.stage, f.variety, f.color_family, f.qty, f.price, f.tiers, f.price_display, f.featured, C.now(), p.id);
+  ctx.db.prepare(`UPDATE products SET title=?,descr=?,grade=?,size_spec=?,flower_count=?,stage=?,variety=?,color_family=?,spike_len=?,qty=?,price=?,tiers=?,price_display=?,featured=?,updated=? WHERE id = ?`)
+    .run(f.title, f.descr, f.grade, f.size_spec, f.flower_count, f.stage, f.variety, f.color_family, f.spike_len, f.qty, f.price, f.tiers, f.price_display, f.featured, C.now(), p.id);
   C.audit(ctx.db, { tenantId: S.tenant.id, userId: S.user && S.user.id, actor: S.actor, action: 'product_update', target: p.id, detail: JSON.stringify({ qty: f.qty, price: f.price }).slice(0, 200), ip: C.ipOf(req) });
   C.json(res, { ok: true });
 }
@@ -480,6 +482,7 @@ function shop(req, res, ctx, m, q) {
     return {
       id: p.id, title: p.title, descr: p.descr, grade: p.grade, sizeSpec: p.size_spec,
       flowerCount: p.flower_count, stage: p.stage, variety: p.variety, colorFamily: p.color_family,
+      spikeLen: p.spike_len || 0,
       qty: p.qty, featured: !!p.featured,
       price: priceInfo(p, brand),
       media: pm.map((x) => x.url),
@@ -518,7 +521,15 @@ async function placeOrder(req, res, ctx) {
   const qty = C.int(d.qty, 1, 999999, 1) || 1;
 
   let kind = 'constellation', productId = null, msnap = {}, recipe = '';
-  if (d.productId) {
+  if (d.kind === 'rfq') {
+    // 求购/批量询价: structured requirement rows instead of a product
+    const rows = (Array.isArray(d.rows) ? d.rows : []).slice(0, 8)
+      .map((r) => ({ what: C.clean(r && r.what, 60), spec: C.clean(r && r.spec, 40), qty: C.int(r && r.qty, 1, 9999999, null) }))
+      .filter((r) => r.what && r.qty);
+    if (!rows.length) return C.err(res, 400, '请至少填写一行需求');
+    kind = 'rfq';
+    msnap = { rows, region: C.clean(d.region, 40) };
+  } else if (d.productId) {
     const p = ctx.db.prepare("SELECT * FROM products WHERE id = ? AND tenant_id = ? AND status = 'active'").get(String(d.productId), t.id);
     if (!p) return C.err(res, 404, '商品不存在或已下架');
     kind = 'product'; productId = p.id;
@@ -543,12 +554,56 @@ async function placeOrder(req, res, ctx) {
   const hook = brandOf(t).wecomHook;
   if (hook) {
     N.postWeCom(hook, '【新询单】' + code + '\n' +
-      (kind === 'product' ? (msnap.title || '商品') : '星空艺术兰 · ' + (recipe || '定制')) +
-      ' × ' + qty + '\n' + name + ' ' + phone +
+      (kind === 'rfq' ? '批量求购：' + msnap.rows.map((r) => r.what + (r.spec ? ' ' + r.spec : '') + ' ×' + r.qty).join('；')
+        : (kind === 'product' ? (msnap.title || '商品') : '星空艺术兰 · ' + (recipe || '定制')) + ' × ' + qty) +
+      '\n' + name + ' ' + phone +
       (d.note ? '\n留言：' + C.cleanText(d.note, 100) : '') +
       '\n→ 卖家中心处理：' + (ctx.env.BASE_URL || '') + '/seller');
   }
   C.json(res, { ok: true, id, code });
+}
+
+/* =============================== marketplace (cross-seller) =============================== */
+// The platform surface: every active product from every active shop, with
+// seller identity + rating attached; LIKE search over title/variety, spec
+// filters applied client-side (payload is small at B2B catalogue scale).
+function market(req, res, ctx, m, q) {
+  const db = ctx.db;
+  const kw = C.clean(q.get('q') || '', 40);
+  let sql = `SELECT p.*, t.slug AS tslug, t.name AS tname, t.verified AS tverified, t.brand AS tbrand
+    FROM products p JOIN tenants t ON t.id = p.tenant_id
+    WHERE p.status = 'active' AND t.status = 'active'`;
+  const args = [];
+  if (kw) { sql += ' AND (p.title LIKE ? OR p.variety LIKE ?)'; args.push('%' + kw + '%', '%' + kw + '%'); }
+  sql += ' ORDER BY p.featured DESC, p.updated DESC LIMIT 400';
+  const rows = db.prepare(sql).all(...args);
+  const products = rows.map((p) => {
+    const brand = brandOf({ brand: p.tbrand });
+    const pm = productMedia(db, p.id, true);
+    return {
+      id: p.id, title: p.title, grade: p.grade, sizeSpec: p.size_spec, stage: p.stage,
+      variety: p.variety, colorFamily: p.color_family, spikeLen: p.spike_len || 0,
+      flowerCount: p.flower_count, qty: p.qty, featured: !!p.featured,
+      price: priceInfo(p, brand),
+      media: pm.slice(0, 1).map((x) => x.url),
+      rating: ratingOf(db, p.id),
+      seller: { slug: p.tslug, name: p.tname, verified: !!p.tverified },
+    };
+  });
+  const sellers = db.prepare(`SELECT t.*, COUNT(p.id) AS np, COALESCE(SUM(p.qty),0) AS stock
+    FROM tenants t JOIN products p ON p.tenant_id = t.id AND p.status = 'active'
+    WHERE t.status = 'active' GROUP BY t.id HAVING np > 0 ORDER BY np DESC LIMIT 12`).all()
+    .map((t) => {
+      const b = brandOf(t);
+      return { slug: t.slug, name: t.name, tagline: t.tagline, verified: !!t.verified,
+        logo: b.logo, banner: b.banner, accent: b.accent, shipsFrom: b.shipsFrom, products: t.np, stock: t.stock };
+    });
+  const stats = {
+    sellers: sellers.length,
+    products: db.prepare("SELECT COUNT(*) AS n FROM products WHERE status = 'active'").get().n,
+    stock: db.prepare("SELECT COALESCE(SUM(qty),0) AS n FROM products WHERE status = 'active'").get().n,
+  };
+  C.json(res, { products, sellers, stats, icp: (db.prepare("SELECT value FROM kv WHERE key = 'icp'").get() || {}).value || '' });
 }
 
 /* =============================== reviews (buyer, phone-verified) =============================== */
@@ -940,6 +995,7 @@ const ROUTES = [
   ['POST', /^\/api\/orders\/([a-zA-Z0-9_]+)\/state$/, orderState],
   ['GET', /^\/api\/stats$/, stats],
 
+  ['GET', /^\/api\/market$/, market],
   ['GET', /^\/api\/shop\/([a-z0-9_-]+)$/, shop],
   ['POST', /^\/api\/order$/, placeOrder],
   ['POST', /^\/api\/review\/lookup$/, reviewLookup],

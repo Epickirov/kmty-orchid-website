@@ -172,6 +172,9 @@ function open(dataDir) {
 // Additive column migrations for databases created by earlier versions.
 function migrate(db) {
   const cols = (t) => db.prepare('PRAGMA table_info(' + t + ')').all().map((c) => c.name);
+  const productCols = cols('products');
+  // spike length in cm (梗长) — B2B spec added with the marketplace build
+  if (!productCols.includes('spike_len')) db.exec('ALTER TABLE products ADD COLUMN spike_len INTEGER NOT NULL DEFAULT 0');
   const mediaCols = cols('media');
   // review photos live in the media table, linked by review_id (product photo
   // queries must filter review_id IS NULL)

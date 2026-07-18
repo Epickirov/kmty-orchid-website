@@ -4,8 +4,11 @@
 # redeploys automatically.
 
 [build]
-  publish = "."
-  # no build command — nothing to compile
+  # ⚠ BRANCH OVERRIDE (claude/githack-preview-link-9nykre): publish the static
+  # marketplace demo instead of the repo root. On main this must stay ".".
+  # Revert this block before merging to main.
+  publish = "netlify-demo"
+  # no build command — the demo is prebuilt by saas/build-static-demo.js
 
 # ── clean, WeChat-friendly paths for the Constellation order page ──
 # Both serve constellation.html without the “.html”; status 200 = rewrite, so

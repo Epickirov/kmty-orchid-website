@@ -1,0 +1,6 @@
+/assets/*
+  Cache-Control: public, max-age=3600
+/m/*
+  Cache-Control: public, max-age=86400
+/market/hero*.jpg
+  Cache-Control: public, max-age=86400
