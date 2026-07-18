@@ -1,7 +1,7 @@
 # Raw source material - not part of the deployed site
 uploads/
 _archive/
-lib/
+/lib/
 scratch_frames/
 scratch_slot/
 .thumbnail
@@ -28,3 +28,4 @@ desktop.ini
 *.pyc
 __pycache__/
 .wrangler/
+saas/data/
