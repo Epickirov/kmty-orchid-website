@@ -76,8 +76,10 @@ async function signup(req, res, ctx) {
   if (pass.length < 6) return C.err(res, 400, '密码至少 6 位');
   if (ctx.db.prepare('SELECT id FROM tenants WHERE slug = ?').get(slug)) return C.err(res, 409, '该代号已被使用');
   const tid = 't_' + C.hexId(8), uid = 'u_' + C.hexId(8);
-  ctx.db.prepare('INSERT INTO tenants (id,slug,name,wechat,created) VALUES (?,?,?,?,?)')
-    .run(tid, slug, name, C.clean(d.wechat, 60), C.now());
+  // No approval gate (owner's call, 2026-07): shops are live the moment they
+  // sign up. Moderation is takedown-based — the admin 动态 feed + suspend.
+  ctx.db.prepare("INSERT INTO tenants (id,slug,name,wechat,status,created,approved_at) VALUES (?,?,?,?,'active',?,?)")
+    .run(tid, slug, name, C.clean(d.wechat, 60), C.now(), C.now());
   ctx.db.prepare('INSERT INTO users (id,tenant_id,phone,pass_hash,created) VALUES (?,?,?,?,?)')
     .run(uid, tid, phone, C.hashPass(pass), C.now());
   const token = C.createSession(ctx.db, { userId: uid, tenantId: tid, role: 'owner', ip: C.ipOf(req) });
@@ -286,9 +288,11 @@ async function publishProduct(req, res, ctx, m) {
   if (!p) return C.err(res, 404, '商品不存在');
   const d = await C.readJson(req);
   let to = null;
-  const auto = (ctx.db.prepare("SELECT value FROM kv WHERE key = 'autoApprove'").get() || {}).value === '1';
-  if (d.op === 'publish' && (p.status === 'draft' || p.status === 'rejected' || p.status === 'paused')) to = p.status === 'paused' ? 'active' : (auto ? 'active' : 'pending');
-  if (d.op === 'pause' && (p.status === 'active' || p.status === 'pending')) to = 'paused';
+  // Publishing is instant — no review queue. 'rejected' means the platform
+  // took the product down; only the admin can restore it (evasion guard).
+  if (d.op === 'publish' && (p.status === 'draft' || p.status === 'paused')) to = 'active';
+  if (d.op === 'publish' && p.status === 'rejected') return C.err(res, 403, '该商品已被平台下架，如有疑问请联系 KMTY');
+  if (d.op === 'pause' && p.status === 'active') to = 'paused';
   if (!to) return C.err(res, 400, '当前状态不支持该操作');
   ctx.db.prepare('UPDATE products SET status = ?, updated = ? WHERE id = ?').run(to, C.now(), p.id);
   if (to === 'active') ctx.db.prepare("UPDATE media SET status = 'approved' WHERE product_id = ? AND status = 'pending'").run(p.id);
@@ -348,9 +352,9 @@ async function upload(req, res, ctx, m, q) {
   const nMedia = ctx.db.prepare('SELECT COUNT(*) AS n FROM media WHERE product_id = ?').get(p.id).n;
   if (nMedia >= 10) { M.removeFile(ctx.dataDir, saved.file); return C.err(res, 400, '每个商品最多 10 张图'); }
   const id = 'm_' + C.hexId(8);
-  // photos added to an already-live product go straight to review (先审后发);
-  // photos on drafts ride along with the product's own review at publish time.
-  const status = p.status === 'active' ? 'pending' : 'pending';
+  // Photos are live immediately (no review queue); the admin 动态 feed can
+  // remove any photo after the fact.
+  const status = 'approved';
   ctx.db.prepare('INSERT INTO media (id,tenant_id,product_id,file,bytes,w,h,status,sort,created) VALUES (?,?,?,?,?,?,?,?,?,?)')
     .run(id, S.tenant.id, p.id, saved.file, saved.bytes, w, h, status, nMedia, C.now());
   C.audit(ctx.db, { tenantId: S.tenant.id, userId: S.user && S.user.id, actor: S.actor, action: 'media_upload', target: p.id, ip: C.ipOf(req) });
@@ -545,9 +549,8 @@ function adminOverview(req, res, ctx) {
   const db = ctx.db;
   const day = C.today();
   C.json(res, {
-    pendingTenants: db.prepare("SELECT COUNT(*) AS n FROM tenants WHERE status = 'pending'").get().n,
-    pendingProducts: db.prepare("SELECT COUNT(*) AS n FROM products WHERE status = 'pending'").get().n,
-    pendingMedia: db.prepare("SELECT COUNT(*) AS n FROM media WHERE status = 'pending' AND product_id IN (SELECT id FROM products WHERE status = 'active')").get().n,
+    newTenants7d: db.prepare('SELECT COUNT(*) AS n FROM tenants WHERE created > ?').get(C.now() - 7 * 86400e3).n,
+    newProducts24h: db.prepare("SELECT COUNT(*) AS n FROM products WHERE status = 'active' AND updated > ?").get(C.now() - 86400e3).n,
     tenants: db.prepare('SELECT COUNT(*) AS n FROM tenants').get().n,
     activeTenants: db.prepare("SELECT COUNT(*) AS n FROM tenants WHERE status = 'active'").get().n,
     ordersToday: db.prepare('SELECT COALESCE(SUM(orders),0) AS n FROM counters WHERE day = ?').get(day).n,
@@ -603,19 +606,32 @@ async function adminTenantOp(req, res, ctx, m) {
   C.json(res, { ok: true });
 }
 
-function adminQueue(req, res, ctx) {
+// "Just published" feed — everything goes live without review, so this is the
+// operator's after-the-fact watch surface: newest shops, products and photos,
+// each with a one-tap takedown next to it in the UI.
+function adminFeed(req, res, ctx) {
   if (!C.admin(ctx.db, req)) return C.err(res, 401, '需要登录');
-  const prods = ctx.db.prepare("SELECT p.*, t.slug AS tslug, t.name AS tname FROM products p JOIN tenants t ON t.id = p.tenant_id WHERE p.status = 'pending' ORDER BY p.updated").all();
-  const media = ctx.db.prepare(`SELECT m.*, p.title AS ptitle, t.slug AS tslug FROM media m
+  const tenants = ctx.db.prepare('SELECT * FROM tenants ORDER BY created DESC LIMIT 20').all();
+  const prods = ctx.db.prepare(`SELECT p.*, t.slug AS tslug, t.name AS tname FROM products p
+    JOIN tenants t ON t.id = p.tenant_id WHERE p.status IN ('active','rejected')
+    ORDER BY p.updated DESC LIMIT 50`).all();
+  const media = ctx.db.prepare(`SELECT m.*, p.title AS ptitle, p.status AS pstatus, t.slug AS tslug FROM media m
     JOIN products p ON p.id = m.product_id JOIN tenants t ON t.id = m.tenant_id
-    WHERE m.status = 'pending' AND p.status = 'active' ORDER BY m.created`).all();
+    WHERE m.status = 'approved' ORDER BY m.created DESC LIMIT 30`).all();
   C.json(res, {
+    tenants: tenants.map((t) => ({
+      id: t.id, slug: t.slug, name: t.name, status: t.status, created: t.created,
+      wechat: t.wechat, logo: brandOf(t).logo,
+      phone: (ctx.db.prepare("SELECT phone FROM users WHERE tenant_id = ? AND role = 'owner'").get(t.id) || {}).phone || '',
+      products: ctx.db.prepare('SELECT COUNT(*) AS n FROM products WHERE tenant_id = ?').get(t.id).n,
+    })),
     products: prods.map((p) => ({
       id: p.id, title: p.title, grade: p.grade, sizeSpec: p.size_spec, stage: p.stage,
-      qty: p.qty, price: p.price, descr: p.descr, tenant: p.tname, slug: p.tslug,
+      qty: p.qty, price: p.price, descr: p.descr, status: p.status, updated: p.updated,
+      tenant: p.tname, slug: p.tslug,
       media: productMedia(ctx.db, p.id, false),
     })),
-    media: media.map((x) => ({ id: x.id, url: mediaUrl(x.file), product: x.ptitle, slug: x.tslug })),
+    media: media.map((x) => ({ id: x.id, url: mediaUrl(x.file), product: x.ptitle, slug: x.tslug, created: x.created })),
   });
 }
 
@@ -624,6 +640,7 @@ async function adminProductOp(req, res, ctx, m) {
   const p = ctx.db.prepare('SELECT * FROM products WHERE id = ?').get(m[1]);
   if (!p) return C.err(res, 404, 'not found');
   const d = await C.readJson(req);
+  // 'reject' = platform takedown (seller cannot republish); 'approve' = restore.
   if (d.op === 'approve') {
     ctx.db.prepare("UPDATE products SET status = 'active', updated = ? WHERE id = ?").run(C.now(), p.id);
     ctx.db.prepare("UPDATE media SET status = 'approved' WHERE product_id = ? AND status = 'pending'").run(p.id);
@@ -762,7 +779,7 @@ const ROUTES = [
   ['GET', /^\/api\/admin\/overview$/, adminOverview],
   ['GET', /^\/api\/admin\/tenants$/, adminTenants],
   ['POST', /^\/api\/admin\/tenants\/([a-zA-Z0-9_]+)$/, adminTenantOp],
-  ['GET', /^\/api\/admin\/queue$/, adminQueue],
+  ['GET', /^\/api\/admin\/feed$/, adminFeed],
   ['POST', /^\/api\/admin\/product\/([a-zA-Z0-9_]+)$/, adminProductOp],
   ['POST', /^\/api\/admin\/media\/([a-zA-Z0-9_]+)$/, adminMediaOp],
   ['GET', /^\/api\/admin\/orders$/, adminOrders],

@@ -564,7 +564,7 @@ F-13, F-14 are Phase 4 candidates; F-15 grows incrementally from Phase 2.
 | D1 | Fulfilment/responsibility | **Revised & settled by you:** responsible party = the storefront the buyer ordered from; owner drop-ships as supplier (consignment). |
 | D2 | Video hosting | OSS + strict caps (≤30 s, ≤20 MB, poster) for MVP |
 | D3 | KMTY platform fee | Build the lever, default **0%** |
-| D4 | Moderate products before live | **Yes** (extended to all UGC, 先审后发) |
+| D4 | Moderate products before live | **OVERRIDDEN (owner, 2026-07): no — instant publish everywhere; takedown-based moderation via the admin published-feed.** Buyer reviews (Phase 2) may still warrant 先审后发 — reconfirm then. |
 | D5 | Consignment scope/commission | All-or-selected + default %, per-product override |
 | D6 | Show prices to customers | **No** (inquiry-only; see F-3 price sheets) |
 | D7 | Cart & stock decrement | One product/order; quantity advisory |

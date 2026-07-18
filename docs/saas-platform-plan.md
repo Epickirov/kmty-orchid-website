@@ -109,15 +109,19 @@ platform-operator console (§11).
 
 ```
 visitor → 注册 (phone + OTP) → claim storefront id (/r/<id>) → guided onboarding wizard
-        → [KMTY approval gate ⟡ D18] → storefront live (draft products still 先审后发)
+        → storefront live immediately (D18 — owner decided: no approval gate anywhere)
 ```
 
 - **Onboarding wizard** (the "10 minutes to live" promise): ① business name + logo upload →
   ② WeChat contact (QR upload) → ③ service commitments (3 toggles) → ④ first product
   (photos, spec, qty, price) → ⑤ preview → publish. Each step skippable; checklist persists
   on the dashboard home until done.
-- **Approval gate (⟡ D18):** new tenants go live only after KMTY one-tap approval (identity
-  sanity, not a full audit). Keeps squatters/spam off the domain that carries our beian.
+- **No approval gate (D18 — decided 2026-07):** the owner ruled that nothing a seller does
+  waits on KMTY — signup, products and photos are live instantly. Moderation is a
+  **takedown net**: the admin 动态 feed lists everything just published with one-tap
+  下架/暂停/移除 (reversible, audited); a platform takedown cannot be self-republished.
+  Mitigates the beian exposure without adding seller friction; 内容安全 auto-screening
+  post-publish (D14) becomes the scale valve.
 - **Verification (企业认证):** optional upload of business licence → KMTY check → verified
   badge ([MKT] F-7). Verified status can gate higher quotas.
 - Reserved/blocked id list (kmty, admin, api, www, order, obscenities…).
@@ -384,7 +388,7 @@ Evolves `/admin` from "the backend" into "the operator's console":
 
 - **Beian:** one ICP filing covers apex + all subdomains incl. wildcard tenant subdomains;
   备案号 in every footer; 公安备案 within 30 days. Hosting *sellers'* content under our
-  domain = our responsibility → approval gate (D18), 先审后发 moderation, audit trail,
+  domain = our responsibility → takedown net (D18: no pre-approval), post-publish watch, audit trail,
   kill switches. Keep the filing 非经营性 by staying payment-free; before ever charging
   subscriptions **online** or processing marketplace payments, do the 经营性ICP/EDI
   licence analysis ([MKT] §9.1). Offline contracts + transfers avoid the question for now.
@@ -439,7 +443,7 @@ link, take orders."* Phases 2–3 make it defensible (trust loop + marketplace n
 | # | Decision | Recommended default |
 |---|---|---|
 | **D17** | Price display (revises D6) | Seller-managed prices with per-seller mode (`public` / `on_request` / `hidden`) + per-product override; default **public**; wholesale tiers supported. |
-| **D18** | Self-serve signup | **Yes, with KMTY one-tap approval gate** before a storefront goes public. |
+| **D18** | Self-serve signup | **DECIDED (owner, 2026-07): fully instant — no approval gate on signup, products, or photos.** Admin gets a published-feed with one-tap takedown/suspend instead. |
 | **D19** | Monetization | Entitlement system from day 1; **free at launch**, paid tiers (≈ §6 table) once sellers get orders; billing **offline** (contract + transfer + 发票). |
 | **D20** | Customization depth | **Token/section/template system, no custom code**; concierge themes later for big accounts. |
 | **D21** | Tenant subdomains | **Yes** (`<id>.kmtyorchid.com`, wildcard cert) as a paid-tier perk in Phase 3; external custom domains deferred (need per-seller beian). |

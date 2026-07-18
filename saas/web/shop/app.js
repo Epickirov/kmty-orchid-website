@@ -33,7 +33,7 @@ function render() {
   root.innerHTML = '';
 
   if (PREVIEW && SHOP.status !== 'active') {
-    root.append(h('div', { class: 'banner warn', style: 'margin:0;border-radius:0;text-align:center' }, '预览模式 — 店铺审核通过后买家才能访问'));
+    root.append(h('div', { class: 'banner warn', style: 'margin:0;border-radius:0;text-align:center' }, '预览模式 — 店铺当前对买家不可见'));
   }
   if (b.announcement) root.append(h('div', { class: 'anno' }, '📢 ' + b.announcement));
 

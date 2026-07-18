@@ -108,20 +108,25 @@ TLS, this app behind it. Ubuntu 22.04+ or Alibaba Cloud Linux.
 - Tenancy: every seller query is scoped by the session's tenant id; platform
   admin may act as a tenant via `x-tenant` (view-as) — every such write is
   audited with `actor=admin`.
-- Moderation (先审后发): new tenants need approval before their shop is public;
-  product publishes and photos added to live products queue in /admin. Buyer
-  UGC (reviews) arrives in Phase 2 with the same pipeline + 内容安全.
+- Moderation is **takedown-based, not approval-based** (owner's decision,
+  2026-07): signup, product publishes and photo uploads all go live instantly —
+  nothing ever waits on the platform. The admin 动态 feed shows everything just
+  published with one-tap 下架/暂停/移除 (all reversible, all audited); a
+  platform takedown ('rejected') cannot be self-republished by the seller.
+  Consider adding Aliyun 内容安全 auto-screening post-publish in Phase 2 to
+  keep this hands-off as volume grows.
 - SMS OTP, WeCom notifications, OSS media offload: deliberate Phase-2 hooks —
   the storage layer (lib/media.js) and login path are the two contained swap
   points.
 
 ## What this implements (vs the plans in ../docs)
 
-Phase 0+1 of `saas-platform-plan.md`: tenancy + self-serve signup with approval
-gate (D18), the seller backend core (inventory with photos, **prices incl.
-wholesale tiers + display modes** — D17, order pipeline with the
-completed/delivered lifecycle + buyer-relevant delivery date), storefront
-rendering with per-tenant accent, platform admin (approvals, moderation,
-tenants, plans as data, constellation colour config, leads, audit), the old
-system's compat API, and the migration path. Reviews/ratings, consignment,
-plans enforcement, WeCom/SMS are Phases 2–3 per the plan.
+Phase 0+1 of `saas-platform-plan.md`: tenancy + fully self-serve signup with
+**no approval gate** (D18 overridden by the owner — instant everywhere,
+takedown-net moderation), the seller backend core (inventory with photos,
+**prices incl. wholesale tiers + display modes** — D17, order pipeline with
+the completed/delivered lifecycle + buyer-relevant delivery date), storefront
+rendering with per-tenant accent, platform admin (published-feed with
+takedown/restore, tenants, plans as data, constellation colour config, leads,
+audit), the old system's compat API, and the migration path. Reviews/ratings,
+consignment, plans enforcement, WeCom/SMS are Phases 2–3 per the plan.

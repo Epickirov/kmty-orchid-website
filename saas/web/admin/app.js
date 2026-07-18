@@ -33,7 +33,7 @@ function gate() {
     errEl)));
 }
 
-const TABS = [['queue', '审核'], ['tenants', '租户'], ['orders', '订单'], ['colours', '颜色'], ['leads', '留言'], ['audit', '日志']];
+const TABS = [['feed', '动态'], ['tenants', '租户'], ['orders', '订单'], ['colours', '颜色'], ['leads', '留言'], ['audit', '日志']];
 
 function shell() {
   document.title = '平台控制台 · KMTY 星商';
@@ -50,16 +50,16 @@ function shell() {
   window.onhashchange = route;
 }
 function badgeFor(id) {
-  const n = id === 'queue' ? (OV.pendingTenants + OV.pendingProducts + OV.pendingMedia) : 0;
-  return n > 0 ? h('span', { class: 'badge pending', style: 'margin-left:4px' }, n) : null;
+  const n = id === 'feed' ? OV.newProducts24h : 0;
+  return n > 0 ? h('span', { class: 'badge active', style: 'margin-left:4px' }, n) : null;
 }
 
 function route() {
-  const view = (location.hash.replace(/^#\//, '') || 'queue').split('?')[0];
+  const view = (location.hash.replace(/^#\//, '') || 'feed').split('?')[0];
   $all('#tabbar button').forEach((b) => b.classList.toggle('on', b.dataset.tab === view));
   main.innerHTML = '';
   main.append(h('div', { class: 'skel' }));
-  ({ queue: renderQueue, tenants: renderTenants, orders: renderOrders, colours: renderColours, leads: renderLeads, audit: renderAudit }[view] || renderQueue)();
+  ({ feed: renderFeed, tenants: renderTenants, orders: renderOrders, colours: renderColours, leads: renderLeads, audit: renderAudit }[view] || renderFeed)();
 }
 
 async function refreshOverview() {
@@ -70,73 +70,82 @@ async function refreshOverview() {
   });
 }
 
-/* ================= 审核 queue ================= */
+/* ================= 动态 feed (post-publication watch + takedown) ================= */
+// Nothing waits for approval — this feed shows what just went live so the
+// operator can spot-check and take down anything bad after the fact.
 
-async function renderQueue() {
-  const [{ tenants }, q] = await Promise.all([
-    API.get('/api/admin/tenants?status=pending'),
-    API.get('/api/admin/queue'),
-  ]);
+async function renderFeed() {
+  const q = await API.get('/api/admin/feed');
   main.innerHTML = '';
-  if (!tenants.length && !q.products.length && !q.media.length) {
-    main.append(h('div', { class: 'empty' }, h('div', { class: 'big' }, '✓'), '审核队列已清空'));
+  main.append(h('p', { class: 'small muted', style: 'margin:4px 0 10px' },
+    '所有店铺与商品发布即上线，无需审核。这里按时间倒序展示最新动态，发现问题可一键下架 / 暂停（可恢复，全部记入日志）。'));
+
+  if (!q.tenants.length && !q.products.length) {
+    main.append(h('div', { class: 'empty' }, h('div', { class: 'big' }, '❀'), '还没有动态'));
     return;
   }
 
-  if (tenants.length) {
-    main.append(h('h2', { style: 'font-size:16px;margin:8px 0' }, '待审核店铺 · ' + tenants.length));
-    tenants.forEach((t) => {
+  if (q.tenants.length) {
+    main.append(h('h2', { style: 'font-size:16px;margin:8px 0' }, '最新店铺'));
+    q.tenants.forEach((t) => {
       main.append(h('div', { class: 'trow' },
         h('div', null,
           h('div', { class: 'row' },
             t.logo ? h('img', { src: t.logo, style: 'width:38px;height:38px;border-radius:9px;object-fit:cover' }) : null,
-            h('b', null, t.name), h('span', { class: 'mono small muted' }, '/' + t.slug)),
+            h('b', null, t.name), h('span', { class: 'mono small muted' }, '/' + t.slug),
+            t.status !== 'active' ? h('span', { class: 'badge ' + t.status }, STATUS_ZH[t.status] || t.status) : null),
           h('div', { class: 'small muted', style: 'margin-top:4px' },
-            '手机 ' + (t.phone || '—') + (t.wechat ? ' · 微信 ' + t.wechat : '') + ' · ' + relTime(t.created) + ' 注册 · 商品 ' + t.products)),
+            '手机 ' + (t.phone || '—') + (t.wechat ? ' · 微信 ' + t.wechat : '') + ' · ' + relTime(t.created) + ' 开店 · 商品 ' + t.products)),
         h('div', { class: 'row' },
-          h('a', { class: 'btn tiny', href: '/s/' + t.slug + '?preview=1', target: '_blank' }, '预览'),
-          h('button', { class: 'btn tiny solid', onclick: async () => { await op(t.id, 'approve'); } }, '通过'),
-          h('button', { class: 'btn tiny ghost danger', onclick: async () => {
-            if (await confirmSheet('暂停「' + t.name + '」？', '暂停')) await op(t.id, 'suspend');
-          } }, '拒绝'))));
+          h('a', { class: 'btn tiny', href: '/s/' + t.slug, target: '_blank' }, '查看'),
+          t.status === 'active'
+            ? h('button', { class: 'btn tiny ghost danger', onclick: async () => {
+                if (await confirmSheet('暂停「' + t.name + '」？买家将无法访问其店铺。', '暂停')) {
+                  await API.post('/api/admin/tenants/' + t.id, { op: 'suspend' }); toast('已暂停'); renderFeed();
+                }
+              } }, '暂停')
+            : h('button', { class: 'btn tiny solid', onclick: async () => {
+                await API.post('/api/admin/tenants/' + t.id, { op: 'activate' }); toast('已恢复'); renderFeed();
+              } }, '恢复'))));
     });
   }
 
   if (q.products.length) {
-    main.append(h('h2', { style: 'font-size:16px;margin:16px 0 8px' }, '待审核商品 · ' + q.products.length,
-      h('button', { class: 'btn tiny solid', style: 'margin-left:10px', onclick: async () => {
-        for (const p of q.products) await API.post('/api/admin/product/' + p.id, { op: 'approve' });
-        toast('已全部通过'); refreshOverview(); renderQueue();
-      } }, '一键全部通过')));
+    main.append(h('h2', { style: 'font-size:16px;margin:16px 0 8px' }, '最新商品'));
     q.products.forEach((p) => {
       main.append(h('div', { class: 'trow' },
         h('div', { style: 'min-width:0' },
-          h('div', null, h('b', null, p.title), ' ', h('span', { class: 'small muted' }, p.tenant + ' /' + p.slug)),
-          h('div', { class: 'small muted' }, [p.grade, p.sizeSpec, p.stage, p.qty ? '现货' + p.qty : '', p.price != null ? money(p.price) + '/株' : ''].filter(Boolean).join(' · ')),
-          p.descr ? h('div', { class: 'small muted', style: 'margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap' }, p.descr) : null,
-          p.media.length ? h('div', { class: 'qmedia' }, p.media.map((m) => h('img', { src: m.url, loading: 'lazy' }))) : h('div', { class: 'small muted' }, '（无图片）')),
+          h('div', null, h('b', null, p.title), ' ', h('span', { class: 'small muted' }, p.tenant + ' /' + p.slug),
+            p.status === 'rejected' ? h('span', { class: 'badge rejected', style: 'margin-left:6px' }, '已下架') : null),
+          h('div', { class: 'small muted' }, [p.grade, p.sizeSpec, p.stage, p.qty ? '现货' + p.qty : '', p.price != null ? money(p.price) + '/株' : ''].filter(Boolean).join(' · ') + ' · ' + relTime(p.updated)),
+          p.media.length ? h('div', { class: 'qmedia' }, p.media.map((m) => h('img', { src: m.url, loading: 'lazy' }))) : null),
         h('div', { class: 'row' },
-          h('button', { class: 'btn tiny solid', onclick: async () => { await API.post('/api/admin/product/' + p.id, { op: 'approve' }); toast('已通过'); refreshOverview(); renderQueue(); } }, '通过'),
-          h('button', { class: 'btn tiny ghost danger', onclick: async () => { await API.post('/api/admin/product/' + p.id, { op: 'reject' }); toast('已驳回'); refreshOverview(); renderQueue(); } }, '驳回'))));
+          p.status === 'active'
+            ? h('button', { class: 'btn tiny ghost danger', onclick: async () => {
+                if (await confirmSheet('下架「' + p.title + '」？卖家将无法自行重新上架。', '下架')) {
+                  await API.post('/api/admin/product/' + p.id, { op: 'reject' }); toast('已下架'); renderFeed();
+                }
+              } }, '下架')
+            : h('button', { class: 'btn tiny solid', onclick: async () => {
+                await API.post('/api/admin/product/' + p.id, { op: 'approve' }); toast('已恢复上架'); renderFeed();
+              } }, '恢复'))));
     });
   }
 
   if (q.media.length) {
-    main.append(h('h2', { style: 'font-size:16px;margin:16px 0 8px' }, '在售商品新增图片 · ' + q.media.length));
+    main.append(h('h2', { style: 'font-size:16px;margin:16px 0 8px' }, '最新图片'));
+    const grid = h('div', { class: 'qmedia', style: 'flex-wrap:wrap' });
     q.media.forEach((m) => {
-      main.append(h('div', { class: 'trow' },
-        h('div', { class: 'row' }, h('img', { src: m.url, style: 'width:76px;height:76px;border-radius:9px;object-fit:cover' }),
-          h('div', { class: 'small' }, m.product, h('div', { class: 'muted' }, '/' + m.slug))),
-        h('div', { class: 'row' },
-          h('button', { class: 'btn tiny solid', onclick: async () => { await API.post('/api/admin/media/' + m.id, { op: 'approve' }); refreshOverview(); renderQueue(); } }, '通过'),
-          h('button', { class: 'btn tiny ghost danger', onclick: async () => { await API.post('/api/admin/media/' + m.id, { op: 'reject' }); refreshOverview(); renderQueue(); } }, '驳回'))));
+      const cell = h('div', { style: 'position:relative;flex:0 0 auto' },
+        h('img', { src: m.url, title: m.product + ' /' + m.slug, style: 'width:76px;height:76px;border-radius:9px;object-fit:cover;border:1px solid var(--line)' }),
+        h('button', { class: 'btn tiny ghost danger', style: 'position:absolute;right:2px;top:2px;padding:1px 7px;background:rgba(0,0,0,.6)', title: '移除该图片', onclick: async () => {
+          if (await confirmSheet('移除这张图片？', '移除')) {
+            await API.post('/api/admin/media/' + m.id, { op: 'reject' }); cell.remove(); toast('已移除');
+          }
+        } }, '✕'));
+      grid.append(cell);
     });
-  }
-
-  async function op(id, o) {
-    await API.post('/api/admin/tenants/' + id, { op: o });
-    toast('完成');
-    refreshOverview(); renderQueue();
+    main.append(grid);
   }
 }
 

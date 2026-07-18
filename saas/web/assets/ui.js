@@ -137,7 +137,7 @@ function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({
 function localDate() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
 
 const STATUS_ZH = {
-  draft: '草稿', pending: '审核中', active: '在售', paused: '已下架', rejected: '未通过',
+  draft: '草稿', pending: '处理中', active: '在售', paused: '已下架', rejected: '平台已下架',
   placed: '新询单', talking: '洽谈中', completed: '已成交', delivered: '已送达', void: '已作废',
   suspended: '已暂停', closed: '已关闭',
 };

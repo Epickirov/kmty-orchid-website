@@ -43,7 +43,7 @@ function gate(err) {
     h('label', { class: 'f' }, h('span', null, '设置密码（至少 6 位）'),
       h('input', { id: 's-pass', type: 'password', autocomplete: 'new-password', enterkeyhint: 'go' })),
     h('button', { class: 'btn solid block', style: 'margin-top:6px', onclick: doSignup }, '创建店铺'),
-    h('p', { class: 'fhint center', style: 'margin-top:10px' }, '提交后需平台审核通过，店铺才对外可见；审核前可先布置店铺、上传商品。'));
+    h('p', { class: 'fhint center', style: 'margin-top:10px' }, '创建即开张：上传商品立即上架，把链接发给客户就能收询单。'));
   const toggle = h('button', { class: 'btn ghost block small', style: 'margin-top:12px', onclick: () => {
     mode = mode === 'login' ? 'signup' : 'login';
     loginBox.hidden = mode !== 'login';
@@ -137,10 +137,6 @@ async function renderHome() {
   const t = me.tenant, ck = me.checklist;
   main.innerHTML = '';
 
-  if (t.status === 'pending') {
-    main.append(h('div', { class: 'banner warn' },
-      h('b', null, '店铺审核中。'), ' 平台通过后买家才能访问你的店铺；现在就可以先上传商品、布置店铺 — 通过后立即开卖。'));
-  }
   if (t.status === 'suspended') {
     main.append(h('div', { class: 'banner warn' }, h('b', null, '店铺已被平台暂停。'), ' 如有疑问请联系 KMTY。'));
   }
@@ -155,7 +151,7 @@ async function renderHome() {
   // onboarding checklist
   const steps = [
     ['product', '上传第一个商品', '#/products'],
-    ['published', '发布商品（提交审核）', '#/products'],
+    ['published', '发布商品（立即上架）', '#/products'],
     ['logo', '上传店铺 Logo', '#/shop'],
     ['wechat', '填写微信号 / 上传微信二维码', '#/shop'],
     ['services', '设置服务承诺（包邮、质保…）', '#/settings'],
@@ -177,8 +173,7 @@ async function renderHome() {
       location.origin + '/s/' + t.slug),
     h('div', { class: 'row', style: 'margin-top:10px' },
       h('button', { class: 'btn solid small', onclick: () => copyText(location.origin + '/s/' + t.slug) }, '复制链接'),
-      h('a', { class: 'btn small', href: shopUrl(), target: '_blank' }, '打开店铺'),
-      me.pending.review > 0 ? h('span', { class: 'small muted right' }, me.pending.review + ' 个商品审核中') : null)));
+      h('a', { class: 'btn small', href: shopUrl(), target: '_blank' }, '打开店铺'))));
 
   // 14-day chart
   const maxV = Math.max(1, ...stats.days.map((d) => d.views));
@@ -252,14 +247,14 @@ function productRow(p) {
   function renderActions() {
     actions.innerHTML = '';
     actions.append(h('span', { class: 'badge ' + p.status }, STATUS_ZH[p.status] || p.status));
-    if (p.status === 'draft' || p.status === 'rejected') {
-      actions.append(h('button', { class: 'btn tiny solid', onclick: () => pub('publish') }, '发布'));
+    if (p.status === 'draft') {
+      actions.append(h('button', { class: 'btn tiny solid', onclick: () => pub('publish') }, '上架'));
     } else if (p.status === 'active') {
       actions.append(h('button', { class: 'btn tiny', onclick: () => pub('pause') }, '下架'));
     } else if (p.status === 'paused') {
       actions.append(h('button', { class: 'btn tiny solid', onclick: () => pub('publish') }, '重新上架'));
-    } else if (p.status === 'pending') {
-      actions.append(h('button', { class: 'btn tiny ghost', onclick: () => pub('pause') }, '撤回'));
+    } else if (p.status === 'rejected') {
+      actions.append(h('span', { class: 'small muted' }, '如有疑问请联系平台'));
     }
     actions.append(savedTick);
   }
@@ -267,7 +262,7 @@ function productRow(p) {
     const r = await API.post('/api/products/' + p.id + '/publish', { op });
     p.status = r.status;
     renderActions();
-    toast(r.status === 'pending' ? '已提交审核' : (r.status === 'active' ? '已上架' : '已下架'));
+    toast(r.status === 'active' ? '已上架 ✓ 买家立即可见' : '已下架');
   }
   renderActions();
 
@@ -413,8 +408,8 @@ function editorSheet(p) {
   }
 
   const saveBtn = h('button', { class: 'btn solid grow', onclick: save }, isNew ? '保存商品' : '保存修改');
-  const pubBtn = (!p || p.status === 'draft' || p.status === 'rejected')
-    ? h('button', { class: 'btn acc grow', onclick: async () => { await save(true); } }, '保存并发布')
+  const pubBtn = (!p || p.status === 'draft')
+    ? h('button', { class: 'btn acc grow', onclick: async () => { await save(true); } }, '保存并上架')
     : null;
 
   async function save(publish) {
@@ -422,8 +417,8 @@ function editorSheet(p) {
     if (productId) await API.put('/api/products/' + productId, collect());
     else { const r = await API.post('/api/products', collect()); productId = r.id; }
     if (publish) {
-      const r = await API.post('/api/products/' + productId + '/publish', { op: 'publish' });
-      toast(r.status === 'active' ? '已上架 ✓' : '已提交审核，通过后自动上架');
+      await API.post('/api/products/' + productId + '/publish', { op: 'publish' });
+      toast('已上架 ✓ 买家立即可见');
     } else toast('已保存 ✓');
     sh.close();
     renderProducts();
@@ -433,7 +428,7 @@ function editorSheet(p) {
     h('h2', null, isNew ? '新增商品' : '编辑商品'),
     field('商品名称 *', f.title),
     h('div', { class: 'f' }, h('span', { style: 'display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px' }, '商品图片（第一张为封面，最多 10 张）'), mgrid, fileIn,
-      h('div', { class: 'fhint' }, '上架前需平台审核；图片会自动压缩，无需处理')),
+      h('div', { class: 'fhint' }, '手机照片直接传即可 — 自动压缩，保存后立即可见')),
     h('div', { class: 'grid2' },
       field('等级', chipSelect(GRADES, d.grade, (v) => { d.grade = v; })),
       field('苗期', chipSelect(STAGES, d.stage, (v) => { d.stage = v; }))),
@@ -615,7 +610,7 @@ async function renderShop() {
     } }, l)));
 
   // featured picker
-  const active = products.filter((p) => ['active', 'pending', 'paused'].includes(p.status));
+  const active = products.filter((p) => ['active', 'paused'].includes(p.status));
   const featBox = h('div');
   if (active.length) {
     active.forEach((p) => {

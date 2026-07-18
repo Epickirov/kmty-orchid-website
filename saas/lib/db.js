@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS tenants (
   name        TEXT NOT NULL,
   company     TEXT NOT NULL DEFAULT '',
   tagline     TEXT NOT NULL DEFAULT '',
-  status      TEXT NOT NULL DEFAULT 'pending',   -- pending|active|suspended|closed
+  status      TEXT NOT NULL DEFAULT 'active',    -- active|suspended|closed (no approval gate — takedown-based moderation)
   verified    INTEGER NOT NULL DEFAULT 0,
   plan        TEXT NOT NULL DEFAULT 'free',
   brand       TEXT NOT NULL DEFAULT '{}',        -- logo/banner/accent/about/announcement/priceMode/featured/modules/wechatQr/shipsFrom
