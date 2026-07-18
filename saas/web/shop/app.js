@@ -1,15 +1,15 @@
-/* 店铺 — buyer-facing storefront. Slug injected by the server as
-   window.__SLUG__ (path /s/<slug> or tenant subdomain). Inquiry-only:
-   an order captures name/phone/qty and hands the buyer to the seller's
-   WeChat with a short order code. */
+/* 店铺 — buyer-facing storefront (editorial redesign).
+   Slug injected by the server as window.__SLUG__. Inquiry-only: an order
+   captures name/phone/qty and hands the buyer to the seller's WeChat with a
+   short order code. Fraunces (self-hosted) carries prices/numerals; CJK stays
+   on the system stack. All motion respects prefers-reduced-motion. */
 'use strict';
 
 const SLUG = window.__SLUG__ || location.pathname.split('/')[2] || '';
 const PREVIEW = new URLSearchParams(location.search).get('preview') === '1';
 const root = $('#app');
-let SHOP = null, PRODUCTS = [];
+let SHOP = null, PRODUCTS = [], ICP = '';
 const F = { stage: '', size: '', sort: 'default' };
-let ICP = '';
 
 async function boot() {
   let data;
@@ -18,16 +18,27 @@ async function boot() {
   } catch (e) {
     root.innerHTML = '';
     root.append(h('div', { class: 'gatewrap' }, h('div', { class: 'gatebox center' },
-      h('div', { style: 'font-size:40px;margin-bottom:12px' }, '❀'),
+      h('div', { style: 'font-size:44px;margin-bottom:12px;color:var(--acc)' }, '❀'),
       h('h2', null, '店铺不存在或未开放'),
       h('p', { class: 'lead' }, '请与卖家确认链接是否正确。'))));
     return;
   }
   SHOP = data.shop; PRODUCTS = data.products; ICP = data.icp || '';
-  document.title = SHOP.name + ' · 蝴蝶兰批发';
+  document.title = SHOP.name + ' · 蝴蝶兰';
   document.documentElement.style.setProperty('--acc', SHOP.brand.accent || '#E7B7CF');
   render();
 }
+
+/* aggregate shop rating across products */
+function shopRating() {
+  let sum = 0, n = 0;
+  for (const p of PRODUCTS) if (p.rating && p.rating.n) { sum += p.rating.avg * p.rating.n; n += p.rating.n; }
+  return n ? { avg: Math.round(sum / n * 10) / 10, n } : null;
+}
+
+const PETAL_SVG = '<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.6" xmlns="http://www.w3.org/2000/svg">' +
+  [0, 72, 144, 216, 288].map((r) => '<ellipse cx="50" cy="26" rx="13" ry="24" transform="rotate(' + r + ' 50 50)"/>').join('') +
+  '<circle cx="50" cy="50" r="6"/></svg>';
 
 function render() {
   const b = SHOP.brand, sv = SHOP.services;
@@ -36,61 +47,92 @@ function render() {
   if (PREVIEW && SHOP.status !== 'active') {
     root.append(h('div', { class: 'banner warn', style: 'margin:0;border-radius:0;text-align:center' }, '预览模式 — 店铺当前对买家不可见'));
   }
-  if (b.announcement) root.append(h('div', { class: 'anno' }, '📢 ' + b.announcement));
 
-  // header
-  root.append(h('div', { class: 'shophead' },
-    h('div', { class: 'row', style: 'gap:14px' },
-      b.logo ? h('img', { class: 'logo', src: b.logo, alt: '' }) : null,
-      h('div', { class: 'grow' },
-        h('div', { class: 'shopname' }, SHOP.name, ' ',
-          SHOP.verified ? h('span', { class: 'badge ok', style: 'vertical-align:3px' }, '✓ 认证') : null),
-        SHOP.tagline ? h('div', { class: 'h-sub', style: 'margin-top:3px' }, SHOP.tagline) : null),
-      h('button', { class: 'btn acc small', onclick: contactSheet }, '联系卖家'))));
+  /* ---------- sticky mini header ---------- */
+  const sticky = h('div', { class: 'stickybar' }, h('div', { class: 'in' },
+    b.logo ? h('img', { src: b.logo, alt: '' }) : null,
+    h('span', { class: 'nm grow' }, SHOP.name),
+    h('button', { class: 'btn acc small', onclick: contactSheet }, '联系卖家')));
+  root.append(sticky);
 
-  if (b.banner) root.append(h('div', { class: 'bannerimg' }, h('img', { src: b.banner, alt: '' })));
+  /* ---------- hero ---------- */
+  const agg = shopRating();
+  const trust = h('div', { class: 'trustrow' });
+  if (SHOP.verified) trust.append(h('span', { class: 'tchip' }, h('span', { style: 'color:var(--ok)' }, '✓'), '企业认证'));
+  if (agg) trust.append(h('span', { class: 'tchip' }, h('span', { class: 'st' }, '★ ' + agg.avg), agg.n + ' 条买家评价'));
+  if (b.shipsFrom) trust.append(h('span', { class: 'tchip' }, '📍 ' + b.shipsFrom + ' 直发'));
+  const hero = h('header', { class: 'hero' + (b.banner ? ' hasimg' : '') },
+    b.banner ? h('div', { class: 'bgimg', style: 'background-image:url(' + b.banner + ')' }) : h('div', { class: 'bggen' }),
+    h('div', { class: 'grain' }),
+    b.banner ? null : h('div', { class: 'bloomwm', html: PETAL_SVG }),
+    h('div', { class: 'in' },
+      h('div', { class: 'row', style: 'gap:16px;align-items:flex-start' },
+        b.logo ? h('img', { class: 'shoplogo', src: b.logo, alt: '' }) : null,
+        h('div', { class: 'grow', style: 'min-width:0' },
+          h('h1', { class: 'shopname' }, SHOP.name),
+          SHOP.tagline ? h('p', { class: 'shoptag' }, SHOP.tagline) : null),
+        h('button', { class: 'btn acc small', style: 'flex:0 0 auto', onclick: contactSheet }, '联系卖家')),
+      trust.children.length ? trust : null,
+      b.announcement ? h('div', null, h('span', { class: 'annopill' }, h('b', null, '公告'), b.announcement)) : null));
+  root.append(hero);
 
-  // services strip
-  const chips = [];
-  if (sv.shippingIncluded) chips.push(['🚚', '包邮']);
-  if (sv.qaRate > 0) chips.push(['🛡', h('span', null, h('b', null, sv.qaRate + '%'), ' 好苗率质保')]);
-  if (sv.replacePolicy) chips.push(['♻', sv.replacePolicy]);
-  if (sv.invoice) chips.push(['🧾', '可开发票']);
-  if (sv.minOrder > 0) chips.push(['📦', '起订 ' + sv.minOrder + ' 株']);
-  if (b.shipsFrom) chips.push(['📍', b.shipsFrom + ' 发货']);
-  if (sv.carrierNote) chips.push(['🚛', sv.carrierNote]);
-  if (chips.length) root.append(h('div', { class: 'svcstrip' }, chips.map(([i, t]) => h('span', { class: 'chip' }, i + ' ', t))));
+  // sticky bar appears once the hero scrolls away
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((es) => {
+      sticky.classList.toggle('show', !es[0].isIntersecting);
+    }, { rootMargin: '-60px 0px 0px 0px' });
+    io.observe(hero);
+  }
 
-  if (b.about) root.append(h('div', { class: 'aboutbox' }, b.about));
+  /* ---------- service band ---------- */
+  const svcs = [];
+  if (sv.shippingIncluded) svcs.push(['🚚', '包邮到家']);
+  if (sv.qaRate > 0) svcs.push(['🛡', h('span', null, h('b', null, sv.qaRate + '%'), ' 好苗率质保')]);
+  if (sv.replacePolicy) svcs.push(['♻', sv.replacePolicy]);
+  if (sv.invoice) svcs.push(['🧾', '可开发票']);
+  if (sv.minOrder > 0) svcs.push(['📦', '起订 ' + sv.minOrder + ' 株']);
+  if (sv.carrierNote) svcs.push(['🚛', sv.carrierNote]);
+  if (svcs.length) {
+    root.append(h('div', { class: 'svcband' }, h('div', { class: 'in' },
+      svcs.map(([ic, t]) => h('span', { class: 'svc' }, h('span', { class: 'ic' }, ic), t)))));
+  }
 
-  // constellation module
+  const wrap = h('div', { class: 'wrapx' });
+  root.append(wrap);
+
+  if (b.about) wrap.append(h('p', { class: 'aboutbox rv' }, b.about));
+
+  /* ---------- constellation module ---------- */
   if (SHOP.constellation) {
-    root.append(h('div', { class: 'constcard' },
+    const stars = [[18, 22], [42, 70], [70, 18], [86, 55], [55, 40]].map(([x, y], i) =>
+      h('i', { style: 'left:' + x + '%;top:' + y + '%;animation-delay:' + (i * 0.55) + 's' }));
+    wrap.append(h('div', { class: 'constcard rv' },
       h('a', { href: '/r/' + SHOP.slug },
+        stars,
         h('span', { class: 'star' }, '✨'),
         h('span', { class: 'grow' },
-          h('b', { class: 'serif', style: 'font-size:16px' }, 'KMTY 星空艺术兰'),
-          h('div', { class: 'small muted' }, '三色随机星洒 · 每一株都是孤品 · 在线定制配色')),
-        h('span', { class: 'muted' }, '›'))));
+          h('span', { class: 't' }, 'KMTY 星空艺术兰'),
+          h('div', { class: 'sub' }, '三色随机星洒 · 每一株都是孤品 · 在线定制配色')),
+        h('span', { class: 'muted', style: 'font-size:20px' }, '›'))));
   }
 
-  // featured rail
+  /* ---------- featured ---------- */
   const featured = PRODUCTS.filter((p) => p.featured);
   if (featured.length) {
-    root.append(h('div', { class: 'secttl' }, '主推 · FEATURED'));
-    root.append(h('div', { class: 'featrail' }, featured.map(card)));
+    wrap.append(sect('精选', 'Selection'));
+    wrap.append(h('div', { class: 'featrail' }, featured.map((p, i) => card(p, i))));
   }
 
-  // filters + grid
+  /* ---------- catalogue ---------- */
+  wrap.append(sect('全部商品', 'Catalogue', PRODUCTS.length));
   const stages = [...new Set(PRODUCTS.map((p) => p.stage).filter(Boolean))];
   const sizes = [...new Set(PRODUCTS.map((p) => p.sizeSpec).filter(Boolean))];
   const anyPublic = PRODUCTS.some((p) => p.price && p.price.mode === 'public');
-  root.append(h('div', { class: 'secttl' }, '全部商品 · ' + PRODUCTS.length));
   if (stages.length + sizes.length > 1 || anyPublic) {
     const bar = h('div', { class: 'filters' });
     const mk = (label, key, val) => h('span', {
       class: 'chip' + (F[key] === val ? ' on' : ''),
-      onclick: () => { F[key] = F[key] === val ? '' : val; render(); window.scrollTo(0, document.body.scrollHeight * 0); },
+      onclick: () => { F[key] = F[key] === val ? '' : val; render(); },
     }, label);
     stages.forEach((s) => bar.append(mk(s, 'stage', s)));
     sizes.forEach((s) => bar.append(mk(s, 'size', s)));
@@ -98,7 +140,7 @@ function render() {
       class: 'chip' + (F.sort === 'price' ? ' on' : ''),
       onclick: () => { F.sort = F.sort === 'price' ? 'default' : 'price'; render(); },
     }, '价格 ↑'));
-    root.append(bar);
+    wrap.append(bar);
   }
 
   let list = PRODUCTS.filter((p) => (!F.stage || p.stage === F.stage) && (!F.size || p.sizeSpec === F.size));
@@ -110,32 +152,54 @@ function render() {
     });
   }
   if (!list.length) {
-    root.append(h('div', { class: 'empty' }, h('div', { class: 'big' }, '❀'), PRODUCTS.length ? '没有符合筛选的商品' : '店铺正在上货中，敬请期待'));
+    wrap.append(h('div', { class: 'empty' }, h('div', { class: 'big', style: 'color:var(--acc)' }, '❀'),
+      PRODUCTS.length ? '没有符合筛选的商品' : '店铺正在上货中，敬请期待'));
   } else {
-    root.append(h('div', { class: 'grid' }, list.map(card)));
+    wrap.append(h('div', { class: 'grid' }, list.map((p, i) => card(p, i))));
   }
 
-  // footer
-  root.append(h('div', { class: 'shopfoot' },
-    h('button', { class: 'btn small', style: 'margin-bottom:14px', onclick: () => reviewSheet() }, '📝 已购评价 · 确认收货'),
-    h('br'),
-    (SHOP.company || SHOP.name),
-    h('br'),
-    h('span', null, '交易在微信中完成 · 下单即询价，无需在线支付'),
-    h('br'),
-    h('a', { href: 'https://www.kmtyorchid.com', style: 'color:var(--faint)' }, 'Powered by KMTY 星商'),
-    ICP ? h('div', null, h('a', { href: 'https://beian.miit.gov.cn', target: '_blank', rel: 'noopener', style: 'color:var(--faint)' }, ICP)) : null));
+  /* ---------- footer ---------- */
+  root.append(h('footer', { class: 'shopfoot' },
+    h('div', { class: 'rule' }),
+    h('div', { class: 'mk' }, SHOP.company || SHOP.name),
+    h('div', { class: 'rowlinks' },
+      h('button', { class: 'btn small ghost', onclick: () => reviewSheet() }, '📝 已购评价 · 确认收货')),
+    h('div', null, '下单即询价，交易在微信中完成 · 无需在线支付'),
+    h('div', { style: 'margin-top:8px' },
+      h('a', { href: 'https://www.kmtyorchid.com' }, 'Powered by KMTY 星商'),
+      ICP ? h('span', null, ' · ', h('a', { href: 'https://beian.miit.gov.cn', target: '_blank', rel: 'noopener' }, ICP)) : null)));
+
+  revealInit();
 }
 
-function card(p) {
-  const el = h('div', { class: 'pcard', role: 'button', tabindex: 0, onclick: () => detailSheet(p) },
+function sect(zh, en, cnt) {
+  return h('div', { class: 'sect' },
+    h('span', { class: 'zh' }, zh),
+    h('span', { class: 'en' }, en),
+    h('span', { class: 'rule' }),
+    cnt != null ? h('span', { class: 'cnt' }, cnt + ' 款') : null);
+}
+
+function revealInit() {
+  const els = $all('.rv');
+  if (!('IntersectionObserver' in window)) { els.forEach((e) => e.classList.add('in')); return; }
+  const io = new IntersectionObserver((es) => {
+    es.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
+  }, { rootMargin: '0px 0px -6% 0px' });
+  els.forEach((e) => io.observe(e));
+}
+
+/* ---------- product card ---------- */
+
+function card(p, i) {
+  const el = h('div', { class: 'pcard rv', role: 'button', tabindex: 0, style: 'transition-delay:' + ((i % 4) * 60) + 'ms', onclick: () => detailSheet(p) },
     h('div', { class: 'ph' },
       p.media.length ? h('img', { src: p.media[0], loading: 'lazy', alt: p.title }) : '❀',
       p.featured ? h('span', { class: 'ft' }, '主推') : null),
     h('div', { class: 'bd' },
       h('div', { class: 't' }, p.title),
       h('div', { class: 'specs' }, [p.grade, p.sizeSpec, p.stage, p.flowerCount ? p.flowerCount + '梗' : ''].filter(Boolean).map((s) => h('span', null, s))),
-      p.rating && p.rating.n > 0 ? h('div', { class: 'small', style: 'margin-top:5px;color:var(--warn)' }, '★ ' + p.rating.avg + ' ', h('span', { class: 'muted' }, '(' + p.rating.n + ')')) : null,
+      p.rating && p.rating.n > 0 ? h('div', { class: 'rating' }, '★ ' + p.rating.avg, h('span', { class: 'n' }, '(' + p.rating.n + ')')) : null,
       priceLine(p),
       p.qty > 0 ? h('div', { class: 'stock' }, '现货 ' + p.qty.toLocaleString('zh-CN') + ' 株') : null));
   el.addEventListener('keydown', (e) => { if (e.key === 'Enter') detailSheet(p); });
@@ -145,53 +209,106 @@ function card(p) {
 function priceLine(p) {
   const pi = p.price || { mode: 'hidden' };
   if (pi.mode === 'public') {
-    const tierHint = pi.tiers && pi.tiers.length ? h('span', { class: 'u' }, '≥' + pi.tiers[0].min + '株 ' + money(pi.tiers[0].price)) : null;
-    return h('div', { class: 'price' }, h('span', { class: 'v' }, money(pi.price)), h('span', { class: 'u' }, '/株'), tierHint);
+    return h('div', { class: 'price' },
+      h('span', { class: 'cur' }, '¥'),
+      h('span', { class: 'v' }, (Math.round(pi.price * 100) / 100).toLocaleString('zh-CN')),
+      h('span', { class: 'u' }, '/株'),
+      pi.tiers && pi.tiers.length ? h('span', { class: 'tier' }, '≥' + pi.tiers[0].min + '株 ' + money(pi.tiers[0].price)) : null);
   }
   if (pi.mode === 'on_request') return h('div', { class: 'price' }, h('span', { class: 'ask' }, '询价 ›'));
   return h('div', { class: 'price' }, h('span', { class: 'u', style: 'font-size:12.5px' }, '详询卖家'));
+}
+
+/* ---------- lightbox ---------- */
+
+let _lb;
+function lightbox(src) {
+  if (!_lb) {
+    _lb = h('div', { class: 'lightbox', onclick: () => _lb.classList.remove('show') }, h('img', { alt: '' }));
+    document.body.append(_lb);
+  }
+  _lb.querySelector('img').src = src;
+  requestAnimationFrame(() => _lb.classList.add('show'));
 }
 
 /* ---------- product detail ---------- */
 
 function detailSheet(p) {
   const pi = p.price || { mode: 'hidden' };
+
   const gal = p.media.length
-    ? h('div', { class: 'gal' }, p.media.map((u) => h('img', { src: u, alt: p.title })))
-    : h('div', { class: 'gal' }, h('div', { style: 'width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:52px;color:var(--faint)' }, '❀'));
-  const dots = p.media.length > 1 ? h('div', { class: 'dots' }, p.media.map((_, i) => h('i', { class: i === 0 ? 'on' : '' }))) : null;
-  if (dots) {
+    ? h('div', { class: 'gal' }, p.media.map((u) => h('img', { src: u, alt: p.title, onclick: () => lightbox(u) })))
+    : h('div', { class: 'gal' }, h('div', { class: 'noimg' }, '❀'));
+  const thumbs = p.media.length > 1
+    ? h('div', { class: 'thumbs' }, p.media.map((u, i) =>
+        h('img', { src: u, class: i === 0 ? 'on' : '', alt: '', onclick: () => gal.scrollTo({ left: i * gal.clientWidth, behavior: 'smooth' }) })))
+    : null;
+  if (thumbs) {
     gal.addEventListener('scroll', debounce(() => {
       const i = Math.round(gal.scrollLeft / gal.clientWidth);
-      $all('i', dots).forEach((d, j) => d.classList.toggle('on', j === i));
+      $all('img', thumbs).forEach((t, j) => t.classList.toggle('on', j === i));
     }, 60), { passive: true });
   }
 
-  const rows = [
+  const specs = [
     ['品种', p.variety], ['等级', p.grade], ['盆径', p.sizeSpec], ['苗期', p.stage],
     ['梗数', p.flowerCount ? p.flowerCount + ' 梗' : ''], ['现货', p.qty > 0 ? p.qty.toLocaleString('zh-CN') + ' 株' : ''],
   ].filter(([, v]) => v);
 
   const priceBlock = pi.mode === 'public'
     ? h('div', null,
-        h('div', { class: 'row', style: 'align-items:baseline;gap:8px' },
-          h('span', { class: 'bigprice' }, money(pi.price)), h('span', { class: 'muted small' }, '/株起')),
+        h('div', { class: 'pricehero' },
+          h('span', { class: 'cur' }, '¥'),
+          h('span', { class: 'v' }, (Math.round(pi.price * 100) / 100).toLocaleString('zh-CN')),
+          h('span', { class: 'u' }, '/株起 · 按量优惠')),
         pi.tiers && pi.tiers.length ? h('table', { class: 'tiertable' },
-          h('tr', null, h('td', { class: 'muted' }, '1 株起'), h('td', null, money(pi.price))),
-          pi.tiers.map((t) => h('tr', null, h('td', { class: 'muted' }, '≥ ' + t.min + ' 株'), h('td', null, money(t.price))))) : null)
-    : h('div', { class: 'banner info', style: 'margin:8px 0' }, pi.mode === 'on_request' ? '价格以询价为准 — 提交询单后卖家微信报价' : '规格详询卖家');
+          h('tr', null, h('td', null, '1 株起'), h('td', null, money(pi.price))),
+          pi.tiers.map((t) => h('tr', null, h('td', null, '≥ ' + t.min.toLocaleString('zh-CN') + ' 株'), h('td', null, money(t.price))))) : null)
+    : h('div', { class: 'banner info', style: 'margin:12px 0 4px' },
+        pi.mode === 'on_request' ? '价格以询价为准 — 提交询单后卖家微信报价' : '规格详询卖家');
 
   const body = h('div', null,
-    gal, dots,
-    h('h2', { style: 'font-size:19px;margin-top:14px' }, p.title),
-    priceBlock,
-    rows.length ? h('table', { class: 'spectable' }, rows.map(([k, v]) => h('tr', null, h('td', null, k), h('td', null, v)))) : null,
-    p.descr ? h('div', { class: 'small', style: 'color:var(--muted);white-space:pre-line;line-height:1.8' }, p.descr) : null,
-    reviewsBlock(p),
+    gal, thumbs,
+    h('div', { class: 'pdbody' },
+      h('div', { class: 'pdtitle' }, p.title),
+      priceBlock,
+      specs.length ? h('div', { class: 'specgrid' }, specs.map(([k, v]) =>
+        h('div', { class: 'sg' }, h('div', { class: 'k' }, k), h('div', { class: 'v' }, v)))) : null,
+      p.descr ? h('div', { class: 'pddesc' }, p.descr) : null,
+      reviewsBlock(p)),
     h('div', { class: 'stickycta' },
-      h('button', { class: 'btn acc block', style: 'font-size:16px;padding:14px', onclick: () => { sh.close(); orderSheet(p); } },
+      h('button', { class: 'ctabtn', onclick: () => { sh.close(); orderSheet(p); } },
         pi.mode === 'public' ? '立即询单' : '询价 · 下询单')));
   const sh = sheet(body);
+  sh.el.querySelector('.sheet').classList.add('pd');
+}
+
+/* ---------- reviews on the product page ---------- */
+
+function reviewsBlock(p) {
+  if (!p.rating || !p.rating.n) return null;
+  const box = h('div', { style: 'margin:8px 0 4px' },
+    h('div', { class: 'sect', style: 'margin:14px 0 6px' },
+      h('span', { class: 'zh', style: 'font-size:16px' }, '买家评价'),
+      h('span', { class: 'en' }, 'Reviews'),
+      h('span', { class: 'rule' }),
+      h('span', { class: 'cnt' }, '★ ' + p.rating.avg + ' · ' + p.rating.n + ' 条')),
+    h('div', { class: 'skel', style: 'height:56px' }));
+  API.get('/api/reviews?product=' + p.id, { quiet: true }).then((d) => {
+    box.lastChild.remove();
+    d.reviews.forEach((r) => {
+      box.append(h('div', { class: 'rvrow' },
+        h('div', { class: 'row', style: 'gap:8px' },
+          h('span', { class: 'rvstars' }, '★★★★★'.slice(0, r.stars)),
+          h('span', { class: 'small' }, r.buyer),
+          h('span', { class: 'badge ok', style: 'font-size:10px' }, '✓ 已购'),
+          h('span', { class: 'small muted right' }, new Date(r.created).toLocaleDateString('zh-CN'))),
+        r.text ? h('div', { class: 'small', style: 'margin-top:5px;line-height:1.75;color:#d9d1e0' }, r.text) : null,
+        r.photos.length ? h('div', { class: 'rvphotos' },
+          r.photos.map((u) => h('img', { src: u, loading: 'lazy', alt: '', onclick: (e) => { e.stopPropagation(); lightbox(u); } }))) : null));
+    });
+  }).catch(() => {});
+  return box;
 }
 
 /* ---------- order flow ---------- */
@@ -202,7 +319,7 @@ function orderSheet(p) {
   let qty = min;
 
   const qtyIn = h('input', { type: 'number', inputmode: 'numeric', value: qty, min: 1 });
-  const sumEl = h('div', { class: 'small accent', style: 'min-height:20px;font-weight:600' });
+  const sumEl = h('div', { class: 'livesum accent' });
   function updateSum() {
     qty = Math.max(1, parseInt(qtyIn.value || '1', 10));
     if (pi.mode === 'public') {
@@ -233,7 +350,7 @@ function orderSheet(p) {
     h('label', { class: 'f' }, h('span', null, '期望到货日期（选填）'), dateIn),
     h('label', { class: 'f' }, h('span', null, '留言（选填）'), noteIn),
     errEl,
-    h('button', { class: 'btn acc block', style: 'font-size:16px;padding:14px', onclick: submit }, '提交询单'));
+    h('button', { class: 'ctabtn', onclick: submit }, '提交询单'));
   const sh = sheet(body);
 
   async function submit() {
@@ -254,19 +371,21 @@ function orderSheet(p) {
 
 function successSheet(code, p) {
   const w = SHOP.wechat, qr = SHOP.brand.wechatQr;
+  const petals = [12, 30, 55, 74, 90].map((x, i) =>
+    h('span', { class: 'petal', style: 'left:' + x + '%;animation-delay:' + (i * 0.8) + 's;font-size:' + (11 + (i % 3) * 4) + 'px' }, '❀'));
   const body = h('div', { class: 'center' },
-    h('div', { style: 'font-size:40px;margin-top:8px' }, '🎉'),
-    h('h2', null, '询单已提交'),
-    h('p', { class: 'small muted' }, '你的订单号（截图或复制，发给卖家）'),
-    h('div', { class: 'codebig copy', onclick: () => copyText(code) }, code),
-    h('button', { class: 'btn small', onclick: () => copyText(code) }, '复制订单号'),
-    h('div', { class: 'divider' }),
+    h('h2', { style: 'margin-top:6px' }, '询单已提交 🎉'),
+    h('div', { class: 'ticket' },
+      petals,
+      h('p', { class: 'small muted', style: 'margin:0 0 4px' }, '你的订单号 · 发给卖家'),
+      h('div', { class: 'codebig copy', onclick: () => copyText(code) }, code),
+      h('button', { class: 'btn small', style: 'margin-top:10px', onclick: () => copyText(code) }, '复制订单号')),
     qr ? h('div', null,
-      h('p', { class: 'small', style: 'margin:0' }, '长按识别 / 截图扫码，加卖家微信'),
-      h('img', { class: 'qrimg', src: qr, alt: '卖家微信二维码' })) : null,
+      h('p', { class: 'small', style: 'margin:6px 0 0' }, '长按识别 / 截图扫码，加卖家微信'),
+      h('div', { class: 'qrframe' }, h('img', { src: qr, alt: '卖家微信二维码' }))) : null,
     w ? h('div', { style: 'margin-top:6px' },
-      h('p', { class: 'small muted', style: 'margin:0 0 6px' }, '或搜索微信号'),
-      h('div', { class: 'code copy', style: 'display:inline-block', onclick: () => copyText(w) }, w),
+      h('p', { class: 'small muted', style: 'margin:0 0 6px' }, qr ? '或搜索微信号' : '添加卖家微信'),
+      h('div', { class: 'code copy frx', style: 'display:inline-block', onclick: () => copyText(w) }, w),
       h('div', null, h('button', { class: 'btn small', style: 'margin-top:8px', onclick: () => copyText(w) }, '复制微信号'))) : null,
     (!qr && !w) ? h('p', { class: 'small muted' }, '卖家会尽快电话联系你。') : null,
     h('p', { class: 'small muted', style: 'margin-top:12px' }, '成交收货后，回到本店点「已购评价」打星晒图（收货 5 天内可传实拍图）。'),
@@ -274,26 +393,17 @@ function successSheet(code, p) {
   const sh = sheet(body, { dismiss: false });
 }
 
-function reviewsBlock(p) {
-  if (!p.rating || !p.rating.n) return null;
-  const box = h('div', { style: 'margin:14px 0 4px' },
-    h('div', { class: 'secttl', style: 'padding:0;margin:0 0 8px' }, '买家评价 · ' + p.rating.n + ' 条 · ★ ' + p.rating.avg),
-    h('div', { class: 'skel', style: 'height:60px' }));
-  API.get('/api/reviews?product=' + p.id, { quiet: true }).then((d) => {
-    box.lastChild.remove();
-    d.reviews.forEach((r) => {
-      box.append(h('div', { style: 'border-top:1px solid var(--line);padding:10px 0' },
-        h('div', { class: 'row', style: 'gap:8px' },
-          h('span', { style: 'color:var(--warn);letter-spacing:2px' }, '★★★★★'.slice(0, r.stars) ),
-          h('span', { class: 'small' }, r.buyer),
-          h('span', { class: 'badge ok', style: 'font-size:10px' }, '✓ 已购'),
-          h('span', { class: 'small muted right' }, new Date(r.created).toLocaleDateString('zh-CN'))),
-        r.text ? h('div', { class: 'small', style: 'margin-top:5px;line-height:1.7' }, r.text) : null,
-        r.photos.length ? h('div', { style: 'display:flex;gap:6px;overflow-x:auto;margin-top:8px' },
-          r.photos.map((u) => h('img', { src: u, loading: 'lazy', style: 'width:84px;height:84px;border-radius:9px;object-fit:cover;border:1px solid var(--line);flex:0 0 auto' }))) : null));
-    });
-  }).catch(() => {});
-  return box;
+function contactSheet() {
+  const w = SHOP.wechat, qr = SHOP.brand.wechatQr;
+  const body = h('div', { class: 'center' },
+    h('h2', null, '联系 ' + SHOP.name),
+    qr ? h('div', { class: 'qrframe' }, h('img', { src: qr, alt: '微信二维码' })) : null,
+    w ? h('div', null,
+      h('p', { class: 'small muted', style: 'margin:8px 0 6px' }, '微信号'),
+      h('div', { class: 'code copy frx', style: 'display:inline-block', onclick: () => copyText(w) }, w),
+      h('div', null, h('button', { class: 'btn small', style: 'margin-top:10px', onclick: () => copyText(w) }, '复制微信号'))) : null,
+    (!qr && !w) ? h('p', { class: 'small muted' }, '通过任意商品「询单」留下手机号，卖家会联系你。') : null);
+  sheet(body);
 }
 
 /* ---------- buyer review flow (确认收货 + 评价 + 晒图) ---------- */
@@ -306,7 +416,7 @@ function reviewSheet() {
     h('h2', null, '已购评价'),
     h('p', { class: 'small muted' }, '输入下单手机号找到你的订单：确认收货、打星评价，收货 5 天内还可上传实拍图。'),
     h('label', { class: 'f' }, phoneIn), errEl,
-    h('button', { class: 'btn acc block', onclick: lookup }, '查找我的订单'),
+    h('button', { class: 'ctabtn', onclick: lookup }, '查找我的订单'),
     step2);
   const sh = sheet(body);
 
@@ -348,7 +458,7 @@ function reviewSheet() {
       h('h2', { style: 'font-size:16px;margin-top:8px' }, '确认收货 · ' + o.code),
       h('p', { class: 'small muted' }, '货收到了？选择实际到货日期（评价与晒图期从这天起算）。'),
       h('label', { class: 'f' }, h('span', null, '到货日期'), dateIn),
-      h('button', { class: 'btn acc block', onclick: async () => {
+      h('button', { class: 'ctabtn', onclick: async () => {
         try {
           await API.post('/api/review/deliver', { orderId: o.id, phone: phoneIn.value.trim(), deliveryDate: dateIn.value }, { quiet: true });
         } catch (e) { errEl.textContent = e.message; return; }
@@ -361,11 +471,14 @@ function reviewSheet() {
 
   function rateForm(o) {
     let stars = 0;
-    const starRow = h('div', { class: 'row', style: 'gap:6px;font-size:30px;justify-content:center;cursor:pointer' });
+    const starRow = h('div', { class: 'row', style: 'gap:8px;font-size:34px;justify-content:center;cursor:pointer;margin:6px 0' });
     for (let i = 1; i <= 5; i++) {
-      const b = h('span', { role: 'button', style: 'color:var(--line2)', onclick: () => {
+      const b = h('span', { role: 'button', style: 'color:var(--line2);transition:transform .15s,color .15s', onclick: () => {
         stars = i;
-        Array.from(starRow.children).forEach((x, j) => { x.style.color = j < i ? 'var(--warn)' : 'var(--line2)'; });
+        Array.from(starRow.children).forEach((x, j) => {
+          x.style.color = j < i ? 'var(--gold)' : 'var(--line2)';
+          x.style.transform = j < i ? 'scale(1.12)' : 'none';
+        });
       } }, '★');
       starRow.append(b);
     }
@@ -374,7 +487,7 @@ function reviewSheet() {
       h('h2', { style: 'font-size:16px;margin-top:8px' }, '评价 · ' + o.title),
       starRow,
       h('label', { class: 'f' }, txt),
-      h('button', { class: 'btn acc block', onclick: async () => {
+      h('button', { class: 'ctabtn', onclick: async () => {
         if (!stars) { errEl.textContent = '请点星打分'; return; }
         errEl.textContent = '';
         try { await API.post('/api/review/create', { orderId: o.id, phone: phoneIn.value.trim(), stars, text: txt.value }, { quiet: true }); }
@@ -404,19 +517,6 @@ function reviewSheet() {
     return h('div', null, grid, fileIn,
       h('button', { class: 'btn block ghost small', style: 'margin-top:10px', onclick: () => sh.close() }, '完成'));
   }
-}
-
-function contactSheet() {
-  const w = SHOP.wechat, qr = SHOP.brand.wechatQr;
-  const body = h('div', { class: 'center' },
-    h('h2', null, '联系 ' + SHOP.name),
-    qr ? h('img', { class: 'qrimg', src: qr, alt: '微信二维码' }) : null,
-    w ? h('div', null,
-      h('p', { class: 'small muted', style: 'margin:8px 0 6px' }, '微信号'),
-      h('div', { class: 'code copy', style: 'display:inline-block', onclick: () => copyText(w) }, w),
-      h('div', null, h('button', { class: 'btn small', style: 'margin-top:10px', onclick: () => copyText(w) }, '复制微信号'))) : null,
-    (!qr && !w) ? h('p', { class: 'small muted' }, '通过任意商品「询单」留下手机号，卖家会联系你。') : null);
-  sheet(body);
 }
 
 boot();
