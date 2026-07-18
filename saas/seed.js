@@ -42,8 +42,8 @@ if (process.argv.includes('--demo')) {
   });
   const demos = [
     { title: '大辣椒 3.5寸 开花株 双梗', grade: 'A级', size: '3.5寸', stage: '开花株', fc: 2, qty: 5000, price: 18.5, tiers: [{ min: 500, price: 17 }, { min: 1000, price: 15.8 }], img: 'images/art-06-peach.jpg', feat: 1 },
-    { title: '富乐夕阳 2.5寸 中苗', grade: 'A级', size: '2.5寸', stage: '中苗', fc: 0, qty: 12000, price: 6.8, tiers: [{ min: 1000, price: 6.2 }], img: 'images/art-05-fuchsia.jpg', feat: 0 },
-    { title: '大辣椒 组培瓶苗', grade: '特级', size: '', stage: '瓶苗', fc: 0, qty: 30000, price: null, tiers: [], img: 'images/art-03-purple.jpg', feat: 0, pd: 'on_request' },
+    { title: '富乐夕阳 2.5寸 中苗', grade: 'A级', size: '2.5寸', stage: '中苗', fc: 0, qty: 12000, price: 6.8, tiers: [{ min: 1000, price: 6.2 }], img: 'images/art-07-aurora.jpg', feat: 0 },
+    { title: '大辣椒 组培瓶苗', grade: '特级', size: '', stage: '瓶苗', fc: 0, qty: 30000, price: null, tiers: [], img: 'images/art-04-pink.webp', feat: 0, pd: 'on_request' },
   ];
   for (const d of demos) {
     if (db.prepare('SELECT id FROM products WHERE tenant_id = ? AND title = ?').get(tid, d.title)) continue;

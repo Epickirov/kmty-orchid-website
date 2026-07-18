@@ -272,7 +272,8 @@ function productRow(p) {
       h('div', { class: 'row', style: 'gap:8px' },
         h('span', { class: 't grow' }, (p.featured ? '★ ' : '') + p.title),
         h('button', { class: 'btn tiny ghost', onclick: () => editorSheet(p) }, '编辑')),
-      h('div', { class: 'm' }, specChips(p)),
+      h('div', { class: 'm' }, specChips(p),
+        p.rating && p.rating.n > 0 ? h('span', { style: 'color:var(--warn)' }, '★' + p.rating.avg + ' (' + p.rating.n + ')') : null),
       h('div', { class: 'row', style: 'margin-top:8px;gap:8px' },
         h('span', { class: 'small muted' }, '库存'), qtyIn,
         h('span', { class: 'small muted' }, '¥'), priceIn,
@@ -695,6 +696,19 @@ async function renderSettings() {
       svcToggle('invoice', '可开发票'),
       h('label', { class: 'f' }, h('span', null, '破损处理'), replaceIn),
       h('label', { class: 'f' }, h('span', null, '物流说明'), carrierIn)),
+    h('div', { class: 'card' },
+      h('p', { class: 'h' }, '通知 · 企业微信群机器人'),
+      h('p', { class: 'small muted', style: 'margin:0 0 8px' }, '在你的企业微信群里「添加群机器人」，把 Webhook 地址粘贴到这里 — 新询单会立刻推送到群里。'),
+      (() => {
+        const hookIn = h('input', { value: (t.brand && t.brand.wecomHook) || '', placeholder: 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=…' });
+        hookIn.addEventListener('change', async () => {
+          const v = hookIn.value.trim();
+          if (v && !v.startsWith('https://qyapi.weixin.qq.com/cgi-bin/webhook/send')) { toast('地址需以 qyapi.weixin.qq.com 的 webhook 开头', true); return; }
+          await API.put('/api/tenant', { brand: { wecomHook: v } });
+          toast(v ? '已保存 ✓ 下一个询单开始推送' : '已关闭推送');
+        });
+        return h('label', { class: 'f' }, hookIn);
+      })()),
     h('div', { class: 'card' },
       h('p', { class: 'h' }, '账号'),
       h('div', { class: 'row', style: 'padding:6px 0' }, h('span', { class: 'muted' }, '登录代号'), h('span', { class: 'mono right' }, t.slug)),

@@ -9,6 +9,7 @@ const PREVIEW = new URLSearchParams(location.search).get('preview') === '1';
 const root = $('#app');
 let SHOP = null, PRODUCTS = [];
 const F = { stage: '', size: '', sort: 'default' };
+let ICP = '';
 
 async function boot() {
   let data;
@@ -22,7 +23,7 @@ async function boot() {
       h('p', { class: 'lead' }, '请与卖家确认链接是否正确。'))));
     return;
   }
-  SHOP = data.shop; PRODUCTS = data.products;
+  SHOP = data.shop; PRODUCTS = data.products; ICP = data.icp || '';
   document.title = SHOP.name + ' · 蝴蝶兰批发';
   document.documentElement.style.setProperty('--acc', SHOP.brand.accent || '#E7B7CF');
   render();
@@ -116,11 +117,14 @@ function render() {
 
   // footer
   root.append(h('div', { class: 'shopfoot' },
+    h('button', { class: 'btn small', style: 'margin-bottom:14px', onclick: () => reviewSheet() }, '📝 已购评价 · 确认收货'),
+    h('br'),
     (SHOP.company || SHOP.name),
     h('br'),
     h('span', null, '交易在微信中完成 · 下单即询价，无需在线支付'),
     h('br'),
-    h('a', { href: 'https://www.kmtyorchid.com', style: 'color:var(--faint)' }, 'Powered by KMTY 星商')));
+    h('a', { href: 'https://www.kmtyorchid.com', style: 'color:var(--faint)' }, 'Powered by KMTY 星商'),
+    ICP ? h('div', null, h('a', { href: 'https://beian.miit.gov.cn', target: '_blank', rel: 'noopener', style: 'color:var(--faint)' }, ICP)) : null));
 }
 
 function card(p) {
@@ -131,6 +135,7 @@ function card(p) {
     h('div', { class: 'bd' },
       h('div', { class: 't' }, p.title),
       h('div', { class: 'specs' }, [p.grade, p.sizeSpec, p.stage, p.flowerCount ? p.flowerCount + '梗' : ''].filter(Boolean).map((s) => h('span', null, s))),
+      p.rating && p.rating.n > 0 ? h('div', { class: 'small', style: 'margin-top:5px;color:var(--warn)' }, '★ ' + p.rating.avg + ' ', h('span', { class: 'muted' }, '(' + p.rating.n + ')')) : null,
       priceLine(p),
       p.qty > 0 ? h('div', { class: 'stock' }, '现货 ' + p.qty.toLocaleString('zh-CN') + ' 株') : null));
   el.addEventListener('keydown', (e) => { if (e.key === 'Enter') detailSheet(p); });
@@ -182,6 +187,7 @@ function detailSheet(p) {
     priceBlock,
     rows.length ? h('table', { class: 'spectable' }, rows.map(([k, v]) => h('tr', null, h('td', null, k), h('td', null, v)))) : null,
     p.descr ? h('div', { class: 'small', style: 'color:var(--muted);white-space:pre-line;line-height:1.8' }, p.descr) : null,
+    reviewsBlock(p),
     h('div', { class: 'stickycta' },
       h('button', { class: 'btn acc block', style: 'font-size:16px;padding:14px', onclick: () => { sh.close(); orderSheet(p); } },
         pi.mode === 'public' ? '立即询单' : '询价 · 下询单')));
@@ -263,8 +269,141 @@ function successSheet(code, p) {
       h('div', { class: 'code copy', style: 'display:inline-block', onclick: () => copyText(w) }, w),
       h('div', null, h('button', { class: 'btn small', style: 'margin-top:8px', onclick: () => copyText(w) }, '复制微信号'))) : null,
     (!qr && !w) ? h('p', { class: 'small muted' }, '卖家会尽快电话联系你。') : null,
-    h('button', { class: 'btn block ghost', style: 'margin-top:16px', onclick: () => sh.close() }, '继续逛店'));
+    h('p', { class: 'small muted', style: 'margin-top:12px' }, '成交收货后，回到本店点「已购评价」打星晒图（收货 5 天内可传实拍图）。'),
+    h('button', { class: 'btn block ghost', style: 'margin-top:10px', onclick: () => sh.close() }, '继续逛店'));
   const sh = sheet(body, { dismiss: false });
+}
+
+function reviewsBlock(p) {
+  if (!p.rating || !p.rating.n) return null;
+  const box = h('div', { style: 'margin:14px 0 4px' },
+    h('div', { class: 'secttl', style: 'padding:0;margin:0 0 8px' }, '买家评价 · ' + p.rating.n + ' 条 · ★ ' + p.rating.avg),
+    h('div', { class: 'skel', style: 'height:60px' }));
+  API.get('/api/reviews?product=' + p.id, { quiet: true }).then((d) => {
+    box.lastChild.remove();
+    d.reviews.forEach((r) => {
+      box.append(h('div', { style: 'border-top:1px solid var(--line);padding:10px 0' },
+        h('div', { class: 'row', style: 'gap:8px' },
+          h('span', { style: 'color:var(--warn);letter-spacing:2px' }, '★★★★★'.slice(0, r.stars) ),
+          h('span', { class: 'small' }, r.buyer),
+          h('span', { class: 'badge ok', style: 'font-size:10px' }, '✓ 已购'),
+          h('span', { class: 'small muted right' }, new Date(r.created).toLocaleDateString('zh-CN'))),
+        r.text ? h('div', { class: 'small', style: 'margin-top:5px;line-height:1.7' }, r.text) : null,
+        r.photos.length ? h('div', { style: 'display:flex;gap:6px;overflow-x:auto;margin-top:8px' },
+          r.photos.map((u) => h('img', { src: u, loading: 'lazy', style: 'width:84px;height:84px;border-radius:9px;object-fit:cover;border:1px solid var(--line);flex:0 0 auto' }))) : null));
+    });
+  }).catch(() => {});
+  return box;
+}
+
+/* ---------- buyer review flow (确认收货 + 评价 + 晒图) ---------- */
+
+function reviewSheet() {
+  const phoneIn = h('input', { type: 'tel', placeholder: '下单时填写的手机号', autocomplete: 'tel' });
+  const errEl = h('div', { class: 'ferr' });
+  const step2 = h('div');
+  const body = h('div', null,
+    h('h2', null, '已购评价'),
+    h('p', { class: 'small muted' }, '输入下单手机号找到你的订单：确认收货、打星评价，收货 5 天内还可上传实拍图。'),
+    h('label', { class: 'f' }, phoneIn), errEl,
+    h('button', { class: 'btn acc block', onclick: lookup }, '查找我的订单'),
+    step2);
+  const sh = sheet(body);
+
+  async function lookup() {
+    errEl.textContent = '';
+    let d;
+    try { d = await API.post('/api/review/lookup', { slug: SHOP.slug, phone: phoneIn.value.trim() }, { quiet: true }); }
+    catch (e) { errEl.textContent = e.message; return; }
+    step2.innerHTML = '';
+    if (!d.orders.length) { errEl.textContent = '没有找到已成交的订单（需卖家先确认成交）'; return; }
+    d.orders.forEach((o) => {
+      const line = h('div', { class: 'item', style: 'cursor:pointer', onclick: () => pick(o) },
+        h('div', { class: 'grow' },
+          h('div', { class: 't' }, o.title),
+          h('div', { class: 'm' }, h('span', { class: 'mono chip' }, o.code), o.qty + ' 株',
+            o.status === 'delivered' ? '已收货 ' + o.deliveryDate : '待确认收货',
+            o.reviewed ? h('span', { class: 'badge ok' }, '已评价') : null)),
+        h('span', { class: 'muted' }, '›'));
+      step2.append(line);
+    });
+  }
+
+  function pick(o) {
+    step2.innerHTML = '';
+    if (o.reviewed) {
+      step2.append(h('p', { class: 'small muted center', style: 'padding:12px' },
+        o.photoOpen ? '该订单已评价。仍在晒图期内，可继续传图：' : '该订单已评价，感谢！'));
+      if (o.photoOpen) step2.append(photoBox(o));
+      return;
+    }
+    if (o.status !== 'delivered') { confirmDeliver(o); return; }
+    if (!o.canReview) { step2.append(h('p', { class: 'small muted center' }, '该订单已超过评价期（收货后 60 天）')); return; }
+    rateForm(o);
+  }
+
+  function confirmDeliver(o) {
+    const dateIn = h('input', { type: 'date', value: localDate(), max: localDate() });
+    step2.append(
+      h('h2', { style: 'font-size:16px;margin-top:8px' }, '确认收货 · ' + o.code),
+      h('p', { class: 'small muted' }, '货收到了？选择实际到货日期（评价与晒图期从这天起算）。'),
+      h('label', { class: 'f' }, h('span', null, '到货日期'), dateIn),
+      h('button', { class: 'btn acc block', onclick: async () => {
+        try {
+          await API.post('/api/review/deliver', { orderId: o.id, phone: phoneIn.value.trim(), deliveryDate: dateIn.value }, { quiet: true });
+        } catch (e) { errEl.textContent = e.message; return; }
+        toast('已确认收货 ✓');
+        o.status = 'delivered'; o.deliveryDate = dateIn.value; o.canReview = true; o.photoOpen = true;
+        step2.innerHTML = '';
+        rateForm(o);
+      } }, '确认收货'));
+  }
+
+  function rateForm(o) {
+    let stars = 0;
+    const starRow = h('div', { class: 'row', style: 'gap:6px;font-size:30px;justify-content:center;cursor:pointer' });
+    for (let i = 1; i <= 5; i++) {
+      const b = h('span', { role: 'button', style: 'color:var(--line2)', onclick: () => {
+        stars = i;
+        Array.from(starRow.children).forEach((x, j) => { x.style.color = j < i ? 'var(--warn)' : 'var(--line2)'; });
+      } }, '★');
+      starRow.append(b);
+    }
+    const txt = h('textarea', { placeholder: '货怎么样？包装、花况、发货速度…（选填）', style: 'min-height:80px' });
+    step2.append(
+      h('h2', { style: 'font-size:16px;margin-top:8px' }, '评价 · ' + o.title),
+      starRow,
+      h('label', { class: 'f' }, txt),
+      h('button', { class: 'btn acc block', onclick: async () => {
+        if (!stars) { errEl.textContent = '请点星打分'; return; }
+        errEl.textContent = '';
+        try { await API.post('/api/review/create', { orderId: o.id, phone: phoneIn.value.trim(), stars, text: txt.value }, { quiet: true }); }
+        catch (e) { errEl.textContent = e.message; return; }
+        toast('评价已发布 ✓');
+        step2.innerHTML = '';
+        step2.append(h('p', { class: 'small ok center', style: 'padding:8px' }, '评价已发布！收货 5 天内可上传实拍图：'));
+        step2.append(photoBox(o));
+      } }, '发布评价'));
+  }
+
+  function photoBox(o) {
+    const grid = h('div', { class: 'mgrid' });
+    const fileIn = h('input', { type: 'file', accept: 'image/*', multiple: true, hidden: true, onchange: async () => {
+      for (const file of Array.from(fileIn.files).slice(0, 6)) {
+        const cell = h('div', { class: 'mcell' }, h('div', { class: 'prog', style: 'width:40%' }));
+        grid.insertBefore(cell, grid.lastChild);
+        try {
+          const { blob } = await compressImage(file);
+          const r = await API.post('/api/review/photo?order=' + o.id + '&phone=' + encodeURIComponent(phoneIn.value.trim()), blob, { quiet: true });
+          cell.innerHTML = ''; cell.append(h('img', { src: r.url }));
+        } catch (e) { cell.remove(); errEl.textContent = e.message; }
+      }
+      fileIn.value = '';
+    } });
+    grid.append(h('div', { class: 'mcell add', role: 'button', onclick: () => fileIn.click() }, '＋'));
+    return h('div', null, grid, fileIn,
+      h('button', { class: 'btn block ghost small', style: 'margin-top:10px', onclick: () => sh.close() }, '完成'));
+  }
 }
 
 function contactSheet() {

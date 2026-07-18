@@ -1,0 +1,20 @@
+[Unit]
+Description=KMTY Orchid Storefronts
+After=network.target
+
+[Service]
+WorkingDirectory=__APP__/saas
+EnvironmentFile=__APP__/saas/.env
+Environment=PORT=8787
+Environment=DATA_DIR=__APP__/saas/data
+Environment=BASE_URL=https://order.kmtyorchid.com
+ExecStart=/opt/node22/bin/node server.js
+Restart=always
+RestartSec=3
+# hardening (paths outside the app are read-only to the service)
+ProtectSystem=full
+ReadWritePaths=__APP__/saas/data
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

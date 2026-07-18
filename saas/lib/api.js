@@ -6,6 +6,7 @@
 'use strict';
 const C = require('./core');
 const M = require('./media');
+const N = require('./notify');
 
 /* =============================== helpers =============================== */
 
@@ -21,6 +22,7 @@ function brandOf(t) {
     featured: Array.isArray(b.featured) ? b.featured.slice(0, 8) : [],
     modules: { constellation: !!(b.modules && b.modules.constellation) },
     footer: b.footer || '',
+    wecomHook: N.validWecomHook(b.wecomHook) ? b.wecomHook : '',
   };
 }
 function servicesOf(t) {
@@ -37,7 +39,7 @@ function servicesOf(t) {
 function mediaUrl(file) { return '/m/' + file; }
 
 function productMedia(db, productId, publicOnly) {
-  const rows = db.prepare('SELECT * FROM media WHERE product_id = ? ' + (publicOnly ? "AND status = 'approved' " : '') + 'ORDER BY sort, created').all(productId);
+  const rows = db.prepare('SELECT * FROM media WHERE product_id = ? AND review_id IS NULL ' + (publicOnly ? "AND status = 'approved' " : '') + 'ORDER BY sort, created').all(productId);
   return rows.map((m) => ({ id: m.id, url: mediaUrl(m.file), status: m.status, sort: m.sort, bytes: m.bytes }));
 }
 
@@ -56,6 +58,13 @@ function priceInfo(product, tenantBrand) {
   }
   return { mode: mode === 'public' ? 'on_request' : mode };  // public without a price set behaves as on_request
 }
+
+function ratingOf(db, productId) {
+  const r = db.prepare("SELECT AVG(stars) AS a, COUNT(*) AS n FROM reviews WHERE product_id = ? AND status = 'published'").get(productId);
+  return r && r.n ? { avg: Math.round(r.a * 10) / 10, n: r.n } : { avg: 0, n: 0 };
+}
+function maskName(n) { n = String(n || '').trim(); return n ? n[0] + '**' : '匿名'; }
+function maskPhone(p) { const d = String(p || '').replace(/\D/g, ''); return d.length >= 7 ? d.slice(0, 3) + '****' + d.slice(-4) : '****'; }
 
 function tenantBySlug(db, slug) {
   return db.prepare('SELECT * FROM tenants WHERE slug = ?').get(C.safeSlug(slug));
@@ -180,6 +189,7 @@ async function updateTenant(req, res, ctx) {
       announcement: b.announcement !== undefined ? C.clean(b.announcement, 120) : brand.announcement,
       shipsFrom: b.shipsFrom !== undefined ? C.clean(b.shipsFrom, 40) : brand.shipsFrom,
       priceMode: b.priceMode !== undefined && ['public', 'on_request', 'hidden'].includes(b.priceMode) ? b.priceMode : brand.priceMode,
+      wecomHook: b.wecomHook !== undefined ? (N.validWecomHook(String(b.wecomHook).trim()) ? String(b.wecomHook).trim() : '') : brand.wecomHook,
       featured: Array.isArray(b.featured) ? b.featured.map(String).slice(0, 8) : brand.featured,
       modules: b.modules !== undefined ? { constellation: !!(b.modules && b.modules.constellation) } : brand.modules,
       footer: b.footer !== undefined ? C.clean(b.footer, 40) : brand.footer,
@@ -247,6 +257,7 @@ function listProducts(req, res, ctx) {
       qty: p.qty, price: p.price, tiers: parseJson(p.tiers, []), priceDisplay: p.price_display,
       status: p.status, featured: !!p.featured, created: p.created, updated: p.updated,
       media: productMedia(ctx.db, p.id, false),
+      rating: ratingOf(ctx.db, p.id),
     })),
   });
 }
@@ -472,6 +483,7 @@ function shop(req, res, ctx, m, q) {
       qty: p.qty, featured: !!p.featured,
       price: priceInfo(p, brand),
       media: pm.map((x) => x.url),
+      rating: ratingOf(ctx.db, p.id),
     };
   });
   if (!preview) {
@@ -487,6 +499,7 @@ function shop(req, res, ctx, m, q) {
       constellation: brand.modules.constellation,
     },
     products,
+    icp: (ctx.db.prepare("SELECT value FROM kv WHERE key = 'icp'").get() || {}).value || '',
   });
 }
 
@@ -527,7 +540,139 @@ async function placeOrder(req, res, ctx) {
     .run(id, code, t.id, productId, kind, name, phone, qty, C.clean(d.wishDate || d.date, 12), C.cleanText(d.note, 500), recipe, JSON.stringify(msnap), C.now());
   ctx.db.prepare(`INSERT INTO counters (tenant_id, day, views, orders) VALUES (?,?,0,1)
     ON CONFLICT(tenant_id, day) DO UPDATE SET orders = orders + 1`).run(t.id, C.today());
+  const hook = brandOf(t).wecomHook;
+  if (hook) {
+    N.postWeCom(hook, '【新询单】' + code + '\n' +
+      (kind === 'product' ? (msnap.title || '商品') : '星空艺术兰 · ' + (recipe || '定制')) +
+      ' × ' + qty + '\n' + name + ' ' + phone +
+      (d.note ? '\n留言：' + C.cleanText(d.note, 100) : '') +
+      '\n→ 卖家中心处理：' + (ctx.env.BASE_URL || '') + '/seller');
+  }
   C.json(res, { ok: true, id, code });
+}
+
+/* =============================== reviews (buyer, phone-verified) =============================== */
+// Certified-buyer reviews per the marketplace spec §7, MVP verification =
+// order-id + phone match (SMS OTP upgrade lands after the Aliyun move).
+// Two-sided gate: the seller marked the deal completed AND delivery is
+// confirmed (by seller in the pipeline, or by the buyer right here). Stars/
+// text within 60 days of delivery; photos within 5 days (and never more than
+// 5 days after the confirmation moment, so back-dating can't stretch it).
+
+const REVIEW_TEXT_DAYS = 60 * 86400e3;
+function reviewOrderAuth(ctx, d) {
+  const o = ctx.db.prepare('SELECT * FROM orders WHERE id = ?').get(String(d.orderId || ''));
+  if (!o) return { err: '订单不存在' };
+  const phone = String(d.phone || '').replace(/\D/g, '');
+  if (phone.length < 6 || o.phone.replace(/\D/g, '') !== phone) return { err: '手机号与订单不符' };
+  return { o };
+}
+function photoDeadline(o) {
+  // min(deliveryDate + ~5d with timezone slack, confirmed-at + 5d hard)
+  const byDate = (Date.parse(o.delivery_date || '') || 0) + 6 * 86400e3;
+  const byConfirm = (o.delivered_at || 0) + 5 * 86400e3;
+  return Math.min(byDate || byConfirm, byConfirm);
+}
+
+async function reviewLookup(req, res, ctx) {
+  if (!C.rateLimit('rvlookup', C.ipOf(req), 12, 600e3)) return C.err(res, 429, '尝试太频繁，请稍后再试');
+  const d = await C.readJson(req);
+  const t = tenantBySlug(ctx.db, d.slug);
+  if (!t) return C.err(res, 404, '店铺不存在');
+  const phone = String(d.phone || '').replace(/\D/g, '');
+  if (phone.length < 6) return C.err(res, 400, '请输入下单时用的手机号');
+  const rows = ctx.db.prepare(`SELECT * FROM orders WHERE tenant_id = ? AND status IN ('completed','delivered')
+    ORDER BY created DESC LIMIT 100`).all(t.id)
+    .filter((o) => o.phone.replace(/\D/g, '') === phone).slice(0, 10);
+  C.json(res, {
+    orders: rows.map((o) => {
+      const reviewed = !!ctx.db.prepare('SELECT id FROM reviews WHERE order_id = ?').get(o.id);
+      const snap = parseJson(o.msnap, {});
+      return {
+        id: o.id, code: o.code, status: o.status,
+        title: o.kind === 'constellation' ? '星空艺术兰 · ' + (o.recipe || '定制') : (snap.title || '商品'),
+        qty: o.qty, deliveryDate: o.delivery_date || '', reviewed,
+        canReview: o.status === 'delivered' && !reviewed && (C.now() - (o.delivered_at || 0)) < REVIEW_TEXT_DAYS,
+        photoOpen: o.status === 'delivered' && C.now() < photoDeadline(o),
+      };
+    }),
+  });
+}
+
+// buyer confirms receipt + enters the delivery date (set once, order date ≤ d ≤ today)
+async function reviewDeliver(req, res, ctx) {
+  if (!C.rateLimit('rvdeliver', C.ipOf(req), 12, 600e3)) return C.err(res, 429, '尝试太频繁');
+  const d = await C.readJson(req);
+  const a = reviewOrderAuth(ctx, d);
+  if (a.err) return C.err(res, 400, a.err);
+  const o = a.o;
+  if (o.status === 'delivered') return C.json(res, { ok: true, already: true });
+  if (o.status !== 'completed') return C.err(res, 400, '该订单还未由卖家确认成交，暂不能确认收货');
+  const dd = String(d.deliveryDate || C.today()).slice(0, 10);
+  const orderDay = new Date(o.created + 8 * 3600e3).toISOString().slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dd) || dd > C.today() || dd < orderDay) return C.err(res, 400, '送达日期无效（需在下单日与今天之间）');
+  ctx.db.prepare("UPDATE orders SET status = 'delivered', delivery_date = ?, delivered_at = ? WHERE id = ?")
+    .run(dd, C.now(), o.id);
+  C.audit(ctx.db, { tenantId: o.tenant_id, actor: 'public', action: 'buyer_confirm_delivery', target: o.code, detail: dd, ip: C.ipOf(req) });
+  C.json(res, { ok: true });
+}
+
+async function reviewCreate(req, res, ctx) {
+  if (!C.rateLimit('rvcreate', C.ipOf(req), 8, 600e3)) return C.err(res, 429, '尝试太频繁');
+  const d = await C.readJson(req);
+  const a = reviewOrderAuth(ctx, d);
+  if (a.err) return C.err(res, 400, a.err);
+  const o = a.o;
+  if (o.status !== 'delivered') return C.err(res, 400, '确认收货后才能评价');
+  if (C.now() - (o.delivered_at || 0) > REVIEW_TEXT_DAYS) return C.err(res, 400, '已超过评价期（收货后 60 天内）');
+  if (ctx.db.prepare('SELECT id FROM reviews WHERE order_id = ?').get(o.id)) return C.err(res, 409, '该订单已评价过');
+  const stars = C.int(d.stars, 1, 5, null);
+  if (!stars) return C.err(res, 400, '请选择星级');
+  const id = 'rv_' + C.hexId(8);
+  // ratings attach to the goods owner — the storefront tenant until
+  // consignment ships (spec §3 rating rule keeps this field separate)
+  ctx.db.prepare(`INSERT INTO reviews (id,order_id,tenant_id,owner_id,product_id,stars,text,buyer_name,buyer_phone,created)
+    VALUES (?,?,?,?,?,?,?,?,?,?)`)
+    .run(id, o.id, o.tenant_id, o.tenant_id, o.product_id, stars, C.cleanText(d.text, 1000), o.name, o.phone, C.now());
+  C.audit(ctx.db, { tenantId: o.tenant_id, actor: 'public', action: 'review_create', target: o.code, detail: stars + '★', ip: C.ipOf(req) });
+  C.json(res, { ok: true, id });
+}
+
+async function reviewPhoto(req, res, ctx, m, q) {
+  if (!C.rateLimit('rvphoto', C.ipOf(req), 30, 3600e3)) return C.err(res, 429, '上传太频繁');
+  const a = reviewOrderAuth(ctx, { orderId: q.get('order'), phone: q.get('phone') });
+  if (a.err) return C.err(res, 400, a.err);
+  const o = a.o;
+  const rv = ctx.db.prepare('SELECT * FROM reviews WHERE order_id = ?').get(o.id);
+  if (!rv) return C.err(res, 400, '请先提交评价再传图');
+  if (C.now() > photoDeadline(o)) return C.err(res, 403, '晒图已截止（收货后 5 天内）');
+  const nOld = ctx.db.prepare('SELECT COUNT(*) AS n FROM media WHERE review_id = ?').get(rv.id).n;
+  if (nOld >= 6) return C.err(res, 400, '最多 6 张图');
+  let buf;
+  try { buf = await C.readBody(req, M.LIMITS.photo); } catch (e) { return C.err(res, 413, '图片过大'); }
+  const saved = M.saveBuffer(ctx.dataDir, o.tenant_id, buf);
+  if (saved.error) return C.err(res, 400, saved.error);
+  const id = 'm_' + C.hexId(8);
+  ctx.db.prepare(`INSERT INTO media (id,tenant_id,product_id,review_id,file,bytes,status,sort,created)
+    VALUES (?,?,?,?,?,?,'approved',?,?)`)
+    .run(id, o.tenant_id, o.product_id, rv.id, saved.file, saved.bytes, nOld, C.now());
+  C.json(res, { ok: true, url: mediaUrl(saved.file) });
+}
+
+function reviewsList(req, res, ctx, m, q) {
+  const pid = String(q.get('product') || '');
+  if (!pid) return C.err(res, 400, 'product required');
+  const rows = ctx.db.prepare(`SELECT * FROM reviews WHERE product_id = ? AND status = 'published'
+    ORDER BY created DESC LIMIT 50`).all(pid);
+  C.json(res, {
+    rating: ratingOf(ctx.db, pid),
+    reviews: rows.map((r) => ({
+      id: r.id, stars: r.stars, text: r.text,
+      buyer: maskName(r.buyer_name), phone: maskPhone(r.buyer_phone),
+      created: r.created,
+      photos: ctx.db.prepare("SELECT file FROM media WHERE review_id = ? AND status = 'approved' ORDER BY sort").all(r.id).map((x) => mediaUrl(x.file)),
+    })),
+  });
 }
 
 /* =============================== platform admin =============================== */
@@ -618,7 +763,18 @@ function adminFeed(req, res, ctx) {
   const media = ctx.db.prepare(`SELECT m.*, p.title AS ptitle, p.status AS pstatus, t.slug AS tslug FROM media m
     JOIN products p ON p.id = m.product_id JOIN tenants t ON t.id = m.tenant_id
     WHERE m.status = 'approved' ORDER BY m.created DESC LIMIT 30`).all();
+  const reviews = ctx.db.prepare(`SELECT r.*, t.slug AS tslug, p.title AS ptitle FROM reviews r
+    JOIN tenants t ON t.id = r.tenant_id LEFT JOIN products p ON p.id = r.product_id
+    ORDER BY r.created DESC LIMIT 20`).all();
+  const flagged = ctx.db.prepare(`SELECT m.*, t.slug AS tslug FROM media m JOIN tenants t ON t.id = m.tenant_id
+    WHERE m.scan = 'flagged' AND m.status = 'approved' ORDER BY m.created DESC LIMIT 30`).all();
   C.json(res, {
+    reviews: reviews.map((r) => ({
+      id: r.id, stars: r.stars, text: r.text, status: r.status, slug: r.tslug,
+      product: r.ptitle || '', buyer: maskName(r.buyer_name), created: r.created,
+      photos: ctx.db.prepare("SELECT file FROM media WHERE review_id = ? AND status = 'approved' ORDER BY sort").all(r.id).map((x) => mediaUrl(x.file)),
+    })),
+    flagged: flagged.map((x) => ({ id: x.id, url: mediaUrl(x.file), slug: x.tslug })),
     tenants: tenants.map((t) => ({
       id: t.id, slug: t.slug, name: t.name, status: t.status, created: t.created,
       wechat: t.wechat, logo: brandOf(t).logo,
@@ -648,6 +804,18 @@ async function adminProductOp(req, res, ctx, m) {
     ctx.db.prepare("UPDATE products SET status = 'rejected', updated = ? WHERE id = ?").run(C.now(), p.id);
   } else return C.err(res, 400, 'bad op');
   C.audit(ctx.db, { tenantId: p.tenant_id, actor: 'admin', action: 'moderate_product_' + d.op, target: p.id, detail: C.clean(d.reason, 200), ip: C.ipOf(req) });
+  C.json(res, { ok: true });
+}
+
+async function adminReviewOp(req, res, ctx, m) {
+  if (!C.admin(ctx.db, req)) return C.err(res, 401, '需要登录');
+  const r = ctx.db.prepare('SELECT * FROM reviews WHERE id = ?').get(m[1]);
+  if (!r) return C.err(res, 404, 'not found');
+  const d = await C.readJson(req);
+  if (d.op === 'reject') ctx.db.prepare("UPDATE reviews SET status = 'rejected' WHERE id = ?").run(r.id);
+  else if (d.op === 'approve') ctx.db.prepare("UPDATE reviews SET status = 'published' WHERE id = ?").run(r.id);
+  else return C.err(res, 400, 'bad op');
+  C.audit(ctx.db, { tenantId: r.tenant_id, actor: 'admin', action: 'moderate_review_' + d.op, target: r.id, ip: C.ipOf(req) });
   C.json(res, { ok: true });
 }
 
@@ -774,6 +942,11 @@ const ROUTES = [
 
   ['GET', /^\/api\/shop\/([a-z0-9_-]+)$/, shop],
   ['POST', /^\/api\/order$/, placeOrder],
+  ['POST', /^\/api\/review\/lookup$/, reviewLookup],
+  ['POST', /^\/api\/review\/deliver$/, reviewDeliver],
+  ['POST', /^\/api\/review\/create$/, reviewCreate],
+  ['POST', /^\/api\/review\/photo$/, reviewPhoto],
+  ['GET', /^\/api\/reviews$/, reviewsList],
 
   ['POST', /^\/api\/admin\/login$/, adminLogin],
   ['GET', /^\/api\/admin\/overview$/, adminOverview],
@@ -782,6 +955,7 @@ const ROUTES = [
   ['GET', /^\/api\/admin\/feed$/, adminFeed],
   ['POST', /^\/api\/admin\/product\/([a-zA-Z0-9_]+)$/, adminProductOp],
   ['POST', /^\/api\/admin\/media\/([a-zA-Z0-9_]+)$/, adminMediaOp],
+  ['POST', /^\/api\/admin\/review\/([a-zA-Z0-9_]+)$/, adminReviewOp],
   ['GET', /^\/api\/admin\/orders$/, adminOrders],
   ['GET', /^\/api\/admin\/leads$/, adminLeads],
   ['GET', /^\/api\/admin\/audit$/, adminAudit],

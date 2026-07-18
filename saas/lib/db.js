@@ -121,6 +121,21 @@ CREATE TABLE IF NOT EXISTS leads (
   ip      TEXT NOT NULL DEFAULT '',
   created INTEGER NOT NULL
 );
+CREATE TABLE IF NOT EXISTS reviews (
+  id          TEXT PRIMARY KEY,
+  order_id    TEXT NOT NULL UNIQUE,              -- one review per order
+  tenant_id   TEXT NOT NULL,                     -- storefront the order was placed with
+  owner_id    TEXT NOT NULL,                     -- goods owner (= tenant until consignment ships; ratings route here)
+  product_id  TEXT,
+  stars       INTEGER NOT NULL,
+  text        TEXT NOT NULL DEFAULT '',
+  buyer_name  TEXT NOT NULL DEFAULT '',
+  buyer_phone TEXT NOT NULL DEFAULT '',
+  status      TEXT NOT NULL DEFAULT 'published', -- published|rejected (instant publish + takedown net)
+  created     INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_reviews_product ON reviews(product_id, status);
+CREATE INDEX IF NOT EXISTS idx_reviews_tenant ON reviews(tenant_id, created);
 CREATE TABLE IF NOT EXISTS counters (
   tenant_id TEXT NOT NULL,
   day       TEXT NOT NULL,                       -- YYYY-MM-DD (UTC+8)
@@ -150,7 +165,20 @@ function open(dataDir) {
   db.exec('PRAGMA foreign_keys = ON');
   db.exec('PRAGMA busy_timeout = 5000');
   db.exec(SCHEMA);
+  migrate(db);
   return db;
+}
+
+// Additive column migrations for databases created by earlier versions.
+function migrate(db) {
+  const cols = (t) => db.prepare('PRAGMA table_info(' + t + ')').all().map((c) => c.name);
+  const mediaCols = cols('media');
+  // review photos live in the media table, linked by review_id (product photo
+  // queries must filter review_id IS NULL)
+  if (!mediaCols.includes('review_id')) db.exec('ALTER TABLE media ADD COLUMN review_id TEXT');
+  // post-publish auto-moderation verdict (Aliyun 内容安全 wired at deploy):
+  // none|clean|flagged — 'flagged' surfaces in the admin 动态 feed
+  if (!mediaCols.includes('scan')) db.exec("ALTER TABLE media ADD COLUMN scan TEXT NOT NULL DEFAULT 'none'");
 }
 
 module.exports = { open };

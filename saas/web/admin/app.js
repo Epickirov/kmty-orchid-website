@@ -132,6 +132,42 @@ async function renderFeed() {
     });
   }
 
+  if (q.flagged && q.flagged.length) {
+    main.append(h('h2', { style: 'font-size:16px;margin:16px 0 8px;color:var(--err)' }, '⚠ 内容安全标记 · ' + q.flagged.length));
+    const fg = h('div', { class: 'qmedia', style: 'flex-wrap:wrap' });
+    q.flagged.forEach((m) => {
+      fg.append(h('div', { style: 'position:relative;flex:0 0 auto' },
+        h('img', { src: m.url, title: '/' + m.slug, style: 'width:76px;height:76px;border-radius:9px;object-fit:cover;border:2px solid var(--err)' }),
+        h('button', { class: 'btn tiny ghost danger', style: 'position:absolute;right:2px;top:2px;padding:1px 7px;background:rgba(0,0,0,.6)', onclick: async (e) => {
+          await API.post('/api/admin/media/' + m.id, { op: 'reject' }); e.target.closest('div').remove(); toast('已移除');
+        } }, '✕')));
+    });
+    main.append(fg);
+  }
+
+  if (q.reviews && q.reviews.length) {
+    main.append(h('h2', { style: 'font-size:16px;margin:16px 0 8px' }, '最新评价'));
+    q.reviews.forEach((r) => {
+      main.append(h('div', { class: 'trow' },
+        h('div', { style: 'min-width:0' },
+          h('div', { class: 'row' },
+            h('span', { style: 'color:var(--warn);letter-spacing:2px' }, '★★★★★'.slice(0, r.stars)),
+            h('span', { class: 'small' }, r.buyer),
+            h('span', { class: 'small muted' }, r.product + ' · /' + r.slug + ' · ' + relTime(r.created)),
+            r.status === 'rejected' ? h('span', { class: 'badge rejected' }, '已移除') : null),
+          r.text ? h('div', { class: 'small', style: 'margin-top:4px' }, r.text.slice(0, 140)) : null,
+          r.photos.length ? h('div', { class: 'qmedia' }, r.photos.map((u) => h('img', { src: u, loading: 'lazy' }))) : null),
+        h('div', { class: 'row' },
+          r.status === 'published'
+            ? h('button', { class: 'btn tiny ghost danger', onclick: async () => {
+                if (await confirmSheet('移除这条评价？', '移除')) { await API.post('/api/admin/review/' + r.id, { op: 'reject' }); toast('已移除'); renderFeed(); }
+              } }, '移除')
+            : h('button', { class: 'btn tiny solid', onclick: async () => {
+                await API.post('/api/admin/review/' + r.id, { op: 'approve' }); toast('已恢复'); renderFeed();
+              } }, '恢复'))));
+    });
+  }
+
   if (q.media.length) {
     main.append(h('h2', { style: 'font-size:16px;margin:16px 0 8px' }, '最新图片'));
     const grid = h('div', { class: 'qmedia', style: 'flex-wrap:wrap' });
