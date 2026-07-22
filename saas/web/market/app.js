@@ -30,7 +30,7 @@ function render() {
   root.append(h('header', { class: 'mhero' },
     h('div', { class: 'bg' }),
     h('div', { class: 'in' },
-      h('div', { class: 'plat' }, 'KMTY 星商 · Phalaenopsis Wholesale'),
+      h('div', { class: 'plat' }, 'KMTY 星商 · 蝴蝶兰批发平台'),
       h('h1', null, '云南基地直发的', h('b', null, '蝴蝶兰批发市场')),
       h('p', { class: 'sub' }, '规格透明 · 阶梯批发价 · 在线询价，微信成交 — 花店、婚庆、批发商的一站式货源。'),
       h('div', { class: 'searchbar' }, searchIn,
@@ -57,7 +57,7 @@ function render() {
 
   /* ---------- sellers rail ---------- */
   if (sellers.length) {
-    wrap.append(sect('入驻基地', 'Growers'));
+    wrap.append(sect('入驻基地'));
     wrap.append(h('div', { class: 'sellerrail' }, sellers.map((s) =>
       h('a', { class: 'scard rv', href: '/s/' + s.slug },
         h('div', { class: 'bn', style: s.banner ? 'background-image:url(' + s.banner + ')' : 'background:linear-gradient(120deg,color-mix(in srgb,' + s.accent + ' 30%,#221a2c),#221a2c)' }),
@@ -75,10 +75,10 @@ function render() {
   wrap.append(h('div', { class: 'rfqband rv' },
     h('div', { class: 't' }, '按清单采购？发布求购单'),
     h('div', { class: 's' }, '填一张需求清单（品种 · 规格 · 数量），平台对接匹配的基地来报价 — 适合婚庆项目与批量采购。'),
-    h('button', { class: 'btn acc', onclick: () => rfqSheet('kmty', '') }, '发布求购 · RFQ')));
+    h('button', { class: 'btn acc', onclick: () => rfqSheet('kmty', '') }, '发布求购')));
 
   /* ---------- catalogue ---------- */
-  wrap.append(sect('全部现货', 'Marketplace', products.length));
+  wrap.append(sect('全部现货', null, products.length));
   const stages = [...new Set(products.map((p) => p.stage).filter(Boolean))];
   const sizes = [...new Set(products.map((p) => p.sizeSpec).filter(Boolean))];
   const colors = [...new Set(products.map((p) => p.colorFamily).filter(Boolean))];
@@ -132,7 +132,7 @@ function render() {
 function sect(zh, en, cnt) {
   return h('div', { class: 'sect' },
     h('span', { class: 'zh' }, zh),
-    h('span', { class: 'en' }, en),
+    en ? h('span', { class: 'en' }, en) : null,
     h('span', { class: 'rule' }),
     cnt != null ? h('span', { class: 'cnt' }, cnt + ' 款') : null);
 }

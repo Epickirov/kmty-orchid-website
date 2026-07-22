@@ -56,7 +56,7 @@ en: {
   'g.s3.chip':'Months 11–16','g.s3.word':'three','g.s3.title':'Spike &amp; cold room','g.s3.body':'A five-to-six-month cold treatment triggers strong, uniform spikes — the long Yunnan autumn does naturally what other growers force.','g.s3.fact':'5–6 month cold treatment','g.s3.note':'— the mountain autumn is our cold room, with the doors left open.',
   'g.s4.chip':'Months 16–18','g.s4.word':'four','g.s4.title':'Bloom &amp; grade','g.s4.body':'Plants bloom on the bench and are hand-graded — flower count, spike length, stem, leaf and root health — before a single one is boxed.','g.s4.fact':'Graded by five criteria','g.s4.note':'— five checks by hand before any plant earns its box.',
   'gr.eyebrow':'Export quality standard','gr.h3':'Graded like gemstones.','gr.side':'All four grades, side by side',
-  'gr.c1.name':'Special','gr.c1.badge':'export favourite',
+  'gr.c1.name':'Special','pk.reefer':'REEFER','gr.c1.badge':'export favourite',
   'gr.c2.name':'<i style="font-style:italic;font-weight:400;">Grade A</i>',
   'gr.c3.name':'<i style="font-style:italic;font-weight:400;">Grade B</i>',
   'gr.c4.name':'<i style="font-style:italic;font-weight:400;">Grade C</i>',
@@ -112,7 +112,7 @@ en: {
   'f.secs':'Sections','f.lang':'Language',
   'f.c1':'© 2000–2026 Kunming Tong Yi Biotechnology','f.c2':'China’s Nº 1 flowering-Phalaenopsis exporter',
   '_rail':['Our story','How we grow','Products','Constellation Orchid','How it ships'],
-  '_geo':{myanmar:'MYANMAR',laos:'LAOS',vietnam:'VIETNAM',sichuan:'SICHUAN',guizhou:'GUIZHOU',guangxi:'GUANGXI',yunnanBig:'云南',yunnanSub:'YUNNAN'}
+  '_geo':{myanmar:'MYANMAR',laos:'LAOS',vietnam:'VIETNAM',sichuan:'SICHUAN',guizhou:'GUIZHOU',guangxi:'GUANGXI',yunnanBig:'YUNNAN',yunnanSub:''}
 },
 /* ------------------------------------------------------------ 中文 */
 zh: {
@@ -147,7 +147,7 @@ zh: {
   'g.s3.chip':'第 11–16 月','g.s3.word':'三','g.s3.title':'抽梗与低温','g.s3.body':'五至六个月的低温处理催发粗壮而整齐的花梗 — 云南漫长的高原之秋，天然完成了别处需要人工强制的事。','g.s3.fact':'5–6 个月低温处理','g.s3.note':'— 高原之秋就是我们的冷室，而且大门敞开。',
   'g.s4.chip':'第 16–18 月','g.s4.word':'四','g.s4.title':'开花与分级','g.s4.body':'植株在苗床上开花，随后逐株手工分级 — 花朵数、花梗长度、茎、叶与根系健康 — 之后才装箱。','g.s4.fact':'五项标准逐株分级','g.s4.note':'— 每一株都经五道手工检查，才配得上它的箱子。',
   'gr.eyebrow':'出口品质标准 · 蝴蝶兰分级标准','gr.h3':'像宝石一样分级。','gr.side':'四个等级一览',
-  'gr.c1.name':'特级 <i style="font-style:italic;font-weight:400;">Special</i>','gr.c1.badge':'出口首选',
+  'gr.c1.name':'特级','pk.reefer':'冷链','gr.c1.badge':'出口首选',
   'gr.c2.name':'A 级','gr.c3.name':'B 级','gr.c4.name':'C 级',
   'gr.row.f':'花朵与花苞','gr.row.s':'花梗',
   'gr.stem.a':'花梗完整，从未修剪','gr.leaf.a':'叶片无斑点、裂纹或伤口','gr.roots.a':'根系健康 — 无腐烂',
@@ -173,7 +173,7 @@ zh: {
   'v.f1':'6 大主色','v.f2':'数十种花纹','v.f3':'200+ 品种在产','v.f4':'每季新杂交','v.link':'告诉我们颜色，我们来匹配 →',
   'a.eyebrow':'招牌系列 · 星空','a.h2':'星空系列',
   'a.lede':'整片夜空散落在鲜活的花瓣上 — 大理石纹的绿、琥珀与紫罗兰，每一次晕染都不重样。「星空」系列由我们嵩明温室' + ACCZ.b + '全自主研发' + ACCZ.bs + '，' + ACCZ.b + '专利申请中' + ACCZ.bs + ' — 每株编号、独一无二，只在这里可以订购。',
-  'a.t1':'星空 · CONSTELLATION','a.t2':'专利申请中','a.t3':'自主培育','a.t4':'独一无二','a.plants':'同系列植株',
+  'a.t1':'星空系列','a.t2':'专利申请中','a.t3':'自主培育','a.t4':'独一无二','a.plants':'同系列植株',
   'a.c1.n':'柑香石纹','a.c1.t':'盆栽 · 星空','a.c1.b':'橙与绿泼洒在白瓣之上 — 星空苗床上最新的一株，全程自育自成。',
   'a.c2.n':'藏红花与天空','a.c2.t':'当代禅意','a.c2.b':'暖琥珀晕入柔蓝 — 一件安静而向阳的作品。',
   'a.c3.n':'青花靛蓝','a.c3.t':'现代植物风','a.c3.b':'钴蓝在纯白上流转，如瓷上走笔的墨。',
@@ -201,7 +201,7 @@ zh: {
   'f.secs':'栏目','f.lang':'语言',
   'f.c1':'© 2000–2026 昆明统一生物科技有限公司','f.c2':'中国第一开花蝴蝶兰出口商',
   '_rail':['关于我们','如何种植','产品系列','星空','如何发货'],
-  '_geo':{myanmar:'缅甸',laos:'老挝',vietnam:'越南',sichuan:'四川',guizhou:'贵州',guangxi:'广西',yunnanBig:'云南',yunnanSub:'YUNNAN'}
+  '_geo':{myanmar:'缅甸',laos:'老挝',vietnam:'越南',sichuan:'四川',guizhou:'贵州',guangxi:'广西',yunnanBig:'云南',yunnanSub:''}
 },
 /* ------------------------------------------------------------ РУССКИЙ */
 ru: {
@@ -290,7 +290,7 @@ ru: {
   'f.secs':'Разделы','f.lang':'Язык',
   'f.c1':'© 2000–2026 Kunming Tong Yi Biotechnology','f.c2':'Экспортёр №1 цветущих фаленопсисов Китая',
   '_rail':['Наша история','Как мы выращиваем','Продукция','Орхидея «Созвездие»','Как мы отгружаем'],
-  '_geo':{myanmar:'МЬЯНМА',laos:'ЛАОС',vietnam:'ВЬЕТНАМ',sichuan:'СЫЧУАНЬ',guizhou:'ГУЙЧЖОУ',guangxi:'ГУАНСИ',yunnanBig:'云南',yunnanSub:'ЮНЬНАНЬ'}
+  '_geo':{myanmar:'МЬЯНМА',laos:'ЛАОС',vietnam:'ВЬЕТНАМ',sichuan:'СЫЧУАНЬ',guizhou:'ГУЙЧЖОУ',guangxi:'ГУАНСИ',yunnanBig:'ЮНЬНАНЬ',yunnanSub:''}
 },
 /* ------------------------------------------------------------ TIẾNG VIỆT */
 vi: {
@@ -379,7 +379,7 @@ vi: {
   'f.secs':'Chuyên mục','f.lang':'Ngôn ngữ',
   'f.c1':'© 2000–2026 Kunming Tong Yi Biotechnology','f.c2':'Nhà xuất khẩu hồ điệp nở hoa số 1 Trung Quốc',
   '_rail':['Câu chuyện','Cách chúng tôi trồng','Sản phẩm','Lan Chòm Sao','Cách giao hàng'],
-  '_geo':{myanmar:'MYANMAR',laos:'LÀO',vietnam:'VIỆT NAM',sichuan:'TỨ XUYÊN',guizhou:'QUÝ CHÂU',guangxi:'QUẢNG TÂY',yunnanBig:'云南',yunnanSub:'VÂN NAM'}
+  '_geo':{myanmar:'MYANMAR',laos:'LÀO',vietnam:'VIỆT NAM',sichuan:'TỨ XUYÊN',guizhou:'QUÝ CHÂU',guangxi:'QUẢNG TÂY',yunnanBig:'VÂN NAM',yunnanSub:''}
 }
 };
 
@@ -502,8 +502,6 @@ var MAP = {
     var els = this.grab();
     if (!els || !this.data) return;
     var d = I18N[LANG]._geo;
-    var zhOf = { myanmar: '缅甸', laos: '老挝', vietnam: '越南', sichuan: '四川', guizhou: '贵州', guangxi: '广西' };
-    var enOf = { myanmar: 'MYANMAR', laos: 'LAOS', vietnam: 'VIETNAM', sichuan: 'SICHUAN', guizhou: 'GUIZHOU', guangxi: 'GUANGXI' };
     els.back.innerHTML = ''; els.front.innerHTML = ''; els.pins.innerHTML = '';
     var self = this;
     // on phones the map renders as a small in-flow plate (~390px wide for a 1900-unit
@@ -516,13 +514,12 @@ var MAP = {
       // small screens: the front overlay svg is hidden, so countries join the plate
       var target = (co && K === 1) ? els.front : els.back;
       var primary = d[key] || l.en.toUpperCase();
-      var secondary = (LANG === 'zh') ? enOf[key] : zhOf[key];
+      // single-script labels per language — no cross-language pairing
       self.text(target, primary, l.x, l.y, { fill: co ? '#C7E7D3' : 'rgba(238,243,238,.8)', fs: (co ? 25 : 23) * K, fw: co ? 600 : 500, op: co ? 1 : .6, sws: (co ? 3.6 : 3) * K });
-      if (secondary) self.text(target, secondary, l.x, l.y + (l.zhY - l.y) * K, { fill: co ? '#C7E7D3' : 'rgba(238,243,238,.75)', fs: (co ? 19 : 18) * K, fw: 400, lsp: '.08em', op: co ? .9 : .5, sws: (co ? 3.4 : 3) * K, ff: "'Noto Sans SC','Hanken Grotesk','Noto Sans',sans-serif" });
     });
     // Yunnan centre label
     this.text(els.back, d.yunnanBig, 690, 556, { fill: '#fff', fs: 58 * K, fw: 700, st: 'rgba(6,16,10,.55)', sws: 5 * K, ff: "'Noto Serif SC','Playfair Display',serif" });
-    this.text(els.back, d.yunnanSub, 690, 556 + 36 * K, { fill: '#fff', fs: 22 * K, fw: 500, lsp: '.5em', st: 'rgba(6,16,10,.5)', sws: 4 * K });
+    if (d.yunnanSub) this.text(els.back, d.yunnanSub, 690, 556 + 36 * K, { fill: '#fff', fs: 22 * K, fw: 500, lsp: '.5em', st: 'rgba(6,16,10,.5)', sws: 4 * K });
     // pins: pulse rings + dot (names live on the cards)
     (this.data.pins || []).forEach(function (p) {
       var g = document.createElementNS(SVGNS, 'g');

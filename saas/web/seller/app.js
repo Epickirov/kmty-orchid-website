@@ -27,7 +27,7 @@ function gate(err) {
   root.innerHTML = '';
   const errEl = h('div', { class: 'ferr center' }, err || '');
   const loginBox = h('div', null,
-    h('label', { class: 'f' }, h('span', null, '店铺代号 · ID'),
+    h('label', { class: 'f' }, h('span', null, '店铺代号'),
       h('input', { id: 'g-slug', autocapitalize: 'none', autocomplete: 'username', placeholder: '如 lanyuan' })),
     h('label', { class: 'f' }, h('span', null, '密码'),
       h('input', { id: 'g-pass', type: 'password', autocomplete: 'current-password', enterkeyhint: 'go' })),
@@ -56,7 +56,7 @@ function gate(err) {
     h('div', { class: 'gatebox' },
       h('div', { class: 'center' },
         h('div', { class: 'mark', style: 'font-size:24px' }, 'KMTY ', h('b', null, '星商')),
-        h('div', { class: 'tag', style: 'margin-top:4px' }, 'ORCHID STOREFRONTS')),
+        h('div', { class: 'tag', style: 'margin-top:4px' }, '蝴蝶兰卖家平台')),
       h('h2', { class: 'center' }, '卖家中心'),
       h('p', { class: 'lead center' }, '蝴蝶兰批发 · 你自己的线上门店'),
       loginBox, signupBox, errEl, toggle)));

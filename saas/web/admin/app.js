@@ -26,7 +26,7 @@ function gate() {
   root.append(h('div', { class: 'gatewrap' }, h('div', { class: 'gatebox' },
     h('div', { class: 'center' },
       h('div', { class: 'mark', style: 'font-size:24px' }, 'KMTY ', h('b', null, '星商')),
-      h('div', { class: 'tag', style: 'margin-top:4px' }, 'PLATFORM CONSOLE')),
+      h('div', { class: 'tag', style: 'margin-top:4px' }, '平台管理')),
     h('h2', { class: 'center' }, '平台控制台'),
     h('label', { class: 'f', style: 'margin-top:16px' }, pass),
     h('button', { class: 'btn solid block', onclick: go }, '进入'),

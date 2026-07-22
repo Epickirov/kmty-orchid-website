@@ -124,12 +124,12 @@ function render() {
   /* ---------- featured ---------- */
   const featured = PRODUCTS.filter((p) => p.featured);
   if (featured.length) {
-    wrap.append(sect('精选', 'Selection'));
+    wrap.append(sect('精选'));
     wrap.append(h('div', { class: 'featrail' }, featured.map((p, i) => card(p, i))));
   }
 
   /* ---------- catalogue ---------- */
-  wrap.append(sect('全部商品', 'Catalogue', PRODUCTS.length));
+  wrap.append(sect('全部商品', null, PRODUCTS.length));
   const stages = [...new Set(PRODUCTS.map((p) => p.stage).filter(Boolean))];
   const sizes = [...new Set(PRODUCTS.map((p) => p.sizeSpec).filter(Boolean))];
   const anyPublic = PRODUCTS.some((p) => p.price && p.price.mode === 'public');
@@ -167,7 +167,7 @@ function render() {
   wrap.append(h('div', { class: 'rfqband rv', style: 'margin:26px 0 4px;border-radius:18px;padding:20px;position:relative;overflow:hidden;border:1px solid color-mix(in srgb,var(--acc) 30%,transparent);background:radial-gradient(120% 160% at 100% 0%,color-mix(in srgb,var(--acc) 18%,transparent),transparent 55%),#1a1420' },
     h('div', { style: 'font-family:var(--display);font-weight:640;font-size:18px' }, '按清单批量询价'),
     h('div', { style: 'color:#b9aec4;font-size:13px;margin:4px 0 12px' }, '一次填多行需求（品种 · 规格 · 数量），' + SHOP.name + ' 统一给你报价。'),
-    h('button', { class: 'btn acc', onclick: () => rfqSheet(SHOP.slug, SHOP.name) }, '批量询价 · RFQ')));
+    h('button', { class: 'btn acc', onclick: () => rfqSheet(SHOP.slug, SHOP.name) }, '立即批量询价')));
 
   /* ---------- footer ---------- */
   root.append(h('footer', { class: 'shopfoot' },
@@ -179,7 +179,7 @@ function render() {
       h('a', { class: 'btn small ghost', href: '/market' }, '⌂ 批发市场 · 更多基地')),
     h('div', null, '下单即询价，交易在微信中完成 · 无需在线支付'),
     h('div', { style: 'margin-top:8px' },
-      h('a', { href: 'https://www.kmtyorchid.com' }, 'Powered by KMTY 星商'),
+      h('a', { href: 'https://www.kmtyorchid.com' }, '技术支持 · KMTY 星商'),
       ICP ? h('span', null, ' · ', h('a', { href: 'https://beian.miit.gov.cn', target: '_blank', rel: 'noopener' }, ICP)) : null)));
 
   revealInit();
@@ -188,7 +188,7 @@ function render() {
 function sect(zh, en, cnt) {
   return h('div', { class: 'sect' },
     h('span', { class: 'zh' }, zh),
-    h('span', { class: 'en' }, en),
+    en ? h('span', { class: 'en' }, en) : null,
     h('span', { class: 'rule' }),
     cnt != null ? h('span', { class: 'cnt' }, cnt + ' 款') : null);
 }
@@ -305,7 +305,6 @@ function reviewsBlock(p) {
   const box = h('div', { style: 'margin:8px 0 4px' },
     h('div', { class: 'sect', style: 'margin:14px 0 6px' },
       h('span', { class: 'zh', style: 'font-size:16px' }, '买家评价'),
-      h('span', { class: 'en' }, 'Reviews'),
       h('span', { class: 'rule' }),
       h('span', { class: 'cnt' }, '★ ' + p.rating.avg + ' · ' + p.rating.n + ' 条')),
     h('div', { class: 'skel', style: 'height:56px' }));

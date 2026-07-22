@@ -32,7 +32,7 @@ window.__STATIC__ = true;
   // demo badge
   addEventListener('DOMContentLoaded', () => {
     const b = document.createElement('div');
-    b.textContent = '演示数据 · DEMO';
+    b.textContent = '演示数据';
     b.style.cssText = 'position:fixed;left:12px;bottom:12px;z-index:99;font-size:11px;letter-spacing:.12em;color:#F3EEE4;background:rgba(20,15,26,.85);border:1px solid rgba(231,183,207,.4);border-radius:999px;padding:6px 13px;backdrop-filter:blur(8px);pointer-events:none';
     document.body.append(b);
   });
