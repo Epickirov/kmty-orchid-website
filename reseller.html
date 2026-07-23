@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<title>经销商门户 · Reseller — KMTY</title>
+<title>经销商门户 — KMTY</title>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <style>
@@ -51,27 +51,27 @@
     <div class="mark">KMTY <b>星空</b></div>
     <h2>经销商登录</h2>
     <p>输入你的代号和密码</p>
-    <input id="gid" type="text" autocapitalize="none" autocomplete="username" placeholder="代号 · ID（如 acme）">
-    <input id="gpass" type="password" autocomplete="current-password" placeholder="密码 · Password" enterkeyhint="go">
+    <input id="gid" type="text" autocapitalize="none" autocomplete="username" placeholder="代号（如 acme）">
+    <input id="gpass" type="password" autocomplete="current-password" placeholder="密码" enterkeyhint="go">
     <button id="enter" type="button">登录</button>
     <div class="err" id="gateErr"></div>
   </div>
 </div>
 
 <div class="wrap" id="app" hidden>
-  <div class="head" id="head"><span class="mark">KMTY <b>星空</b></span><span class="tag">经销商 · RESELLER</span></div>
+  <div class="head" id="head"><span class="mark">KMTY <b>星空</b></span><span class="tag">经销商门户</span></div>
   <div class="linkcard">
-    <p class="h">你的下单链接 · YOUR LINK（发给你的客户）</p>
+    <p class="h">你的下单链接（发给你的客户）</p>
     <div class="url" id="mylink"></div>
     <div class="obar"><button class="btn solid" id="copy" type="button">复制链接</button><a class="btn" id="open" target="_blank" rel="noopener">打开</a><button class="btn" id="logout" type="button">退出</button></div>
   </div>
   <div class="linkcard" style="background:rgba(120,190,140,.08);border-color:rgba(120,190,140,.3);">
-    <button class="btn" id="pwToggle" type="button" style="width:100%;">🔒 修改密码 · Change your password</button>
+    <button class="btn" id="pwToggle" type="button" style="width:100%;">🔒 修改密码</button>
     <div id="pwForm" style="display:none;margin-top:12px;">
       <p class="lead" style="margin:0 0 10px;">改密码后，只有你知道 — KMTY 无法用你的账号登录查看。</p>
-      <input id="pwCur" type="password" autocomplete="current-password" placeholder="当前密码 · Current password">
-      <input id="pwNew" type="password" autocomplete="new-password" placeholder="新密码 · New password（至少 4 位）">
-      <input id="pwNew2" type="password" autocomplete="new-password" placeholder="确认新密码 · Confirm new password" enterkeyhint="go">
+      <input id="pwCur" type="password" autocomplete="current-password" placeholder="当前密码">
+      <input id="pwNew" type="password" autocomplete="new-password" placeholder="新密码（至少 4 位）">
+      <input id="pwNew2" type="password" autocomplete="new-password" placeholder="确认新密码" enterkeyhint="go">
       <button class="btn solid" id="pwSave" type="button" style="width:100%;">保存新密码</button>
       <div id="pwStatus"></div>
     </div>
@@ -155,7 +155,7 @@
     var sm = $('summary');
     if (list.length) {
       sm.style.display = 'block';
-      sm.innerHTML = '<p class="h">佣金结算 · COMMISSION</p>' +
+      sm.innerHTML = '<p class="h">佣金结算</p>' +
         '<div style="font-size:14px;line-height:1.9;">佣金比例 <b>' + rate + '%</b> · 参考单价 <b>¥' + price + '/株</b><br>' +
         list.length + ' 单 · ' + totPlants + ' 株 · 货值 <b>' + money(totVal) + '</b><br>' +
         '<span style="color:#9ad3a8;font-size:18px;font-weight:700;">应得佣金 ' + money(totCom) + '</span></div>' +
