@@ -208,13 +208,16 @@ async function renderProducts() {
   main.innerHTML = '';
   main.append(h('div', { class: 'row', style: 'margin:4px 0 6px' },
     h('h1', { style: 'font-size:19px' }, '商品 ', h('span', { class: 'h-sub' }, products.length + ' 个')),
-    h('button', { class: 'btn solid small right', onclick: () => editorSheet(null) }, '＋ 新增商品')));
+    h('button', { class: 'btn small right', onclick: () => importSheet(renderProducts) }, '批量导入'),
+    h('button', { class: 'btn solid small', onclick: () => editorSheet(null) }, '＋ 新增商品')));
 
   if (!products.length) {
     main.append(h('div', { class: 'empty' },
       h('div', { class: 'big' }, '❀'),
       '还没有商品。上传照片、填好规格和价格，', h('br'), '客户就能在你的店铺里下询单。',
-      h('div', null, h('button', { class: 'btn solid', onclick: () => editorSheet(null) }, '上传第一个商品'))));
+      h('div', null,
+        h('button', { class: 'btn solid', onclick: () => editorSheet(null) }, '上传第一个商品'),
+        h('button', { class: 'btn', style: 'margin-left:8px', onclick: () => importSheet(renderProducts) }, '从表格批量导入'))));
     return;
   }
   const list = h('div');
@@ -661,6 +664,12 @@ async function renderShop() {
     h('div', { class: 'card' },
       h('p', { class: 'h' }, '主推商品（展示在店铺顶部）'),
       featBox),
+    h('div', { class: 'card' },
+      h('p', { class: 'h' }, '推广物料'),
+      h('p', { class: 'fhint', style: 'margin:0 0 10px' }, '生成带你店铺二维码的图片，直接发微信 —— 不用等平台给你流量。'),
+      h('div', { class: 'row', style: 'gap:8px' },
+        h('button', { class: 'btn grow', onclick: () => posterSheet() }, '门店海报'),
+        h('button', { class: 'btn grow', onclick: () => priceSheetSheet() }, '报价单'))),
     h('div', { class: 'card' },
       h('p', { class: 'h' }, 'KMTY 星空艺术兰'),
       h('label', { class: 'row', style: 'gap:10px;cursor:pointer' },

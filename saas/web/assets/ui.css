@@ -201,6 +201,15 @@ select{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),
 .ck.done{color:var(--muted);text-decoration:line-through}
 .ck.done .box{background:rgba(154,211,168,.2);border-color:var(--ok);color:var(--ok)}
 
+/* ---------- import preview ---------- */
+.imp{border:1px solid var(--line);border-radius:var(--r-s);overflow:hidden;background:rgba(0,0,0,.18)}
+.improw{display:flex;align-items:center;gap:10px;padding:9px 11px;border-bottom:1px solid var(--line);font-size:13.5px}
+.improw:last-child{border-bottom:none}
+.improw.bad{background:rgba(231,155,155,.08)}
+.improw .ln{flex:0 0 auto;width:26px;font-size:11px;color:var(--faint);font-family:ui-monospace,Menlo,monospace;text-align:right}
+.improw b{font-weight:600}
+.imp .ck{padding:9px 11px}
+
 /* ---------- misc ---------- */
 .copy{cursor:pointer}
 .mono{font-family:ui-monospace,Menlo,monospace}

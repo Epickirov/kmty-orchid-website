@@ -154,6 +154,10 @@ plus what a real backend needs:
 - **Stock:** manual adjust always; optional **auto-decrement on order completion** (⟡ D22,
   revises D7) with low-stock and auto-`out_of_stock` thresholds; stock history log.
 - **CSV import/export** for sellers with hundreds of SKUs (template + validation report).
+  *Shipped:* paste-from-Excel or CSV upload (UTF-8 **and** GBK, TSV **and** comma), Chinese
+  header auto-mapping, per-row validation preview, tier-price parsing (`50:25;200:23`),
+  draft-vs-live toggle, 200 rows/import — `POST /api/products/bulk`, re-validated server-side
+  through the same field parser a single create uses.
 - Media pipeline, quotas, moderation exactly per [MKT] §4.2/§11 (OSS policy-signed uploads,
   先审后发).
 
@@ -214,6 +218,13 @@ to platform. Arrival-photo gallery stats ([MKT] F-8).
 ### 4.9 Marketing tools
 - Share-link manager (per-campaign suffixes `?c=` for source tracking).
 - **QR poster generator** ([MKT] F-14) and **price-sheet image generator** ([MKT] F-3).
+  *Shipped:* both render client-side to PNG (1080-wide, branded with the seller's logo,
+  accent and service promises) and carry a storefront QR. The price sheet paginates at 24
+  rows and can drop prices for a specs-only 货单. Save or native-share straight into WeChat.
+  These are deliberately useful **before** the platform sends anyone traffic — see §15's
+  liquidity risk. QR generation is our own dependency-free encoder (`web/assets/qr.js`,
+  byte mode v1–10, ECC L/M/Q/H) verified bit-for-bit against a reference implementation;
+  `saas/test-qr.js` pins it.
 - Product share cards (reuse the existing save-card tech per product).
 
 ### 4.10 Analytics

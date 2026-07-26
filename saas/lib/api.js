@@ -280,6 +280,44 @@ async function createProduct(req, res, ctx) {
   C.json(res, { ok: true, id });
 }
 
+/* Bulk import. A seller arriving with 60 SKUs in a spreadsheet should not
+   retype them. The client parses the CSV/TSV and posts rows; every row still
+   goes through readProductFields(), so the import path cannot write anything
+   a single create could not. */
+async function bulkProducts(req, res, ctx) {
+  const S = C.seller(ctx.db, req);
+  if (!S) return C.err(res, 401, '需要登录');
+  const d = await C.readJson(req);
+  const rows = Array.isArray(d.rows) ? d.rows.slice(0, 200) : [];
+  if (!rows.length) return C.err(res, 400, '没有可导入的数据');
+  const have = ctx.db.prepare('SELECT COUNT(*) AS n FROM products WHERE tenant_id = ?').get(S.tenant.id).n;
+  if (have + rows.length > 500) return C.err(res, 400, '超出商品数量上限（当前 ' + have + ' 个，上限 500 个）');
+
+  const status = d.publish ? 'active' : 'draft';
+  const ins = ctx.db.prepare(`INSERT INTO products (id,tenant_id,title,descr,grade,size_spec,flower_count,stage,variety,color_family,spike_len,qty,price,tiers,price_display,featured,status,created,updated)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
+  const created = [], skipped = [];
+  ctx.db.exec('BEGIN');
+  try {
+    rows.forEach((r, i) => {
+      const f = readProductFields(r || {}, null);
+      if (!f.title) { skipped.push({ row: i, reason: '缺少商品名称' }); return; }
+      const id = 'p_' + C.hexId(8);
+      const ts = C.now();
+      ins.run(id, S.tenant.id, f.title, f.descr, f.grade, f.size_spec, f.flower_count, f.stage, f.variety,
+        f.color_family, f.spike_len, f.qty, f.price, f.tiers, f.price_display, f.featured, status, ts, ts);
+      created.push(id);
+    });
+    ctx.db.exec('COMMIT');
+  } catch (e) { ctx.db.exec('ROLLBACK'); throw e; }
+
+  C.audit(ctx.db, {
+    tenantId: S.tenant.id, userId: S.user && S.user.id, actor: S.actor, action: 'product_bulk',
+    detail: created.length + ' 个 · ' + (status === 'active' ? '直接上架' : '存为草稿'), ip: C.ipOf(req),
+  });
+  C.json(res, { ok: true, created: created.length, skipped, status });
+}
+
 async function updateProduct(req, res, ctx, m) {
   const S = C.seller(ctx.db, req);
   if (!S) return C.err(res, 401, '需要登录');
@@ -985,6 +1023,7 @@ const ROUTES = [
   ['PUT', /^\/api\/tenant$/, updateTenant],
   ['GET', /^\/api\/products$/, listProducts],
   ['POST', /^\/api\/products$/, createProduct],
+  ['POST', /^\/api\/products\/bulk$/, bulkProducts],
   ['PUT', /^\/api\/products\/([a-zA-Z0-9_]+)$/, updateProduct],
   ['POST', /^\/api\/products\/([a-zA-Z0-9_]+)\/publish$/, publishProduct],
   ['DELETE', /^\/api\/products\/([a-zA-Z0-9_]+)$/, deleteProduct],
