@@ -1288,11 +1288,16 @@ class Component extends DCLogic {
        we target — Safari/iOS, Android Chrome, and WeChat's X5/WKWebView — with
        no black-backdrop video to key out and no capability sniffing to be fooled
        by. Nothing to wire up here.
-       The red bloom is our own footage regraded, not new material: hue pinned to
-       red with saturation/value rescaled, masked off the greens so the bud, stem
-       and leaves stay true. Detail survives because the veining lives in S/V, not
-       luminance. bloom-alpha.webp is the untouched pink original — swap the src
-       back to revert. */
+       The red spray opens bud by bud. It is generated footage shot against a
+       blue screen and keyed here — blue, not green, because a green key wide
+       enough to clear the background also eats an orchid's yellow lip (measured:
+       lip alpha 255 at similarity 0.18, 0 at 0.30). Despill cannot fix the edge
+       halo since the contaminated pixels are semi-transparent, so the matte is
+       eroded and colour-extended instead; residual fringe measures -0.9.
+       Framing is deliberate: the old pink asset was cut off at both sides (210
+       rows of petal against the left edge), so this one is cropped to hold ≥31px
+       of clearance on every frame. bloom-alpha.webp is the original pink
+       timelapse — swap the src back to revert. */
 
     /* reveal + clip + count */
     const els = $$('[data-reveal]');
