@@ -210,6 +210,7 @@
   <!-- HERO -->
   <section id="top" data-screen-label="Hero" style="position:relative;min-height:100svh;display:flex;flex-direction:column;justify-content:center;overflow:hidden;background:#12100c;">
     <img src="images/hero-field.jpg" alt="A sea of magenta Phalaenopsis in the KMTY greenhouse" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;animation:kmtyKen 24s ease-in-out infinite alternate;"/>
+    <video data-herovid muted playsinline preload="none" aria-hidden="true" tabindex="-1" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;opacity:0;transition:opacity 1.4s ease;pointer-events:none;"></video>
     <div data-heroscrim style="position:absolute;inset:0;background:linear-gradient(174deg,rgba(18,16,12,.7) 0%,rgba(18,16,12,.32) 34%,rgba(18,16,12,.5) 68%,rgba(18,16,12,.9) 100%);"></div>
     <div style="position:relative;width:100%;max-width:1300px;margin:0 auto;padding:104px clamp(18px,4vw,44px) 0;z-index:3;">
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;">
@@ -1298,6 +1299,37 @@ class Component extends DCLogic {
        rows of petal against the left edge), so this one is cropped to hold ≥31px
        of clearance on every frame. bloom-alpha.webp is the original pink
        timelapse — swap the src back to revert. */
+
+    /* Hero bloom film — the greenhouse coming into flower, played at a third of
+       real speed so the opening is barely perceptible. It sits *over* the hero
+       still rather than replacing it: hero-field.jpg stays the LCP paint, and if
+       any of the gates below trip, the page is exactly what it was before.
+       Plays once and holds on the bloomed frame; looping back to bare buds every
+       half minute would read as a glitch. */
+    (function () {
+      const v = document.querySelector('[data-herovid]');
+      if (!v || !('IntersectionObserver' in window)) return;
+      const conn = navigator.connection || {};
+      const slow = /(^|-)2g$/.test(conn.effectiveType || '');
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches || conn.saveData || slow) return;
+      const io = new IntersectionObserver((entries) => {
+        if (!entries.some(e => e.isIntersecting)) return;
+        io.disconnect();
+        // Set muted as a property, not just the attribute: without it autoplay is
+        // refused and play() rejects silently, leaving the film invisible at
+        // opacity 0. iOS wants the property set too.
+        v.muted = true;
+        v.playsInline = true;
+        v.src = innerWidth < 760 ? 'images/hero-bloom-m.mp4' : 'images/hero-bloom.mp4';
+        v.addEventListener('canplay', () => {
+          const p = v.play();
+          if (p && p.then) p.then(() => { v.style.opacity = '1'; }).catch(() => {});
+          else v.style.opacity = '1';
+        }, { once: true });
+        v.load();
+      });
+      io.observe(v);
+    })();
 
     /* reveal + clip + count */
     const els = $$('[data-reveal]');
