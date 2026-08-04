@@ -33,6 +33,27 @@ const entries = dump.entries || [];
 const db = open(DATA_DIR);
 const stats = { tenants: 0, orders: 0, leads: 0, config: 0, skipped: 0 };
 
+/* Slugs this run creates. A dry run writes nothing, so without tracking them
+   here every order would look tenant-less and be reported as skipped — the
+   preview would claim 0 orders no matter how many exist. */
+const pending = new Set();
+const tenantExists = (slug) => pending.has(slug) || !!db.prepare('SELECT id FROM tenants WHERE slug = ?').get(slug);
+
+/* Orders whose reseller is '_' belong to KMTY itself and map to the 'kmty'
+   house tenant. On a database that was never seeded that tenant is absent and
+   those orders — normally the largest share — would be dropped in silence.
+   Create it rather than lose them. */
+function houseTenant() {
+  const row = db.prepare("SELECT id FROM tenants WHERE slug = 'kmty'").get();
+  if (row) return row;
+  if (DRY) { pending.add('kmty'); return { id: 't_kmty_pending' }; }
+  const tid = 't_' + C.hexId(8);
+  db.prepare('INSERT INTO tenants (id,slug,name,company,status,brand,rate,price,created,approved_at) VALUES (?,?,?,?,?,?,?,?,?,?)')
+    .run(tid, 'kmty', 'KMTY', '', 'active', '{}', 0, 0, C.now(), C.now());
+  console.log("created the 'kmty' house tenant for direct (reseller '_') orders");
+  return { id: tid };
+}
+
 for (const e of entries) {
   const k = e.key || '';
   try {
@@ -42,8 +63,9 @@ for (const e of entries) {
     } else if (k.startsWith('rs:')) {
       const r = JSON.parse(e.value);
       const slug = C.safeSlug(r.id || k.slice(3));
-      if (!slug || db.prepare('SELECT id FROM tenants WHERE slug = ?').get(slug)) { stats.skipped++; continue; }
+      if (!slug || tenantExists(slug)) { stats.skipped++; continue; }
       stats.tenants++;
+      pending.add(slug);
       if (DRY) continue;
       const tid = 't_' + C.hexId(8);
       const brand = { footer: r.footer || '' };
@@ -65,22 +87,28 @@ for (const e of entries) {
         .run('u_' + C.hexId(8), tid, '', r.passHash ? 's1:' + r.passHash : C.hashPass(C.hexId(8)), C.now());
     } else if (k.startsWith('ord:')) {
       const o = JSON.parse(e.value);
-      if (db.prepare('SELECT id FROM orders WHERE id = ?').get('o_' + (o.id || ''))) { stats.skipped++; continue; }
+      /* Derive the id from the KV key, not a random one: these records carry no
+         id of their own, so a random id made re-running the import duplicate
+         every order instead of skipping the ones already in. */
+      const oid = 'o_' + (o.id || C.safeSlug(k.slice(4).replace(/:/g, '_')) || C.hexId(6));
+      if (db.prepare('SELECT id FROM orders WHERE id = ?').get(oid)) { stats.skipped++; continue; }
       const slug = C.safeSlug(o.reseller === '_' ? 'kmty' : o.reseller) || 'kmty';
-      const t = db.prepare('SELECT id FROM tenants WHERE slug = ?').get(slug) || db.prepare("SELECT id FROM tenants WHERE slug = 'kmty'").get();
-      if (!t) { stats.skipped++; continue; }
+      const t = (tenantExists(slug) ? db.prepare('SELECT id FROM tenants WHERE slug = ?').get(slug) : null) || houseTenant();
       stats.orders++;
       if (DRY) continue;
       const recipe = Array.isArray(o.recipe) ? o.recipe.map((c) => (c.zh || c.en) + ' ' + c.pct + '%').join(' · ') : '';
       db.prepare('INSERT INTO orders (id,code,tenant_id,kind,name,phone,qty,wish_date,recipe,msnap,status,created) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)')
-        .run('o_' + (o.id || C.hexId(6)), C.orderCode(), t.id, 'constellation',
+        .run(oid, o.code || C.orderCode(), t.id, 'constellation',
           o.name || '', o.phone || '', +o.qty || 1, o.date || '', recipe, '{}', 'placed', o.ts || C.now());
     } else if (k.startsWith('lead:')) {
       const l = JSON.parse(e.value);
+      // Same reasoning as orders: key-derived id so a re-run skips rather than duplicates.
+      const lid = 'l_' + (C.safeSlug(k.slice(5).replace(/:/g, '_')) || C.hexId(8));
+      if (db.prepare('SELECT id FROM leads WHERE id = ?').get(lid)) { stats.skipped++; continue; }
       stats.leads++;
       if (DRY) continue;
       db.prepare('INSERT INTO leads (id,email,company,name,tel,type,spec,message,lang,page,ip,created) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)')
-        .run('l_' + C.hexId(8), l.email || '', l.company || '', l.name || '', l.tel || '',
+        .run(lid, l.email || '', l.company || '', l.name || '', l.tel || '',
           l.type || '', l.spec || '', l.message || '', l.lang || '', l.page || '', l.ip || '', l.ts || C.now());
     } else stats.skipped++;
   } catch (err) { console.error('entry failed:', k, err.message); stats.skipped++; }
