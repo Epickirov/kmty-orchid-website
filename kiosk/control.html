@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>星空艺术兰 · 调色</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#141018">
+<style>
+:root{
+  --bg:#141018; --bg2:#1b1620; --ink:#F3EEE4; --muted:#a79db2; --acc:#E7B7CF;
+  --line:rgba(243,238,228,.14);
+  --serif:Georgia,'Songti SC','Noto Serif SC',serif;
+  --sans:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans SC',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--sans);
+  background-image:radial-gradient(ellipse at 80% -8%,rgba(231,183,207,.14),transparent 50%);
+  min-height:100dvh;padding:calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 20px);
+  display:flex;flex-direction:column;gap:14px;max-width:520px;margin:0 auto;
+}
+header{display:flex;align-items:baseline;gap:8px}
+.mark{font-family:var(--serif);font-size:17px}
+.mark b{color:var(--acc)}
+.tag{font-size:10px;letter-spacing:.28em;color:var(--muted);margin-left:auto}
+#wrap{position:relative;align-self:center}
+#mixcv{width:min(64vw,240px);height:min(64vw,240px);display:block;filter:drop-shadow(0 10px 26px rgba(0,0,0,.5))}
+#no{text-align:center;font-family:var(--serif);font-size:11px;letter-spacing:.34em;color:rgba(243,238,228,.45);margin-top:4px}
+.lbl{font-size:11px;letter-spacing:.26em;color:var(--muted);margin-bottom:9px}
+#sw{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.sw{position:relative;aspect-ratio:1;border-radius:50%;border:2px solid transparent;cursor:pointer;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.28)}
+.sw[aria-pressed="true"]{border-color:var(--ink);transform:scale(1.06)}
+.sw[disabled]{opacity:.28}
+.sw span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+#sl{display:flex;flex-direction:column;gap:12px}
+.srow{display:flex;align-items:center;gap:11px}
+.sdot{width:22px;height:22px;border-radius:50%;flex:0 0 auto;box-shadow:inset 0 0 0 1px rgba(255,255,255,.3)}
+.snm{font-size:13px;width:62px;flex:0 0 auto}
+input[type=range]{flex:1;accent-color:var(--acc);height:26px}
+.spct{font-family:var(--serif);font-size:13px;color:var(--muted);width:38px;text-align:right}
+.btns{display:flex;gap:10px;margin-top:2px}
+button.b{
+  flex:1;padding:15px 10px;border-radius:13px;border:1px solid var(--line);
+  background:rgba(243,238,228,.07);color:var(--ink);font-size:15px;font-family:inherit;cursor:pointer;
+}
+button.b.solid{background:var(--acc);color:#2b1420;border-color:transparent;font-weight:600}
+button.b:active{transform:scale(.98)}
+#state{font-size:11px;letter-spacing:.14em;color:var(--muted);text-align:center;min-height:14px}
+#state.bad{color:#e79b9b}
+/* card overlay */
+#ovl{position:fixed;inset:0;background:rgba(10,8,12,.92);display:none;align-items:center;justify-content:center;
+  flex-direction:column;gap:14px;padding:22px;z-index:9;backdrop-filter:blur(4px)}
+#ovl.on{display:flex}
+#ovl img{max-width:100%;max-height:64vh;border-radius:12px;box-shadow:0 18px 50px rgba(0,0,0,.6)}
+#ovl .hint{font-size:13px;color:var(--muted);text-align:center}
+</style>
+</head>
+<body>
+  <header>
+    <span class="mark">KMTY <b>星空艺术兰</b></span>
+    <span class="tag">CONSTELLATION</span>
+  </header>
+
+  <div id="wrap">
+    <canvas id="mixcv" width="560" height="560"></canvas>
+    <div id="no">№ ——</div>
+  </div>
+
+  <div>
+    <div class="lbl">选 择 颜 色 （ 最 多 三 种 ）</div>
+    <div id="sw"></div>
+  </div>
+
+  <div>
+    <div class="lbl">调 整 比 例</div>
+    <div id="sl"></div>
+  </div>
+
+  <div class="btns">
+    <button class="b" id="again">↻ 重新调和</button>
+    <button class="b solid" id="save">保存图片</button>
+  </div>
+  <div id="state">—</div>
+
+  <div id="ovl">
+    <img id="card" alt="配色留念">
+    <div class="hint">长按图片保存到相册</div>
+    <button class="b" id="close" style="max-width:200px">关闭</button>
+  </div>
+
+<script src="engine.js"></script>
+<script>
+(function () {
+  'use strict';
+  var cv = document.getElementById('mixcv');
+  var eng = KMTYEngine(cv, { onNumber: function (t) { document.getElementById('no').textContent = t; } });
+  var C = eng.colors();
+  var stateEl = document.getElementById('state');
+
+  /* ---------- push to the big screen ---------- */
+  var pushT = 0, pushFail = 0;
+  function push() {
+    clearTimeout(pushT);
+    // Coalesce: dragging a slider fires continuously and the display only needs
+    // the value it lands on.
+    pushT = setTimeout(function () {
+      fetch('/state', {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(eng.state())
+      }).then(function (r) {
+        if (!r.ok) throw 0;
+        pushFail = 0; stateEl.className = ''; stateEl.textContent = '已同步到大屏';
+      }).catch(function () {
+        pushFail++; stateEl.className = 'bad';
+        stateEl.textContent = pushFail > 2 ? '未连接大屏 · 本机仍可调色' : '重试中…';
+      });
+    }, 90);
+  }
+
+  /* ---------- swatches ---------- */
+  var swWrap = document.getElementById('sw');
+  function buildSwatches() {
+    swWrap.innerHTML = '';
+    C.forEach(function (c, k) {
+      var b = document.createElement('button');
+      b.className = 'sw'; b.style.background = c.hex;
+      b.setAttribute('aria-label', c.zh || c.en);
+      if (!c.stock) b.disabled = true;
+      b.addEventListener('click', function () { toggle(k); });
+      swWrap.append(b);
+    });
+    paintSwatches();
+  }
+  function paintSwatches() {
+    var sel = eng.state().sel;
+    Array.prototype.forEach.call(swWrap.children, function (b, k) {
+      var i = sel.indexOf(k);
+      b.setAttribute('aria-pressed', i >= 0 ? 'true' : 'false');
+      b.innerHTML = i >= 0 ? '<span>' + (i + 1) + '</span>' : '';
+    });
+  }
+  function toggle(k) {
+    var st = eng.state(), i = st.sel.indexOf(k);
+    if (i >= 0) { if (st.sel.length === 1) return; st.sel.splice(i, 1); delete st.weights[k]; }
+    else {
+      if (st.sel.length >= 3) { var drop = st.sel.shift(); delete st.weights[drop]; }
+      st.sel.push(k); st.weights[k] = 30;
+    }
+    eng.apply(st, false);
+    paintSwatches(); buildSliders(); push();
+  }
+
+  /* ---------- weight sliders ---------- */
+  var slWrap = document.getElementById('sl');
+  function buildSliders() {
+    var st = eng.state();
+    var total = st.sel.reduce(function (t, k) { return t + (st.weights[k] || 1); }, 0) || 1;
+    slWrap.innerHTML = '';
+    st.sel.forEach(function (k) {
+      var c = C[k]; if (!c) return;
+      var row = document.createElement('div'); row.className = 'srow';
+      row.innerHTML = '<span class="sdot" style="background:' + c.hex + '"></span>' +
+                      '<span class="snm"></span>' +
+                      '<input type="range" min="5" max="90" value="' + (st.weights[k] || 30) + '">' +
+                      '<span class="spct">' + Math.round((st.weights[k] || 0) / total * 100) + '%</span>';
+      row.querySelector('.snm').textContent = c.zh || c.en;
+      row.querySelector('input').addEventListener('input', function (e) {
+        var s2 = eng.state();
+        s2.weights[k] = +e.target.value;
+        eng.apply(s2, false);
+        var t2 = s2.sel.reduce(function (t, kk) { return t + (s2.weights[kk] || 1); }, 0) || 1;
+        Array.prototype.forEach.call(slWrap.querySelectorAll('.srow'), function (r, idx) {
+          var kk = s2.sel[idx];
+          r.querySelector('.spct').textContent = Math.round((s2.weights[kk] || 0) / t2 * 100) + '%';
+        });
+        push();
+      });
+      slWrap.append(row);
+    });
+  }
+
+  document.getElementById('again').addEventListener('click', function () {
+    eng.reswirl(); buildSliders(); push();
+  });
+
+  /* ---------- keepsake card ---------- */
+  document.getElementById('save').addEventListener('click', function () {
+    var W = 900, H = 1300, cd = document.createElement('canvas');
+    cd.width = W; cd.height = H;
+    var g = cd.getContext('2d');
+    g.fillStyle = '#141018'; g.fillRect(0, 0, W, H);
+    var rg = g.createRadialGradient(W * .8, 0, 0, W * .8, 0, 700);
+    rg.addColorStop(0, 'rgba(231,183,207,.20)'); rg.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = rg; g.fillRect(0, 0, W, 700);
+    g.drawImage(cv, (W - 720) / 2, 120, 720, 720);
+
+    var st = eng.state();
+    var total = st.sel.reduce(function (t, k) { return t + (st.weights[k] || 1); }, 0) || 1;
+    var y = 940;
+    st.sel.forEach(function (k) {
+      var c = C[k]; if (!c) return;
+      g.fillStyle = c.hex;
+      g.beginPath(); g.arc(150, y - 10, 22, 0, Math.PI * 2); g.fill();
+      g.fillStyle = '#F3EEE4'; g.font = '34px "PingFang SC","Noto Sans SC",sans-serif';
+      g.textAlign = 'left'; g.fillText(c.zh || c.en, 196, y);
+      g.fillStyle = '#a79db2'; g.textAlign = 'right';
+      g.fillText(Math.round((st.weights[k] || 0) / total * 100) + '%', W - 150, y);
+      y += 66;
+    });
+    g.textAlign = 'center';
+    g.fillStyle = 'rgba(243,238,228,.45)'; g.font = '24px Georgia,serif';
+    g.fillText(document.getElementById('no').textContent, W / 2, H - 150);
+    g.fillStyle = '#F3EEE4'; g.font = '30px Georgia,serif';
+    g.fillText('KMTY 星空艺术兰', W / 2, H - 96);
+    g.fillStyle = 'rgba(243,238,228,.4)'; g.font = '20px sans-serif';
+    g.fillText('kmtyorchid.com', W / 2, H - 56);
+
+    document.getElementById('card').src = cd.toDataURL('image/png');
+    document.getElementById('ovl').classList.add('on');
+  });
+  document.getElementById('close').addEventListener('click', function () {
+    document.getElementById('ovl').classList.remove('on');
+  });
+
+  /* ---------- boot ---------- */
+  eng.onReady(function () {
+    // Adopt whatever the screen is already showing, so a second visitor picks up
+    // the current bloom instead of resetting the stand.
+    fetch('/state').then(function (r) { return r.json(); }).then(function (d) {
+      if (d && d.state && d.state.sel && d.state.sel.length) eng.apply(d.state, false);
+      buildSwatches(); buildSliders();
+    }).catch(function () { buildSwatches(); buildSliders(); });
+  });
+})();
+</script>
+</body>
+</html>
