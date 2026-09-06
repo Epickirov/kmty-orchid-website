@@ -11,6 +11,6 @@ build_fonts.py
 .gitignore
 .assetsignore
 # the exhibition kiosk runs off a laptop at the booth (kiosk/server.js), not off
-# the website. Its shared pieces — plant.js and plants/ — live at the root and
+# the website. Its shared pieces — plant.js and scenes/ — live at the root and
 # ARE served, because the order page's 整株 tab uses them too.
 kiosk

@@ -79,24 +79,29 @@ https://raw.githack.com/Epickirov/kmty-orchid-website/main/constellation.html
 
 ### 整株 — whole-plant preview
 
-Above the preview there is a **单朵 / 整株** toggle. 整株 paints the same mix onto
-a photograph of a real potted plant standing in one of four environments
-(温室 · 花市 · 花田 · 影棚), so a customer sees their colours at plant scale
-rather than as one bloom. Chips switch environments; 再搅一次 restirs the plant
-along with the bloom; the order card still prints the single bloom.
+Above the preview there is a **单朵 / 整株** toggle. 整株 shows the visitor's mix
+on a whole plant — one plant, one pot, one camera angle, one room — with chips
+for six scenes (极简厅 · 禅意台 · 绿意居 · 窗边台 · 暖阳窗 · 明亮厅), each a
+different pot and a different setting. 再搅一次 restirs the plant along with the
+bloom; the order card still prints the single bloom.
 
-- **No SVG anywhere** — it is canvas 2D compositing end to end (`plant.js`).
-  The swirl is laid down as a colour field, the photograph is composited over it
-  in `'luminosity'` so the petals keep their real shading and veining, and the
-  result is clipped to a petal mask. Leaves, stems and pot stay untouched.
-- Assets are built by `python3 kiosk/build-plant.py` from `images/pot-magenta.jpg`
-  plus three environment photographs, and written to `plants/` (~265 KB total).
-  Re-run it after changing any source photograph.
-- Nothing in `plants/` is fetched until a visitor actually opens 整株, so first
-  paint on a phone is unchanged.
+- **No SVG anywhere** — canvas 2D end to end (`plant.js`).
+- The scenes are the site's own art-catalogue photographs, so the plant is never
+  cut out and re-composited. The page draws the photograph whole and repaints
+  only its petals, through a mask, in canvas `'color'` blend mode: hue and
+  saturation come from the swirl, luminance stays the photograph's. Pot, leaves,
+  stem, lighting and room are the originals, and the petals keep their real
+  shading, veining and cast shadows.
+- Assets are built by `python3 kiosk/build-scenes.py` into `scenes/`, two files
+  per scene (photograph + petal mask), ~330 KB for all six. Re-run it after
+  changing any source card. The script's docstring explains the segmentation.
+- **Scenes load one at a time.** Nothing is fetched until a visitor opens 整株,
+  and then only the scene they are looking at (~55 KB), so first paint on a
+  phone is unchanged.
 - The disclaimer under the preview ("整株预览为示意效果…") is deliberate: the
-  plant body is a stand-in, only the colour is the customer's.
-- The exhibition kiosk shares the same `plant.js` and `plants/` (see `kiosk/`).
+  plant body is a photograph of a real plant, but not *their* plant — only the
+  colour is theirs.
+- The exhibition kiosk shares the same `plant.js` and `scenes/` (see `kiosk/`).
 
 ## Main marketing site on Cloudflare Pages (project `kmty-site`)
 
@@ -152,10 +157,10 @@ stock.html           ← per-batch link generator → /stock
 _worker.js           ← Pages "advanced mode" Worker: all /api/* + clean URLs
 bloom-fallback.png   ← full-quality bloom for old iOS (the inlined bloom is WebP)
 plant.js             ← whole-plant preview compositor (整株 tab)
-plants/              ← plant cut-out, petal mask, luminance + 3 environment plates
+scenes/              ← 6 scenes, each a photograph + its petal mask (~330 KB)
 ```
 
-`plant.js` and `plants/` go together — ship both or neither. If either is
+`plant.js` and `scenes/` go together — ship both or neither. If either is
 missing the 整株 tab hides itself and the page falls back to the single bloom,
 so a partial upload degrades quietly rather than showing an empty frame.
 

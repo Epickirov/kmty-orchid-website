@@ -71,7 +71,8 @@ var ORDER_NOTE    = '';                    // 选填: 价格/交期等一句话�
   .plate canvas[hidden],.plate [hidden]{display:none;}
   /* whole-plant preview — an opaque photograph, so a box shadow rather than the
      alpha drop-shadow the cut-out bloom wants */
-  #plantcv{border-radius:16px;filter:none;box-shadow:0 16px 34px rgba(70,48,26,.24);}
+  #plantcv{border-radius:16px;filter:none;box-shadow:0 16px 34px rgba(70,48,26,.24);
+       max-height:74vh;width:auto;max-width:100%;margin:0 auto;}
   .views{display:inline-flex;margin:18px 0 0;padding:3px;border-radius:999px;
        background:rgba(26,30,23,.055);border:1px solid rgba(26,30,23,.14);}
   .vtab{-webkit-appearance:none;appearance:none;border:none;background:none;font-family:inherit;
@@ -84,6 +85,7 @@ var ORDER_NOTE    = '';                    // 选填: 价格/交期等一句话�
        border:1px solid rgba(26,30,23,.2);background:rgba(26,30,23,.03);
        transition:background .2s ease,border-color .2s ease,color .2s ease;}
   .chip.on{background:#1A1E17;border-color:#1A1E17;color:#F3EEE4;}
+  .chip.busy{opacity:.55;}
   .pnote{margin:11px 0 0;font-size:11.5px;line-height:1.7;color:#8a8478;}
   .numrow{display:flex;align-items:center;justify-content:space-between;margin:2px 0 20px;}
   .numrow .no{font-family:Georgia,'Songti SC',serif;font-size:21px;color:#a4487c;}
@@ -178,7 +180,7 @@ var ORDER_NOTE    = '';                    // 选填: 价格/交期等一句话�
 
   <div class="plate">
     <canvas id="mixcv" width="560" height="560" aria-label="星空艺术兰配色预览"></canvas>
-    <canvas id="plantcv" width="1120" height="630" aria-label="整株环境预览" hidden></canvas>
+    <canvas id="plantcv" width="880" height="1100" aria-label="整株环境预览" hidden></canvas>
     <div class="envchips" id="envchips" hidden></div>
     <div class="pnote" id="pnote" hidden>整株预览为示意效果 — 株型、花量以实物为准；花色按上方配比手工调制，每株纹理均不相同。</div>
   </div>
@@ -435,12 +437,13 @@ var ORDER_NOTE    = '';                    // 选填: 价格/交期等一句话�
   var queueRender = function () { if (!pending) pending = requestAnimationFrame(function () { pending = 0; render(); }); };
 
   /* ---------- whole-plant preview (整株) ----------
-     The same mix, painted onto a photograph of a real potted plant standing in
-     a real environment, so a visitor sees the colours at plant scale and not
-     just as one bloom. plant.js does the compositing (canvas 2D, no SVG); all
-     this block owns is the tab, the environment chips, and keeping the plant in
-     step with the bloom. #mixcv keeps rendering while hidden — it is both the
-     colour source for the plant and what the order card prints. */
+     The same mix on a whole plant — one plant, one pot, one angle, one room —
+     so a visitor sees their colours at plant scale and not just as one bloom.
+     Six scenes, each a different pot and setting. plant.js does the compositing
+     (canvas 2D, no SVG); all this block owns is the tab, the scene chips, and
+     keeping the plant in step with the bloom. #mixcv keeps rendering while
+     hidden — it is both the colour source for the plant and what the order card
+     prints. */
   var plantCv = document.getElementById('plantcv');
   var viewWrap = document.getElementById('views');
   var envWrap = document.getElementById('envchips');
@@ -459,18 +462,20 @@ var ORDER_NOTE    = '';                    // 选填: 价格/交期等一句话�
   }
   function buildEnvChips() {
     envWrap.innerHTML = '';
-    var current = plant.env().id;
-    plant.environments().forEach(function (e) {
+    var current = plant.scene().id;
+    plant.scenes().forEach(function (e) {
       var b = document.createElement('button');
       b.type = 'button';
       b.className = 'chip' + (e.id === current ? ' on' : '');
       b.textContent = e.zh;
       b.addEventListener('click', function () {
-        plant.setEnv(e.id);
         var cs = envWrap.querySelectorAll('.chip');
         for (var j = 0; j < cs.length; j++) cs[j].classList.remove('on');
         b.classList.add('on');
-        paintPlant();
+        // scenes stream in one at a time; the frame keeps the old one until the
+        // new photograph has landed, so the preview never blinks to empty
+        b.classList.add('busy');
+        plant.setScene(e.id, function () { b.classList.remove('busy'); paintPlant(); });
       });
       envWrap.appendChild(b);
     });
@@ -490,7 +495,7 @@ var ORDER_NOTE    = '';                    // 选填: 价格/交期等一句话�
     if (!plantView) return;
     // absolute paths: branded links live at /r/<id>, which the worker rewrites
     // to the root, so a relative src would 404 under that prefix
-    if (!plant) { plant = KMTYPlant(plantCv, { base: '/plants/', lazy: true }); }
+    if (!plant) { plant = KMTYPlant(plantCv, { base: '/scenes/' }); }
     plant.onReady(function () {
       // plates missing (a partial upload, or an offline visitor): retire the
       // tab rather than leave an empty frame on a page people order from
@@ -538,7 +543,7 @@ var ORDER_NOTE    = '';                    // 选填: 价格/交期等一句话�
     qs.sort(function (a, b) { return a - b; });
     var band = (qs[qs.length - 1] - qs[0]) * .06 + 1e-6;
     var mk = maskCv.getContext('2d'), tc = tmpCv.getContext('2d'), md = maskImg.data;
-    var T = 700, t0 = performance.now();
+    var T = 700, t0 = performance.now(), frame = 0;
     var step = function (now) {
       var t = Math.min(1, (now - t0) / T);
       var e = 1 - Math.pow(1 - t, 3);
@@ -556,9 +561,11 @@ var ORDER_NOTE    = '';                    // 选填: 价格/交期等一句话�
       mctx.clearRect(0, 0, SIZE, SIZE);
       mctx.drawImage(prevCv, 0, 0);
       mctx.drawImage(tmpCv, 0, 0);
-      // the plant rides the same dissolve — it is the only thing on screen in
-      // 整株 view, so it has the frame budget the hidden bloom is not using
-      if (plantView) paintPlant();
+      // The plant rides the same dissolve, but at half the rate: a full scene
+      // recolour costs ~18ms, which does not fit in a 60fps frame alongside the
+      // bloom's own compositing. At ~30fps a slow colour wash still reads as
+      // smooth, and the last frame below lands on the exact final state.
+      if (plantView && (frame++ & 1) === 0) paintPlant();
       if (e < 1) transRAF = requestAnimationFrame(step);
       else { transRAF = 0; mctx.clearRect(0, 0, SIZE, SIZE); mctx.drawImage(nextCv, 0, 0); if (plantView) paintPlant(); }
     };

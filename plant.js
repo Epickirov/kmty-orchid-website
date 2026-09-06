@@ -1,89 +1,127 @@
-/* Whole-plant preview: takes the swirl the visitor designed and paints it onto
-   a photograph of a real potted plant, standing in a real environment.
+/* Whole-plant preview: the mix the visitor designed, on a whole plant, in a
+   room — one plant in one pot, shot from one angle, the way the catalogue
+   shoots it. Six scenes, six pots, six angles, six rooms.
 
    Everything here is canvas 2D — no SVG, by requirement.
 
-   How the recolour works. The plant photo is a magenta Phalaenopsis; the build
-   step (build-plant.py) shipped it cut off its studio background plus a mask of
-   just the petals. At paint time we:
-     1. lay down the visitor's swirl as a colour field over the plant's box,
-     2. composite the photograph onto it in 'luminosity' mode, which keeps the
-        photograph's shading and takes hue/saturation from the swirl,
-     3. clip that to the petal mask,
-     4. drop it over the untouched plant so leaves, stems and pot stay real.
-   The result carries genuine petal shading and veining rather than flat fill.
+   How the recolour works. Each scene ships as the photograph plus a mask of
+   just its petals (build-scenes.py). At paint time we:
+     1. draw the photograph whole — pot, leaves, room, lighting all untouched,
+     2. take a copy of it and lay the visitor's swirl over that copy in 'color'
+        blend mode, which replaces hue and saturation but keeps the
+        photograph's luminance,
+     3. clip the copy to the petal mask,
+     4. drop it back over the photograph.
+   Because luminance survives, the petals keep their real shading, veining and
+   cast shadows — the flowers sit in the room's light rather than glowing like
+   stickers. There is no cut-out and no re-compositing: the plant never leaves
+   the photograph it was shot in.
 
    The engine's canvas is bloom-shaped with transparent corners, so it cannot be
-   used directly as a field — it would punch holes. We mirror-tile it and back
-   it with a gradient of the chosen colours, which fills every pixel and keeps
-   the marbling organic. */
+   used directly as a colour field — it would punch holes in the petals. We
+   mirror-tile it over a gradient of the chosen colours, which fills every pixel
+   and keeps the marbling organic.
+
+   Scenes load one at a time. A visitor who never opens the preview pays
+   nothing; one who opens it pays for the scene they are looking at. */
 'use strict';
 
 function KMTYPlant(canvas, opts) {
   opts = opts || {};
-  var base = opts.base || '/plants/';
+  var base = opts.base || '/scenes/';
   var ctx = canvas.getContext('2d');
 
-  var ENVS = opts.envs || [
-    { id: 'greenhouse', zh: '温室' },
-    { id: 'market', zh: '花市' },
-    { id: 'field', zh: '花田' },
-    { id: 'studio', zh: '影棚' }   // drawn, not photographed — no plate to load
+  /* Order matters: the first is what a visitor sees, so it is the cleanest
+     composition. Labels name the room; the pot and the angle are visible. */
+  var SCENES = opts.scenes || [
+    { id: 'minimal', zh: '极简厅', en: 'grey cylinder pot' },
+    { id: 'zen', zh: '禅意台', en: 'grey tapered pot' },
+    { id: 'artisan', zh: '绿意居', en: 'grey pot, green room' },
+    { id: 'window', zh: '窗边台', en: 'stone pot, window marble' },
+    { id: 'terracotta', zh: '暖阳窗', en: 'terracotta pot' },
+    { id: 'bright', zh: '明亮厅', en: 'white pot' }
   ];
 
-  var img = {};
-  var pending = 0, loaded = 0, failed = 0;
-  function load(key, src) {
-    pending++;
-    var i = new Image();
-    i.onload = function () { loaded++; img[key] = i; tick(); };
-    i.onerror = function () { failed++; tick(); };
-    i.src = src;
-  }
-  var readyCbs = [];
-  function tick() {
-    if (loaded + failed < pending) return;
-    readyCbs.splice(0).forEach(function (cb) { cb(); });
+  var loaded = {};          // id -> {photo, petals} once both images are in
+  var inflight = {};        // id -> true while fetching
+  var dead = {};            // id -> true if its files 404
+  var idx = 0;
+  var waiting = [];
+
+  function fetchScene(id, cb) {
+    if (loaded[id]) { cb(loaded[id]); return; }
+    if (dead[id]) { cb(null); return; }
+    waiting.push({ id: id, cb: cb });
+    if (inflight[id]) return;
+    inflight[id] = true;
+    var got = {}, left = 2, bad = false;
+    var done = function () {
+      if (--left) return;
+      inflight[id] = false;
+      if (bad) dead[id] = true; else loaded[id] = got;
+      var pending = waiting, keep = [];
+      waiting = [];
+      pending.forEach(function (w) {
+        if (w.id === id) w.cb(loaded[id] || null); else keep.push(w);
+      });
+      waiting = keep.concat(waiting);
+    };
+    [['photo', id + '.webp'], ['petals', id + '-petals.webp']].forEach(function (p) {
+      var im = new Image();
+      im.onload = function () {
+        got[p[0]] = im;
+        if (p[0] === 'petals') got.box = maskBox(im);
+        done();
+      };
+      im.onerror = function () { bad = true; done(); };
+      im.src = base + p[1];
+    });
   }
 
-  /* ~265KB of plates. With opts.lazy the order page pays for them only when a
-     visitor actually asks for the whole-plant view — the single bloom, which is
-     what most people come for, still loads on a phone as fast as it did. */
-  var started = false;
-  function begin() {
-    if (started) return;
-    started = true;
-    load('plant', base + 'plant-magenta.webp');
-    load('petals', base + 'plant-magenta-petals.webp');
-    load('lum', base + 'plant-magenta-lum.webp');
-    ENVS.forEach(function (e) { if (e.id !== 'studio') load('env-' + e.id, base + 'env-' + e.id + '.webp'); });
+  /* Where in the frame the petals actually are, as fractions. A spike occupies
+     maybe a third of the picture, so recolouring only its bounding box instead
+     of the whole 880x1100 frame is the difference between holding 60fps during
+     the re-swirl dissolve and not. Measured once per scene, off a thumbnail. */
+  var probe = document.createElement('canvas');
+  function maskBox(im) {
+    var W = 110, H = Math.max(1, Math.round(W * im.height / im.width));
+    probe.width = W; probe.height = H;
+    var g = probe.getContext('2d');
+    g.clearRect(0, 0, W, H);
+    g.drawImage(im, 0, 0, W, H);
+    var d;
+    try { d = g.getImageData(0, 0, W, H).data; } catch (e) { return [0, 0, 1, 1]; }
+    var x0 = W, y0 = H, x1 = -1, y1 = -1;
+    for (var y = 0; y < H; y++) {
+      for (var x = 0; x < W; x++) {
+        if (d[(y * W + x) * 4 + 3] > 8) {
+          if (x < x0) x0 = x;
+          if (x > x1) x1 = x;
+          if (y < y0) y0 = y;
+          if (y > y1) y1 = y;
+        }
+      }
+    }
+    if (x1 < x0) return [0, 0, 1, 1];
+    var m = 2;   // a couple of probe pixels of slack for the feathered edge
+    return [Math.max(0, (x0 - m) / W), Math.max(0, (y0 - m) / H),
+            Math.min(1, (x1 + 1 + m) / W), Math.min(1, (y1 + 1 + m) / H)];
   }
-  if (!opts.lazy) begin();
 
-  var envIdx = 0;
-  var field = document.createElement('canvas');   // swirl colour field
+  var field = document.createElement('canvas');   // the visitor's colours
   var tinted = document.createElement('canvas');  // recoloured petals
 
   function coverDraw(g, im, w, h) {
     var k = Math.max(w / im.width, h / im.height);
     var dw = im.width * k, dh = im.height * k;
-    g.drawImage(im, (w - dw) / 2, (h - dh) / 2, dw, dh);
+    var x = (w - dw) / 2, y = (h - dh) / 2;
+    g.drawImage(im, x, y, dw, dh);
+    return [x, y, dw, dh];
   }
 
-  /* Studio backdrop, drawn rather than loaded: a soft warm pool of light on the
-     house aubergine, so there is always one environment even if a plate 404s. */
-  function studio(g, w, h) {
-    g.fillStyle = '#141018'; g.fillRect(0, 0, w, h);
-    var rg = g.createRadialGradient(w * 0.5, h * 0.42, 0, w * 0.5, h * 0.42, h * 0.85);
-    rg.addColorStop(0, 'rgba(231,183,207,.20)');
-    rg.addColorStop(0.55, 'rgba(60,44,66,.30)');
-    rg.addColorStop(1, 'rgba(0,0,0,0)');
-    g.fillStyle = rg; g.fillRect(0, 0, w, h);
-  }
-
-  /* Fill `rect` with the visitor's colours: a gradient of the mix underneath,
-     then the swirl mirror-tiled over it so the marbling never repeats visibly
-     and never leaves a transparent gap. */
+  /* Fill the frame with the visitor's colours: a gradient of the mix
+     underneath, then the swirl mirror-tiled over it so the marbling never
+     repeats visibly and never leaves a transparent gap. */
   function paintField(swirl, colours, w, h) {
     field.width = w; field.height = h;
     var g = field.getContext('2d');
@@ -94,7 +132,6 @@ function KMTYPlant(canvas, opts) {
     g.fillStyle = grad; g.fillRect(0, 0, w, h);
 
     if (!swirl) return field;
-    // Two columns x two rows, alternate tiles mirrored — cheap seamless marble.
     var tw = w / 2, th = h / 2;
     for (var ty = 0; ty < 2; ty++) {
       for (var tx = 0; tx < 2; tx++) {
@@ -109,78 +146,73 @@ function KMTYPlant(canvas, opts) {
     return field;
   }
 
+  var lastSwirl = null, lastColours = null;
+
   var api = {
-    environments: function () { return ENVS.slice(); },
-    env: function () { return ENVS[envIdx]; },
-    /* False once loading has settled means the plates are missing — a partial
-       upload, say. Callers should hide the whole-plant view rather than show an
-       empty frame; the environment plates are optional (studio is drawn). */
-    ok: function () { return !!(img.plant && img.petals); },
-    setEnv: function (id) {
-      var i = ENVS.findIndex(function (e) { return e.id === id; });
-      if (i >= 0) envIdx = i;
+    scenes: function () { return SCENES.slice(); },
+    scene: function () { return SCENES[idx]; },
+    setScene: function (id, cb) {
+      for (var i = 0; i < SCENES.length; i++) {
+        if (SCENES[i].id === id) {
+          idx = i;
+          fetchScene(id, function () { api.paint(lastSwirl, lastColours); if (cb) cb(); });
+          return api;
+        }
+      }
+      if (cb) cb();
       return api;
     },
-    nextEnv: function () { envIdx = (envIdx + 1) % ENVS.length; return ENVS[envIdx]; },
-    /* Also the trigger for a lazy instance: nothing is fetched until something
-       asks to paint. Note the load must be kicked off *before* the readiness
-       test, or a lazy instance would report ready with nothing loaded. */
-    onReady: function (cb) {
-      begin();
-      if (loaded + failed >= pending) cb(); else readyCbs.push(cb);
-      return api;
+    nextScene: function (cb) {
+      return api.setScene(SCENES[(idx + 1) % SCENES.length].id, cb);
     },
+    /* Ready = the first scene is in. Later scenes stream in as they are picked;
+       the frame keeps showing the previous one until the new one lands, which
+       is quieter than blanking. */
+    onReady: function (cb) { fetchScene(SCENES[idx].id, function () { cb(); }); return api; },
+    /* False once the first scene has settled means its files are missing.
+       Callers should hide the whole-plant view rather than show an empty frame. */
+    ok: function () { return !!loaded[SCENES[idx].id] || !dead[SCENES[idx].id]; },
+    ready: function (id) { return !!loaded[id || SCENES[idx].id]; },
 
     /* swirl: the engine's canvas. colours: hex strings of the chosen mix. */
     paint: function (swirl, colours) {
+      lastSwirl = swirl; lastColours = colours;
       var W = canvas.width, H = canvas.height;
+      var sc = loaded[SCENES[idx].id];
+      if (!sc) return;
+
+      ctx.globalCompositeOperation = 'source-over';
       ctx.clearRect(0, 0, W, H);
+      var box = coverDraw(ctx, sc.photo, W, H);
 
-      var e = ENVS[envIdx];
-      var plate = img['env-' + e.id];
-      if (plate) coverDraw(ctx, plate, W, H); else studio(ctx, W, H);
-
-      var p = img.plant;
-      if (!p) return;
-
-      // Plant sits on the lower third, sized off the canvas height.
-      var ph = H * 0.86, pw = ph * (p.width / p.height);
-      if (pw > W * 0.72) { pw = W * 0.72; ph = pw * (p.height / p.width); }
-      var px = (W - pw) / 2, py = H - ph - H * 0.05;
-
-      // Contact shadow, so the pot sits in the scene instead of floating.
-      var sy = py + ph * 0.985, sw = pw * 0.46, sh = ph * 0.045;
-      var sg = ctx.createRadialGradient(W / 2, sy, 0, W / 2, sy, sw);
-      sg.addColorStop(0, 'rgba(0,0,0,.55)'); sg.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.save();
-      ctx.translate(W / 2, sy); ctx.scale(1, sh / sw); ctx.translate(-W / 2, -sy);
-      ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(W / 2, sy, sw, 0, Math.PI * 2); ctx.fill();
-      ctx.restore();
-
-      ctx.drawImage(p, px, py, pw, ph);
-
-      var mask = img.petals;
-      if (mask && swirl) {
-        var w = Math.max(2, Math.round(pw)), h = Math.max(2, Math.round(ph));
+      if (swirl) {
+        // Work on the petals' bounding box only, in the drawn frame's own
+        // coordinates. `bb` is the box as fractions of the photograph.
+        var bb = sc.box || [0, 0, 1, 1];
+        var dx = box[0] + box[2] * bb[0], dy = box[1] + box[3] * bb[1];
+        var dw = box[2] * (bb[2] - bb[0]), dh = box[3] * (bb[3] - bb[1]);
+        var w = Math.max(2, Math.round(dw)), h = Math.max(2, Math.round(dh));
         tinted.width = w; tinted.height = h;
         var t = tinted.getContext('2d');
-        t.clearRect(0, 0, w, h);
-        t.drawImage(paintField(swirl, colours, w, h), 0, 0);
-        // Normalised petal luminance supplies the shading, the field supplies
-        // the colour. Using the raw photo here makes every mix read muddy.
-        t.globalCompositeOperation = 'luminosity';
-        t.drawImage(img.lum || p, 0, 0, w, h);
-        // keep petals only
-        t.globalCompositeOperation = 'destination-in';
-        t.drawImage(mask, 0, 0, w, h);
         t.globalCompositeOperation = 'source-over';
-        ctx.drawImage(tinted, px, py, pw, ph);
+        t.clearRect(0, 0, w, h);
+        // Draw the photo and the mask at the size the WHOLE photograph occupies
+        // in the frame, shifted so the box's top-left lands on 0,0. The tinted
+        // canvas is 1:1 with the frame, so that size is box[2] x box[3] — not
+        // the box's own size, and not the box's size divided by its fraction.
+        var fw = box[2], fh = box[3];
+        var ox = -bb[0] * fw, oy = -bb[1] * fh;
+        t.drawImage(sc.photo, ox, oy, fw, fh);
+        // 'color' takes hue and saturation from the swirl and leaves the
+        // photograph's luminance alone — that is what keeps the petals shaded
+        // and veined instead of flat.
+        t.globalCompositeOperation = 'color';
+        t.drawImage(paintField(swirl, colours, w, h), 0, 0);
+        t.globalCompositeOperation = 'destination-in';
+        t.drawImage(sc.petals, ox, oy, fw, fh);
+        t.globalCompositeOperation = 'source-over';
+        ctx.drawImage(tinted, dx, dy, dw, dh);
       }
-
-      // Vignette last, over everything, to seat the composite.
-      var vg = ctx.createRadialGradient(W / 2, H * 0.5, H * 0.25, W / 2, H * 0.5, H * 0.95);
-      vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.45)');
-      ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
     }
   };
   return api;
