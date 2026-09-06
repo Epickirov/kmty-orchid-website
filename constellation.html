@@ -67,26 +67,6 @@ var ORDER_NOTE    = '';                    // 选填: 价格/交期等一句话�
   .sub{margin:0 0 6px;font-size:14.5px;line-height:1.75;color:#5f5a51;}
   .plate{position:relative;margin:18px 0 4px;}
   .plate canvas{width:100%;height:auto;display:block;filter:drop-shadow(0 16px 30px rgba(70,48,26,.20));}
-  /* [hidden] alone loses to `.plate canvas` on specificity, so say it here */
-  .plate canvas[hidden],.plate [hidden]{display:none;}
-  /* whole-plant preview — an opaque photograph, so a box shadow rather than the
-     alpha drop-shadow the cut-out bloom wants */
-  #plantcv{border-radius:16px;filter:none;box-shadow:0 16px 34px rgba(70,48,26,.24);
-       max-height:74vh;width:auto;max-width:100%;margin:0 auto;}
-  .views{display:inline-flex;margin:18px 0 0;padding:3px;border-radius:999px;
-       background:rgba(26,30,23,.055);border:1px solid rgba(26,30,23,.14);}
-  .vtab{-webkit-appearance:none;appearance:none;border:none;background:none;font-family:inherit;
-       font-size:13px;letter-spacing:.06em;color:#6b665e;padding:9px 20px;border-radius:999px;
-       cursor:pointer;transition:background .2s ease,color .2s ease;}
-  .vtab.on{background:#F3EEE4;color:#1A1E17;font-weight:600;box-shadow:0 1px 4px rgba(70,48,26,.14);}
-  .envchips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0;}
-  .chip{-webkit-appearance:none;appearance:none;font-family:inherit;font-size:12.5px;letter-spacing:.04em;
-       color:#6b665e;padding:9px 16px;border-radius:999px;cursor:pointer;
-       border:1px solid rgba(26,30,23,.2);background:rgba(26,30,23,.03);
-       transition:background .2s ease,border-color .2s ease,color .2s ease;}
-  .chip.on{background:#1A1E17;border-color:#1A1E17;color:#F3EEE4;}
-  .chip.busy{opacity:.55;}
-  .pnote{margin:11px 0 0;font-size:11.5px;line-height:1.7;color:#8a8478;}
   .numrow{display:flex;align-items:center;justify-content:space-between;margin:2px 0 20px;}
   .numrow .no{font-family:Georgia,'Songti SC',serif;font-size:21px;color:#a4487c;}
   .numrow .cap{font-size:11px;letter-spacing:.16em;color:#8a8478;}
@@ -173,17 +153,7 @@ var ORDER_NOTE    = '';                    // 选填: 价格/交期等一句话�
   <h1>亲手调一支<i>你的星空</i>。</h1>
   <p class="sub">最多选三种颜色，调好比例，再搅一次 — 每一次的纹理都不一样，正如真正的艺术兰。满意后保存配色卡，发给我们即可下单。</p>
 
-  <div class="views" id="views" role="tablist" aria-label="预览方式">
-    <button class="vtab on" type="button" role="tab" aria-selected="true" data-view="bloom">单朵</button>
-    <button class="vtab" type="button" role="tab" aria-selected="false" data-view="plant">整株</button>
-  </div>
-
-  <div class="plate">
-    <canvas id="mixcv" width="560" height="560" aria-label="星空艺术兰配色预览"></canvas>
-    <canvas id="plantcv" width="880" height="1100" aria-label="整株环境预览" hidden></canvas>
-    <div class="envchips" id="envchips" hidden></div>
-    <div class="pnote" id="pnote" hidden>整株预览为示意效果 — 株型、花量以实物为准；花色按上方配比手工调制，每株纹理均不相同。</div>
-  </div>
+  <div class="plate"><canvas id="mixcv" width="560" height="560" aria-label="星空艺术兰配色预览"></canvas></div>
   <div class="numrow"><span class="no serif" id="mixno">№ ····</span><span class="cap">你的独一无二</span></div>
 
   <div class="btnrow">
@@ -243,10 +213,6 @@ var ORDER_NOTE    = '';                    // 选填: 价格/交期等一句话�
 </div>
 <div class="toast" id="toast">已复制 ✓</div>
 
-<!-- whole-plant preview (canvas 2D compositor, shared with the exhibition kiosk).
-     It fetches nothing until a visitor opens the 整株 tab; if this file fails to
-     load the tab simply hides itself and the page behaves as it did before. -->
-<script src="/plant.js?v=1"></script>
 <script>
 (function () {
   'use strict';
@@ -431,84 +397,9 @@ var ORDER_NOTE    = '';                    // 选填: 价格/交期等一句话�
     mctx.drawImage(bloomCv, 0, 0);
     mctx.globalCompositeOperation = 'source-over';
     document.getElementById('mixno').textContent = '№ ' + (1000 + seed % 9000);
-    queuePlant();               // keep 整株 in step with every colour change
   }
   var pending = 0;
   var queueRender = function () { if (!pending) pending = requestAnimationFrame(function () { pending = 0; render(); }); };
-
-  /* ---------- whole-plant preview (整株) ----------
-     The same mix on a whole plant — one plant, one pot, one angle, one room —
-     so a visitor sees their colours at plant scale and not just as one bloom.
-     Six scenes, each a different pot and setting. plant.js does the compositing
-     (canvas 2D, no SVG); all this block owns is the tab, the scene chips, and
-     keeping the plant in step with the bloom. #mixcv keeps rendering while
-     hidden — it is both the colour source for the plant and what the order card
-     prints. */
-  var plantCv = document.getElementById('plantcv');
-  var viewWrap = document.getElementById('views');
-  var envWrap = document.getElementById('envchips');
-  var pnote = document.getElementById('pnote');
-  var plant = null, plantView = false, plantRAF = 0;
-  var hasPlant = typeof KMTYPlant === 'function';
-  if (!hasPlant) viewWrap.style.display = 'none';   // plant.js missing — bloom only
-
-  function paintPlant() {
-    if (!plant || !plantView || !sel.length) return;
-    plant.paint(canvas, sel.map(function (k) { return COLORS[k].hex; }));
-  }
-  function queuePlant() {
-    if (!plantView || plantRAF) return;
-    plantRAF = requestAnimationFrame(function () { plantRAF = 0; paintPlant(); });
-  }
-  function buildEnvChips() {
-    envWrap.innerHTML = '';
-    var current = plant.scene().id;
-    plant.scenes().forEach(function (e) {
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'chip' + (e.id === current ? ' on' : '');
-      b.textContent = e.zh;
-      b.addEventListener('click', function () {
-        var cs = envWrap.querySelectorAll('.chip');
-        for (var j = 0; j < cs.length; j++) cs[j].classList.remove('on');
-        b.classList.add('on');
-        // scenes stream in one at a time; the frame keeps the old one until the
-        // new photograph has landed, so the preview never blinks to empty
-        b.classList.add('busy');
-        plant.setScene(e.id, function () { b.classList.remove('busy'); paintPlant(); });
-      });
-      envWrap.appendChild(b);
-    });
-  }
-  function setView(v) {
-    plantView = hasPlant && v === 'plant';
-    canvas.hidden = plantView;
-    plantCv.hidden = !plantView;
-    envWrap.hidden = !plantView;
-    pnote.hidden = !plantView;
-    var tabs = viewWrap.querySelectorAll('.vtab');
-    for (var i = 0; i < tabs.length; i++) {
-      var on = tabs[i].getAttribute('data-view') === (plantView ? 'plant' : 'bloom');
-      tabs[i].classList.toggle('on', on);
-      tabs[i].setAttribute('aria-selected', on ? 'true' : 'false');
-    }
-    if (!plantView) return;
-    // absolute paths: branded links live at /r/<id>, which the worker rewrites
-    // to the root, so a relative src would 404 under that prefix
-    if (!plant) { plant = KMTYPlant(plantCv, { base: '/scenes/' }); }
-    plant.onReady(function () {
-      // plates missing (a partial upload, or an offline visitor): retire the
-      // tab rather than leave an empty frame on a page people order from
-      if (!plant.ok()) { hasPlant = false; viewWrap.style.display = 'none'; setView('bloom'); return; }
-      buildEnvChips();
-      paintPlant();
-    });
-  }
-  if (hasPlant) viewWrap.addEventListener('click', function (ev) {
-    var t = ev.target;
-    while (t && t !== viewWrap && !(t.className && String(t.className).indexOf('vtab') >= 0)) t = t.parentNode;
-    if (t && t !== viewWrap) setView(t.getAttribute('data-view'));
-  });
 
   /* ---------- fluid re-swirl (same as the site) ---------- */
   var transRAF = 0;
@@ -543,7 +434,7 @@ var ORDER_NOTE    = '';                    // 选填: 价格/交期等一句话�
     qs.sort(function (a, b) { return a - b; });
     var band = (qs[qs.length - 1] - qs[0]) * .06 + 1e-6;
     var mk = maskCv.getContext('2d'), tc = tmpCv.getContext('2d'), md = maskImg.data;
-    var T = 700, t0 = performance.now(), frame = 0;
+    var T = 700, t0 = performance.now();
     var step = function (now) {
       var t = Math.min(1, (now - t0) / T);
       var e = 1 - Math.pow(1 - t, 3);
@@ -561,13 +452,8 @@ var ORDER_NOTE    = '';                    // 选填: 价格/交期等一句话�
       mctx.clearRect(0, 0, SIZE, SIZE);
       mctx.drawImage(prevCv, 0, 0);
       mctx.drawImage(tmpCv, 0, 0);
-      // The plant rides the same dissolve, but at half the rate: a full scene
-      // recolour costs ~18ms, which does not fit in a 60fps frame alongside the
-      // bloom's own compositing. At ~30fps a slow colour wash still reads as
-      // smooth, and the last frame below lands on the exact final state.
-      if (plantView && (frame++ & 1) === 0) paintPlant();
       if (e < 1) transRAF = requestAnimationFrame(step);
-      else { transRAF = 0; mctx.clearRect(0, 0, SIZE, SIZE); mctx.drawImage(nextCv, 0, 0); if (plantView) paintPlant(); }
+      else { transRAF = 0; mctx.clearRect(0, 0, SIZE, SIZE); mctx.drawImage(nextCv, 0, 0); }
     };
     transRAF = requestAnimationFrame(step);
   };
