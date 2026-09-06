@@ -77,6 +77,27 @@ https://raw.githack.com/Epickirov/kmty-orchid-website/main/constellation.html
 - The page reuses the site's images but shares no code with the site — editing
   it cannot affect the main website.
 
+### 整株 — whole-plant preview
+
+Above the preview there is a **单朵 / 整株** toggle. 整株 paints the same mix onto
+a photograph of a real potted plant standing in one of four environments
+(温室 · 花市 · 花田 · 影棚), so a customer sees their colours at plant scale
+rather than as one bloom. Chips switch environments; 再搅一次 restirs the plant
+along with the bloom; the order card still prints the single bloom.
+
+- **No SVG anywhere** — it is canvas 2D compositing end to end (`plant.js`).
+  The swirl is laid down as a colour field, the photograph is composited over it
+  in `'luminosity'` so the petals keep their real shading and veining, and the
+  result is clipped to a petal mask. Leaves, stems and pot stay untouched.
+- Assets are built by `python3 kiosk/build-plant.py` from `images/pot-magenta.jpg`
+  plus three environment photographs, and written to `plants/` (~265 KB total).
+  Re-run it after changing any source photograph.
+- Nothing in `plants/` is fetched until a visitor actually opens 整株, so first
+  paint on a phone is unchanged.
+- The disclaimer under the preview ("整株预览为示意效果…") is deliberate: the
+  plant body is a stand-in, only the colour is the customer's.
+- The exhibition kiosk shares the same `plant.js` and `plants/` (see `kiosk/`).
+
 ## Main marketing site on Cloudflare Pages (project `kmty-site`)
 
 The full site is deployed as Pages project **`kmty-site`** → `kmty-site.pages.dev`,
@@ -130,7 +151,13 @@ reseller.html        ← reseller portal (each reseller sees only their orders) 
 stock.html           ← per-batch link generator → /stock
 _worker.js           ← Pages "advanced mode" Worker: all /api/* + clean URLs
 bloom-fallback.png   ← full-quality bloom for old iOS (the inlined bloom is WebP)
+plant.js             ← whole-plant preview compositor (整株 tab)
+plants/              ← plant cut-out, petal mask, luminance + 3 environment plates
 ```
+
+`plant.js` and `plants/` go together — ship both or neither. If either is
+missing the 整株 tab hides itself and the page falls back to the single bloom,
+so a partial upload degrades quietly rather than showing an empty frame.
 
 ### White-label resellers & order capture
 

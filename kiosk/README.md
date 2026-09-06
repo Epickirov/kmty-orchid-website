@@ -10,12 +10,19 @@ state. Verified: identical state produces byte-identical canvases on both.
 
 ```
 kiosk/
-  tv.html        display  → /tv
-  control.html   phone    → /c   (the TV shows a QR of this URL)
-  engine.js      GENERATED — rebuild with `node kiosk/build-engine.js`
-  qr.js          dependency-free QR encoder (shared with the seller tools)
-  server.js      sync server, zero dependencies
+  tv.html          display  → /tv
+  control.html     phone    → /c   (the TV shows a QR of this URL)
+  engine.js        GENERATED — rebuild with `node kiosk/build-engine.js`
+  qr.js            dependency-free QR encoder (shared with the seller tools)
+  server.js        sync server, zero dependencies
+  build-plant.py   builds the whole-plant assets → ../plants/
 ```
+
+Two things live at the repo root because the order page uses them too, and the
+kiosk server serves both from there: **`plant.js`** (the whole-plant compositor,
+canvas 2D — see the 整株 section of the main README) and **`plants/`** (the
+plant cut-out, its petal mask and luminance layer, and the environment plates).
+Rebuild them with `python3 kiosk/build-plant.py`.
 
 ## Run it
 

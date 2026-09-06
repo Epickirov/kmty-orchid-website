@@ -39,9 +39,12 @@ function send(res, code, body, type, extra) {
   res.end(body);
 }
 
-function serveFile(res, file) {
-  const p = path.join(DIR, file);
-  if (!p.startsWith(DIR) || !fs.existsSync(p)) return send(res, 404, 'not found');
+function serveFile(res, file, shared) {
+  // `shared` reaches the repo root for plant.js and the plants/ plates, which
+  // the order page (constellation.html) serves from there too.
+  const root = shared ? path.join(DIR, '..') : DIR;
+  const p = path.join(root, shared ? file.replace(/^\.\.[\/]/, '') : file);
+  if (!p.startsWith(root) || !fs.existsSync(p)) return send(res, 404, 'not found');
   const body = fs.readFileSync(p);
   send(res, 200, body, TYPES[path.extname(p)] || 'application/octet-stream');
 }
@@ -57,7 +60,12 @@ const server = http.createServer((req, res) => {
 
   if (p === '/' || p === '/tv') return serveFile(res, 'tv.html');
   if (p === '/c' || p === '/control') return serveFile(res, 'control.html');
-  if (p === '/engine.js' || p === '/qr.js' || p === '/kiosk.css') return serveFile(res, p.slice(1));
+  // Static assets: js/css from the kiosk folder, plus plant.js and the
+  // environment plates shared with the order page. The path check in serveFile
+  // keeps each of these inside its own root.
+  if (p === '/plant.js') return serveFile(res, 'plant.js', true);
+  if (/^\/[\w.-]+\.(?:js|css)$/.test(p)) return serveFile(res, p.slice(1));
+  if (/^\/plants\/[\w.-]+\.(?:webp|png|jpg)$/.test(p)) return serveFile(res, path.join('..', p), true);
 
   if (p === '/events') {
     res.writeHead(200, {
