@@ -15,8 +15,9 @@ works reliably in mainland China.
 | `support.js` | Render-once React runtime. React/ReactDOM are loaded locally from `vendor/`. |
 | `i18n.js` | Translations, the Yunnan map (labels, pins, base cards, leader tendrils), the deterministic "heal" reveal sweep, and the fabric-texture lab. |
 | `image-slot.js` | Design-app image-slot custom element. |
+| `globe.js` | The hero globe: the world outline it draws, the placement maths, and the loader for `vendor/three.slim.js` (see below). |
 | `fonts/` | Self-hosted webfonts (`fonts.css` + `files/*.woff2`). No Google Fonts. |
-| `vendor/` | Self-hosted React / ReactDOM / Babel. No unpkg / jsDelivr at runtime. |
+| `vendor/` | Self-hosted React / ReactDOM / Babel, and `three.slim.js`. No unpkg / jsDelivr at runtime. |
 | `images/` | All site imagery and video. |
 | `terroir-geo.json` | Yunnan map geometry + production-base pin coordinates. |
 | `build_fonts.py` | Regenerates the self-hosted font subset (see below). |
@@ -255,6 +256,41 @@ python build_fonts.py
 
 then bump the `fonts/fonts.css?v=N` and `i18n.js?v=N` cache markers in the HTML so browsers
 pick up the changes.
+
+## The hero globe
+
+The export map from the trade-show film, cut down for a web page. `globe.js` carries the
+world outline (3.8k points, delta-encoded in tenths of a degree — the film's copy was 30k
+points and 443 KB) and fetches `vendor/three.slim.js` only once the page has loaded, the
+browser is idle, the viewport is at least 768px wide, WebGL works, and the visitor has not
+asked for reduced motion. Phones and reduced-motion visitors get the flat SVG in the markup
+instead, which is the same frame drawn from the same outline.
+
+Both the outline in `globe.js` and the SVG in the hero are generated, and regenerate
+byte-for-byte:
+
+```bash
+python build_globe_geo.py   <film geo/geo.json>  globe-geo.json   # → the GEO constant
+python build_globe_still.py globe-geo.json       still.svg        # → <svg data-globe-still>
+```
+
+`three.slim.js` is a tree-shaken build — 480 KB raw, 121 KB gzipped, down from 687/170 — of
+just the nineteen symbols the globe touches (`vendor/three.slim.entry.js` is the entry point):
+
+```bash
+npm i three@0.169 esbuild            # entry.js re-exports those symbols from 'three'
+npx esbuild entry.js --bundle --minify --format=iife --global-name=THREE \
+  --legal-comments=none --outfile=vendor/three.slim.js
+```
+
+The globe's size and height are measured, not fixed: the headline is capped at 16 characters,
+and sixteen characters of Chinese or Vietnamese run hundreds of pixels further right than
+sixteen of English, so `globe.js` reads the headline's real line boxes and either sits beside
+it or drops into the band below it — whichever leaves room for the bigger sphere. It
+re-measures on resize, on a language switch, and when the self-hosted fonts land. Everything
+it decides is written as inline style: the runtime re-renders this tree and strips attributes
+it did not write, so a class or `data-` flag would survive the first render and vanish on the
+next.
 
 ## Deployment
 
