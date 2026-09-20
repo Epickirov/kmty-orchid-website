@@ -106,6 +106,7 @@ and copies only the images the page actually references.
 Deploying needs a Cloudflare API token with **Pages: Edit** — set
 `CLOUDFLARE_API_TOKEN` in the shell that runs wrangler. No token is kept in
 the repo or in any agent container; create one, use it, delete it.
+Step-by-step, including what to check before and after: **`docs/DEPLOY-WWW.md`**.
 
 `site-worker.js` (deployed as `_worker.js` in the kmty-site folder) adds
 POST `/api/lead` for the catalog-request form: honeypot + per-IP rate limit,
