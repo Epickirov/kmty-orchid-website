@@ -107,6 +107,7 @@
       </datalist>
       <div class="row">
         <label class="fld">数量 Quantity *<input id="f-qty" type="number" min="0" step="1" placeholder="5000"></label>
+        <label class="fld">每盘株数 Tray（选填）<input id="f-tray" type="number" min="0" max="10000" step="1" placeholder="60"></label>
         <label class="fld">起始周 From week *<input id="f-from" type="number" min="1" max="53" placeholder="12"></label>
         <label class="fld">结束周 To week *<input id="f-to" type="number" min="1" max="53" placeholder="20"></label>
         <label class="fld">年份 Year<input id="f-year" type="number" min="2024" max="2100"></label>
@@ -129,7 +130,7 @@
     <div class="card">
       <h2>批量导入 Bulk import</h2>
       <p class="lead">从 Excel 直接复制粘贴，或选择 CSV 文件。每行一个批次，列顺序：
-        <b class="mono">编号, 英文名, 中文名, 杯径, 数量, 起始周, 结束周, 年份, 备注</b>。
+        <b class="mono">编号, 英文名, 中文名, 杯径, 数量, 起始周, 结束周, 年份, 备注, 每盘株数</b>。
         年份与备注可留空。<b>编号＋杯径＋起始周</b>相同的批次会被覆盖，其余新增；照片请在上方逐个上传。</p>
       <textarea id="csv" rows="4" placeholder="TPL-411, Ivory, 象牙白, 2.5&quot;, 5000, 10, 16, 2026,
 TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
@@ -170,7 +171,7 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
   </div>
 </div>
 
-<script src="inventory-shared.js?v=1"></script>
+<script src="inventory-shared.js?v=2"></script>
 <script>
 (function () {
   'use strict';
@@ -223,7 +224,7 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
         '<td class="mono" style="font-size:12px;">' + esc(it.code) + '</td>' +
         '<td>' + esc(it.nameEn) + (it.nameZh ? '<br><span style="color:var(--faint);font-size:12px;">' + esc(it.nameZh) + '</span>' : '') + '</td>' +
         '<td>' + (esc(it.cup) || '—') + '</td>' +
-        '<td class="num"><b>' + n(it.qty) + '</b></td>' +
+        '<td class="num"><b>' + n(it.qty) + '</b>' + (it.tray > 1 ? '<br><span style="color:var(--faint);font-size:11px;">每盘 ' + n(it.tray) + '</span>' : '') + '</td>' +
         '<td>第 ' + it.from + '–' + it.to + ' 周<br><span style="color:var(--faint);font-size:11.5px;">' + it.year + '</span></td>';
       var td = document.createElement('td');
       td.style.whiteSpace = 'nowrap';
@@ -244,7 +245,7 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
     editing = it.id; newImg = undefined;
     $('formTitle').textContent = '编辑批次 · ' + it.code;
     $('f-code').value = it.code; $('f-nameEn').value = it.nameEn; $('f-nameZh').value = it.nameZh || '';
-    $('f-cup').value = it.cup || ''; $('f-qty').value = it.qty;
+    $('f-cup').value = it.cup || ''; $('f-qty').value = it.qty; $('f-tray').value = it.tray || '';
     $('f-from').value = it.from; $('f-to').value = it.to; $('f-year').value = it.year;
     $('f-note').value = it.note || '';
     $('f-img').value = '';
@@ -256,7 +257,7 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
   function resetForm() {
     editing = null; newImg = undefined;
     $('formTitle').textContent = '添加批次';
-    ['f-code','f-nameEn','f-nameZh','f-cup','f-qty','f-from','f-to','f-note','f-img'].forEach(function (k) { $(k).value = ''; });
+    ['f-code','f-nameEn','f-nameZh','f-cup','f-qty','f-tray','f-from','f-to','f-note','f-img'].forEach(function (k) { $(k).value = ''; });
     $('f-year').value = new Date().getUTCFullYear();
     $('imgWrap').style.display = 'none'; $('reset').hidden = true; st('saveStatus', '');
   }
@@ -294,7 +295,7 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
     var body = {
       id: editing || undefined,
       code: $('f-code').value.trim(), nameEn: $('f-nameEn').value.trim(), nameZh: $('f-nameZh').value.trim(),
-      cup: $('f-cup').value.trim(), qty: $('f-qty').value,
+      cup: $('f-cup').value.trim(), qty: $('f-qty').value, tray: $('f-tray').value || 0,
       from: $('f-from').value, to: $('f-to').value,
       year: $('f-year').value || new Date().getUTCFullYear(), note: $('f-note').value.trim(),
     };
@@ -352,6 +353,7 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
       jobs.push({
         id: hit ? hit.id : undefined, code: code, nameEn: en, nameZh: g(2), cup: cup,
         qty: qty, from: from, to: to, year: Number(g(7)) || new Date().getUTCFullYear(), note: g(8),
+        tray: Number(g(9)) || 0,
         img: hit ? '__keep__' : undefined,
       });
     });
@@ -386,8 +388,8 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
   });
   $('csvOut').addEventListener('click', function () {
     var q = function (v) { v = String(v == null ? '' : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
-    var csv = '编号,英文名,中文名,杯径,数量,起始周,结束周,年份,备注\n' +
-      items.map(function (i) { return [i.code, i.nameEn, i.nameZh, i.cup, i.qty, i.from, i.to, i.year, i.note].map(q).join(','); }).join('\n');
+    var csv = '编号,英文名,中文名,杯径,数量,起始周,结束周,年份,备注,每盘株数\n' +
+      items.map(function (i) { return [i.code, i.nameEn, i.nameZh, i.cup, i.qty, i.from, i.to, i.year, i.note, i.tray || ''].map(q).join(','); }).join('\n');
     var a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }));  // BOM so Excel reads the Chinese
     a.download = 'kmty-inventory-' + new Date().toISOString().slice(0, 10) + '.csv';

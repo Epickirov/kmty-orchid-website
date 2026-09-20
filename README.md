@@ -314,8 +314,28 @@ status — an inquiry already decided cannot be decided again, so a double-click
 cannot deduct the same plants twice. Deduction floors at zero and records the
 shortfall rather than going negative. Declining changes nothing.
 
+**The buyer's view is a production calendar**, not a product grid: varieties down
+the side, ISO weeks across, and a bar per batch spanning the weeks it is ready
+in. That is the shape of the question a wholesale buyer actually asks — *when
+can I get this* — and it answers it in one look rather than month → week → hunt.
+A Gallery view sits beside it for browsing by colour, and a Cosy/Compact density
+toggle serves both a buyer skimming photographs and one entering forty lines.
+Search and cup-size filters narrow the rows; clicking any week on a bar opens a
+quantity stepper.
+
+**Quantities snap to the tray.** A batch can carry a tray size (60 for a 2.5in
+plug, 8 for a 3.8in flowering pot); the stepper moves in whole trays, a typed
+number snaps to the nearest one, and the popover says so before you commit —
+a part tray is not something production can pick. The server enforces the same
+rule, so a hand-made request cannot get around it. Leave the tray blank and no
+multiple is enforced.
+
+**Buyers can track a request** with the reference and the email they sent it
+from. The reference alone is short and dated, so it is guessable; the pair is
+not, and it is exactly what the buyer has to hand.
+
 Stock can be typed in one batch at a time or pasted/imported as CSV
-(`code, nameEn, nameZh, cup, qty, from, to, year, note`); a row matching an
+(`code, nameEn, nameZh, cup, qty, from, to, year, note, tray`); a row matching an
 existing **code + cup + start week** updates it instead of duplicating, so a
 corrected sheet can be re-imported. Export writes a BOM so Excel reads the
 Chinese.

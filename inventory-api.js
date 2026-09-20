@@ -93,6 +93,7 @@ function cleanItem(b, prev) {
     nameZh: str(b.nameZh, 60),
     cup: str(b.cup, 24),
     qty: int(b.qty, 0, 9999999, 0),
+    tray: int(b.tray, 0, 10000, 0),        // units per tray; 0 = no multiple enforced
     from: weeks[0],
     to: weeks[1],
     year: int(b.year, 2000, 2100, new Date().getUTCFullYear()),
@@ -179,13 +180,14 @@ async function submitInquiry(request, env, sendMail) {
   const lines = [];
   for (const raw of (Array.isArray(b.lines) ? b.lines.slice(0, 60) : [])) {
     const item = byId.get(str(raw.id, 16));
-    const qty = int(raw.qty, 1, 9999999, 0);
+    let qty = int(raw.qty, 1, 9999999, 0);
     const week = int(raw.week, 1, 53, 0);
     if (!item || !qty || !week) continue;
     if (week < item.from || week > item.to) continue;         // never trust the client's week
+    if (item.tray > 1) qty = Math.max(item.tray, Math.round(qty / item.tray) * item.tray);
     lines.push({
       id: item.id, code: item.code, nameEn: item.nameEn, nameZh: item.nameZh,
-      cup: item.cup, week, qty, year: item.year,
+      cup: item.cup, week, qty, year: item.year, tray: item.tray,
       stockAtRequest: item.qty,                                // what staff should sanity-check against
     });
   }
@@ -276,6 +278,28 @@ export async function handleInventory(request, env, url, sendMail) {
      ids cannot be enumerated. The commercial information is the numbers, and
      the numbers stay behind the code. */
   if (p === '/api/inv/img' && method === 'GET') return serveImage(url, env);
+
+  /* A buyer who has sent a request should not have to email and ask what
+     happened to it. The reference alone is not enough to look one up — it is
+     short and dated, so it is guessable — but reference plus the email it was
+     sent from is not, and it is exactly what the buyer has to hand. */
+  if (p === '/api/inv/status' && method === 'POST') {
+    if (!(await isBuyer(request, env))) return json({ error: 'locked' }, 401);
+    let b; try { b = await request.json(); } catch (e) { b = {}; }
+    const ref = str(b.ref, 40).toUpperCase(), email = str(b.email, 120).toLowerCase();
+    if (!ref || !email) return json({ error: 'ref and email' }, 400);
+    const all = await listInquiries(env);
+    const hit = all.find(q => String(q.ref).toUpperCase() === ref &&
+                              String(q.buyer.email).toLowerCase() === email);
+    if (!hit) return json({ ok: false, error: 'not-found' }, 404);
+    return json({
+      ok: true,
+      ref: hit.ref, status: hit.status, ts: hit.ts, decidedAt: hit.decidedAt || null,
+      lines: hit.lines.map(l => ({ code: l.code, nameEn: l.nameEn, nameZh: l.nameZh, cup: l.cup, week: l.week, qty: l.qty })),
+      // what was actually set aside, once staff have decided
+      applied: hit.status === 'confirmed' ? (hit.applied || []).map(a => ({ code: a.code, taken: a.taken, short: a.short })) : null,
+    });
+  }
 
   if (p === '/api/inv/inquire' && method === 'POST') {
     if (!(await isBuyer(request, env))) return json({ error: 'locked' }, 401);
