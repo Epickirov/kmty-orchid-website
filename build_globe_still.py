@@ -61,8 +61,15 @@ AX = norm(cross((0.0, 1.0, 0.0), EYE))      # screen right
 AY = cross(EYE, AX)                          # screen up
 
 
+# the live globe rolls its camera by the axial tilt (see globe.js); the same
+# roll applied to the projected point keeps this drawing the same frame
+TILT = math.radians(23.4)
+_CT, _ST = math.cos(TILT), math.sin(TILT)
+
+
 def proj(p):
-    return (CX + dot(p, AX) * S, CY - dot(p, AY) * S)
+    x, y = dot(p, AX) * S, -dot(p, AY) * S
+    return (CX + x * _CT - y * _ST, CY + x * _ST + y * _CT)
 
 
 def f(n):

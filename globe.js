@@ -50,6 +50,7 @@
 
   var GOLD = 0xC6952F, BLUSH = 0xE7B7CF, CREAM = 0xF3EEE4, DEEP = 0x1B1522;
   var SPIN = 1.7;          // degrees a second — a full turn takes three and a half minutes
+  var TILT = 23.4 * Math.PI / 180;   // the axial tilt, applied as camera roll in draw()
   var FRAME = 33;          // 30fps is plenty for something this slow, and halves the GPU cost
   var THREE_SRC = 'vendor/three.slim.js';
 
@@ -92,14 +93,16 @@
     return out;
   }
 
-  /* How many device pixels to spend. A background sphere does not need a
-     retina buffer, and the box is now most of the right of the page: at 900
-     CSS px a ratio of 1.75 is a 1575-square buffer to fill thirty times a
-     second. The cap comes down as the box grows, so the buffer stays around a
-     megapixel whatever the screen. */
+  /* How many device pixels to spend. The box is now bigger than the hero —
+     up to 1850 CSS px — and a retina buffer at that size would be nine
+     megapixels of background decoration. Instead the ratio is whatever keeps
+     the drawing buffer near BUF square, so the cost is the same on every
+     screen: a fifth of it is cropped away by the hero unseen, which is the
+     price of keeping the box square and the placement pure CSS. Never below
+     0.8, or the market outlines start to mush. */
+  var BUF = 1500;
   function ratio(size) {
-    var dpr = window.devicePixelRatio || 1;
-    return Math.min(dpr, size > 1000 ? 1 : size > 760 ? 1.25 : size > 560 ? 1.5 : 1.75);
+    return Math.max(0.8, Math.min(window.devicePixelRatio || 1, 1.75, BUF / size));
   }
 
   function build(canvas, T, size) {
@@ -264,7 +267,14 @@
     };
     G.draw = function (turn) {
       cam.position.copy(ll(16, 96 + turn, 4.55));
-      cam.up.set(0, 1, 0); cam.lookAt(0, 0, 0); cam.updateMatrixWorld();
+      cam.up.set(0, 1, 0); cam.lookAt(0, 0, 0);
+      /* The axis leans. Rolling the camera about its own view direction is
+         what keeps that lean fixed on screen: tilting the world instead, or
+         handing lookAt a tilted `up`, would make the lean wander as the
+         camera orbits. 23.4 degrees because that is the one the planet
+         actually has. */
+      cam.rotateZ(TILT);
+      cam.updateMatrixWorld();
       var ph = ((turn / SPIN) * 0.7) % 1;     // one pulse every ~1.4s, tied to the same clock
       ring.scale.setScalar(1 + ph * 2.2);
       ring.material.opacity = .6 * (1 - ph);
@@ -330,9 +340,7 @@
        A flag driving the CSS would survive the first render and vanish on the
        next, leaving the globe invisible. */
     var layout = function () {
-      // full strength on a desktop, where the globe is under the hero scrim;
-      // half on a phone, where it sits over it (see the stylesheet)
-      box.style.opacity = mqWide.matches ? '1' : '.4';
+      box.style.opacity = '1';
       if (G) { G.resize(px()); G.draw(turn); }
     };
 

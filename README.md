@@ -259,14 +259,26 @@ pick up the changes.
 
 ## The hero globe
 
-The export map from the trade-show film, as a background asset: a sphere filling most of the
-right of the hero, turning once every three and a half minutes, with the photograph behind it
-and the headline in front. `globe.js` carries the world outline (6.5k points, delta-encoded in
-tenths of a degree — the film's copy was 30k points and 443 KB) and fetches
+The export map from the trade-show film, as a background asset: a tilted sphere larger than
+the hero itself, cropped top and bottom by the section, turning once every three and a half
+minutes behind the headline. `globe.js` carries the world outline (6.5k points, delta-encoded
+in tenths of a degree — the film's copy was 30k points and 443 KB) and fetches
 `vendor/three.slim.js` only once the page has loaded, the browser is idle, the viewport is at
 least 768px wide, WebGL works, and the visitor has not asked for reduced motion. Phones and
 reduced-motion visitors get the flat SVG in the markup instead, which is the same frame drawn
-from the same outline at the same camera.
+from the same outline, at the same camera, with the same 23.4° tilt.
+
+The tilt is applied as a **camera roll** (`cam.rotateZ`) rather than by tilting the world or
+handing `lookAt` a tilted `up` — either of those would make the lean wander as the camera
+orbits. `build_globe_still.py` rolls its projected points by the same angle; if you change one,
+change the other.
+
+The sphere is sized to overrun the hero (`min(96vw,148vh,1850px)`, and it is 0.84 of that box),
+so all three terms are generous on purpose: 148vh does it on a normal desktop, 96vw keeps the
+crop on a 4:3 window where width runs out first, and the 1850px stop holds it on a 1400px-tall
+monitor. Verified cropped from 900x700 to 2560x1400; a portrait tablet (768x1024) is the one
+shape too tall and narrow for it and keeps a whole globe. The drawing buffer is held near
+1500px square whatever the box, so the cost is the same on every screen.
 
 Both the outline in `globe.js` and the SVG in the hero are generated, and regenerate
 byte-for-byte:
@@ -287,34 +299,37 @@ npx esbuild entry.js --bundle --minify --format=iife --global-name=THREE \
 
 ### Keeping the hero readable
 
-The globe does not step aside for the type, so three things keep the words legible over it,
-and the numbers below are worst-case pixel contrast measured across all four languages at
-1440px — text hidden, background sampled, WCAG ratio computed:
+At this size the globe is the hero's background, so it decides the legibility of everything in
+front of it. It sits **under** `[data-heroscrim]`, so the page's own legibility layer dims it
+exactly as it dims the photograph, and `[data-globefade]` softens its bright features — the
+arcs and the lit market shapes — where the headline crosses them.
 
-- it sits **under** `[data-heroscrim]`, so the hero's own legibility layer dims it exactly as
-  it dims the photograph;
-- `[data-globefade]` takes the rest — a soft ellipse over the upper left, reaching far enough
-  right to cover the Vietnamese headline, which is the longest of the four and runs past the
-  sphere's middle;
-- the globe's body is darker than the flowers behind it, so over most of its area it *helps*.
+The numbers below are worst-case pixel contrast, measured in **one page load** with the hero's
+24s Ken Burns zoom paused and the globe toggled on and off between two otherwise identical
+frames. Measuring across two separate loads samples the zoom at different phases and produces
+±0.4 of pure noise — enough to invent regressions that are not there, which is how the earlier
+tuning went astray.
 
-Unchecked, the arcs and the lit market shapes cut the headline from 2.9:1 to 1.4:1 where they
-crossed it. As shipped the globe is contrast-neutral: every element measures within 0.03 of
-its no-globe baseline, and the globe is never the worst-case pixel for any of them. (The hero
-has never met AA over the flowers — headline 2.9:1, lede 2.9:1 — but that is the photograph,
-not the globe, and is unchanged either way.) `build_globe_still.py`'s palette is kept in step
-with `globe.js`'s; if you brighten one, brighten the other and re-measure.
+Measured that way the globe has **no regressions at all** and is a large net gain, because its
+body is far darker than the flowers it covers (1440px, worst case, globe off → on):
 
-On a phone there is no space to the right to fill, and the scrim runs to .92 at the foot of
-the hero, so there the globe goes back *over* the scrim, cropped into the bottom-right corner
-at 40% — the strongest setting that costs the small statistics labels no more than 0.4 of
-contrast.
+| | English | 中文 | Русский | Tiếng Việt |
+|---|---|---|---|---|
+| headline | 3.18 → **4.18** | 2.34 → **4.69** | 2.41 → **3.65** | 2.38 → **3.81** |
+| lede | 2.90 → **4.70** | 3.25 → 3.25 | 2.86 → 3.18 | 2.88 → 3.16 |
+| kicker | 3.84 → **4.59** | 3.21 → 3.64 | 3.26 → 3.85 | 3.30 → 3.43 |
+
+All four headlines failed their 3:1 target before the globe and pass it after. On a phone the
+gain is larger still — every element passes AA, the English headline going 3.58 → 8.73 — which
+is why the phone gets a whole globe filling the width rather than the dim corner crop it had
+when the globe was small. `build_globe_still.py`'s palette is kept in step with `globe.js`'s;
+if you brighten one, brighten the other and re-measure.
 
 Motion stops when the tab is hidden, when the hero scrolls out of view, and for
-`prefers-reduced-motion`. It does not stop on hover: the sphere covers half the hero, so a
-pointer pause would freeze it for any mouse resting on the page. If the machine cannot keep
-up, the frame budget steps down to 15fps rather than stopping — a background that freezes on
-a hiccup looks broken in a way a coarser one does not.
+`prefers-reduced-motion`. It does not stop on hover: the sphere covers most of the hero, so a
+pointer pause would freeze it for any mouse resting on the page. If the machine cannot keep up,
+the frame budget steps down to 15fps rather than stopping — a background that freezes on a
+hiccup looks broken in a way a coarser one does not.
 
 ## Deployment
 
