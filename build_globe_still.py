@@ -9,15 +9,18 @@ Two audiences never get the WebGL globe: phones, where half a megabyte of
 three.js for a decoration behind the headline is indefensible, and anyone who
 has asked the system for reduced motion. Both are owed the same picture, just
 still — so it is generated here from the very same outline the live globe
-wraps on its sphere, at the very same camera the live globe starts from.
+wraps on its sphere, at the very same camera the live globe starts from, in
+the same palette. Keep the fills below in step with globe.js: the two are seen
+at the same size, and a drawing dimmer than the sphere it stands in for reads
+as a mistake.
 
 Orthographic, because that is what a sphere looks like from far enough away and
 the live camera is at 4.55 radii with a 30 degree lens — close enough that
 nobody will hold the two side by side and find the difference.
 
 Rings are clipped at the terminator: a run of points facing the viewer is
-carried to the horizon and closed along it, which is all the fidelity a
-200-pixel drawing can show.
+carried to the horizon and closed along it, which is all the fidelity this
+needs — the drawing is a few hundred pixels across at most.
 """
 import json, math, sys
 
@@ -134,7 +137,7 @@ def graticule():
     d = []
     for la in range(-60, 61, 30):
         seg = []
-        for lo in range(0, 361, 7):
+        for lo in range(0, 361, 5):
             p = v3(la, lo)
             if dot(p, EYE) > 0:
                 seg.append(proj(p))
@@ -144,7 +147,7 @@ def graticule():
             d.append(seg)
     for lo in range(0, 360, 30):
         seg = []
-        for la in range(-90, 91, 7):
+        for la in range(-90, 91, 5):
             p = v3(la, lo)
             if dot(p, EYE) > 0:
                 seg.append(proj(p))
@@ -197,14 +200,14 @@ svg = (
     'style="position:absolute;inset:0;width:100%;height:100%;transition:opacity .6s ease;">'
     '<defs><radialGradient id="kmtyGlobeRim" cx="50%" cy="50%" r="50%">'
     '<stop offset="91%" stop-color="#C6952F" stop-opacity="0"/>'
-    '<stop offset="100%" stop-color="#C6952F" stop-opacity=".34"/></radialGradient></defs>'
+    '<stop offset="100%" stop-color="#C6952F" stop-opacity=".5"/></radialGradient></defs>'
     '<circle cx="110" cy="110" r="100" fill="#1B1522"/>'
-    '<path d="' + d_for(GEO['land'], 1.7) + '" fill="rgba(198,149,47,.17)"/>'
-    '<path d="' + d_for(GEO['home'], 0.9) + '" fill="rgba(231,183,207,.26)"/>'
-    '<path d="' + d_for(GEO['mkt'], 0.4) + '" fill="rgba(198,149,47,.52)" '
+    '<path d="' + d_for(GEO['land'], 0.9) + '" fill="rgba(198,149,47,.26)"/>'
+    '<path d="' + d_for(GEO['home'], 0.5) + '" fill="rgba(231,183,207,.38)"/>'
+    '<path d="' + d_for(GEO['mkt'], 0.22) + '" fill="rgba(198,149,47,.72)" '
     'stroke="rgba(255,232,170,.9)" stroke-width=".4" stroke-linejoin="round"/>'
-    '<path d="' + graticule() + '" fill="none" stroke="#C6952F" stroke-opacity=".14" stroke-width=".35"/>'
-    '<path d="' + arcs() + '" fill="none" stroke="#DBA95F" stroke-opacity=".75" stroke-width=".7" stroke-linecap="round"/>'
+    '<path d="' + graticule() + '" fill="none" stroke="#C6952F" stroke-opacity=".2" stroke-width=".35"/>'
+    '<path d="' + arcs() + '" fill="none" stroke="#DBA95F" stroke-opacity=".9" stroke-width=".9" stroke-linecap="round"/>'
     + dots() +
     '<circle cx="110" cy="110" r="101" fill="url(#kmtyGlobeRim)"/>'
     '<circle cx="110" cy="110" r="100" fill="none" stroke="#C6952F" stroke-opacity=".3" stroke-width="1"/>'

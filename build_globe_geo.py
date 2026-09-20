@@ -10,9 +10,10 @@ of which regenerate byte-for-byte from the command above. This script's output
 is also what build_globe_still.py draws the flat fallback from.
 
 The film drew 30k points onto a 2048px texture for a 900px globe on a 1080p
-wall. The hero globe is roughly 480 CSS px, so its texture is 1024 across and
-the visible hemisphere is ~512px of it: a point every ~0.7 degrees is already
-sub-pixel. Three things shrink the payload:
+wall. The hero globe fills most of the right of the page — up to about 900 CSS
+px, so up to ~760px of sphere, which puts a degree of latitude at ~4px and
+makes a third of a degree the point at which more detail stops showing. Three
+things shrink the payload:
 
   * Douglas-Peucker, gently on the nine markets and China (they carry a lit
     edge, so their shape has to survive) and hard on everything else, which is
@@ -102,7 +103,7 @@ if __name__ == '__main__':
         elif c['n'] == HOME:
             key, tol, minspan = 'home', 0.25, 0.30
         else:
-            key, tol, minspan = 'land', 0.55, 0.70
+            key, tol, minspan = 'land', 0.30, 0.45
         for ring in c['p']:
             r = clean(ring, tol, minspan)
             if r:

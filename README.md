@@ -15,7 +15,7 @@ works reliably in mainland China.
 | `support.js` | Render-once React runtime. React/ReactDOM are loaded locally from `vendor/`. |
 | `i18n.js` | Translations, the Yunnan map (labels, pins, base cards, leader tendrils), the deterministic "heal" reveal sweep, and the fabric-texture lab. |
 | `image-slot.js` | Design-app image-slot custom element. |
-| `globe.js` | The hero globe: the world outline it draws, the placement maths, and the loader for `vendor/three.slim.js` (see below). |
+| `globe.js` | The hero globe: the world outline it draws, the scene, and the loader for `vendor/three.slim.js` (see below). |
 | `fonts/` | Self-hosted webfonts (`fonts.css` + `files/*.woff2`). No Google Fonts. |
 | `vendor/` | Self-hosted React / ReactDOM / Babel, and `three.slim.js`. No unpkg / jsDelivr at runtime. |
 | `images/` | All site imagery and video. |
@@ -259,12 +259,14 @@ pick up the changes.
 
 ## The hero globe
 
-The export map from the trade-show film, cut down for a web page. `globe.js` carries the
-world outline (3.8k points, delta-encoded in tenths of a degree — the film's copy was 30k
-points and 443 KB) and fetches `vendor/three.slim.js` only once the page has loaded, the
-browser is idle, the viewport is at least 768px wide, WebGL works, and the visitor has not
-asked for reduced motion. Phones and reduced-motion visitors get the flat SVG in the markup
-instead, which is the same frame drawn from the same outline.
+The export map from the trade-show film, as a background asset: a sphere filling most of the
+right of the hero, turning once every three and a half minutes, with the photograph behind it
+and the headline in front. `globe.js` carries the world outline (6.5k points, delta-encoded in
+tenths of a degree — the film's copy was 30k points and 443 KB) and fetches
+`vendor/three.slim.js` only once the page has loaded, the browser is idle, the viewport is at
+least 768px wide, WebGL works, and the visitor has not asked for reduced motion. Phones and
+reduced-motion visitors get the flat SVG in the markup instead, which is the same frame drawn
+from the same outline at the same camera.
 
 Both the outline in `globe.js` and the SVG in the hero are generated, and regenerate
 byte-for-byte:
@@ -283,14 +285,36 @@ npx esbuild entry.js --bundle --minify --format=iife --global-name=THREE \
   --legal-comments=none --outfile=vendor/three.slim.js
 ```
 
-The globe's size and height are measured, not fixed: the headline is capped at 16 characters,
-and sixteen characters of Chinese or Vietnamese run hundreds of pixels further right than
-sixteen of English, so `globe.js` reads the headline's real line boxes and either sits beside
-it or drops into the band below it — whichever leaves room for the bigger sphere. It
-re-measures on resize, on a language switch, and when the self-hosted fonts land. Everything
-it decides is written as inline style: the runtime re-renders this tree and strips attributes
-it did not write, so a class or `data-` flag would survive the first render and vanish on the
-next.
+### Keeping the hero readable
+
+The globe does not step aside for the type, so three things keep the words legible over it,
+and the numbers below are worst-case pixel contrast measured across all four languages at
+1440px — text hidden, background sampled, WCAG ratio computed:
+
+- it sits **under** `[data-heroscrim]`, so the hero's own legibility layer dims it exactly as
+  it dims the photograph;
+- `[data-globefade]` takes the rest — a soft ellipse over the upper left, reaching far enough
+  right to cover the Vietnamese headline, which is the longest of the four and runs past the
+  sphere's middle;
+- the globe's body is darker than the flowers behind it, so over most of its area it *helps*.
+
+Unchecked, the arcs and the lit market shapes cut the headline from 2.9:1 to 1.4:1 where they
+crossed it. As shipped the globe is contrast-neutral: every element measures within 0.03 of
+its no-globe baseline, and the globe is never the worst-case pixel for any of them. (The hero
+has never met AA over the flowers — headline 2.9:1, lede 2.9:1 — but that is the photograph,
+not the globe, and is unchanged either way.) `build_globe_still.py`'s palette is kept in step
+with `globe.js`'s; if you brighten one, brighten the other and re-measure.
+
+On a phone there is no space to the right to fill, and the scrim runs to .92 at the foot of
+the hero, so there the globe goes back *over* the scrim, cropped into the bottom-right corner
+at 40% — the strongest setting that costs the small statistics labels no more than 0.4 of
+contrast.
+
+Motion stops when the tab is hidden, when the hero scrolls out of view, and for
+`prefers-reduced-motion`. It does not stop on hover: the sphere covers half the hero, so a
+pointer pause would freeze it for any mouse resting on the page. If the machine cannot keep
+up, the frame budget steps down to 15fps rather than stopping — a background that freezes on
+a hiccup looks broken in a way a coarser one does not.
 
 ## Deployment
 
