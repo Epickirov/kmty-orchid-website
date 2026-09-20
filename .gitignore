@@ -29,3 +29,6 @@ desktop.ini
 __pycache__/
 .wrangler/
 saas/data/
+
+# Deploy staging (regenerate with build_deploy.py)
+/dist/

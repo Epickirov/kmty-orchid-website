@@ -20,6 +20,7 @@ works reliably in mainland China.
 | `images/` | All site imagery and video. |
 | `terroir-geo.json` | Yunnan map geometry + production-base pin coordinates. |
 | `build_fonts.py` | Regenerates the self-hosted font subset (see below). |
+| `build_deploy.py` | Assembles the `kmty-site` upload folder (see Deployment). |
 
 ## Live preview
 
@@ -85,11 +86,26 @@ DNS; apex/email stay at 凡科 — never touch MX). Upload folder = `index.html`
 (renamed from `KMTY Orchid v5.dc.html`, og:image pointed at www.kmtyorchid.com)
 + `i18n.js` `support.js` `image-slot.js` `terroir-geo.json` `_headers` + `fonts/`
 `vendor/` + only the ~76 images the page references (17 MB total, not the full
-94 MB images/ tree). Deploys are Direct Upload (dashboard drag-and-drop) or:
+94 MB images/ tree). `build_deploy.py` assembles exactly that folder, so the
+choice does not have to be made by hand in a file picker:
 
 ```bash
-npx wrangler pages deploy <folder> --project-name=kmty-site --branch=main
+python build_deploy.py                    # → dist/kmty-site  (~19 MB, 129 files)
+npx wrangler pages deploy dist/kmty-site --project-name=kmty-site --branch=main
 ```
+
+or drag `dist/kmty-site` into the dashboard (Direct Upload). Two files in the
+repo root are named the same as files this project needs but belong to the
+**order page**, and the script is what keeps them apart: the upload's
+`_worker.js` must be `site-worker.js`, and `_redirects` must not be copied at
+all — its /order, /admin and /stock rewrites point at files the marketing
+project does not have. The script also repoints the og:image (absolute by
+necessity, and pointed at githack on preview branches) to the live domain,
+and copies only the images the page actually references.
+
+Deploying needs a Cloudflare API token with **Pages: Edit** — set
+`CLOUDFLARE_API_TOKEN` in the shell that runs wrangler. No token is kept in
+the repo or in any agent container; create one, use it, delete it.
 
 `site-worker.js` (deployed as `_worker.js` in the kmty-site folder) adds
 POST `/api/lead` for the catalog-request form: honeypot + per-IP rate limit,
