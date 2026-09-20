@@ -20,6 +20,10 @@ works reliably in mainland China.
 | `images/` | All site imagery and video. |
 | `terroir-geo.json` | Yunnan map geometry + production-base pin coordinates. |
 | `build_fonts.py` | Regenerates the self-hosted font subset (see below). |
+| `inventory.html` | Buyer-facing inventory inquiry page (`/inventory`). |
+| `inventory-admin.html` | Staff page (`/inventory-admin`): stock, inquiries, access code. |
+| `inventory-shared.js` | ISO-week maths, the four-language dictionary, API client. |
+| `inventory-api.js` | The `/api/inv/*` handlers; imported by `site-worker.js`. |
 | `build_deploy.py` | Assembles the `kmty-site` upload folder (see Deployment). |
 
 ## Live preview
@@ -272,6 +276,66 @@ python build_fonts.py
 
 then bump the `fonts/fonts.css?v=N` and `i18n.js?v=N` cache markers in the HTML so browsers
 pick up the changes.
+
+## Inventory inquiry (`/inventory`)
+
+Buyers pick a month, see it broken into ISO weeks, and send a request that lands
+in `office@kmtybio.com` — the same inbox as the catalog form. Staff confirm it
+in `/inventory-admin`, and only then does stock move.
+
+**The unit is a batch**, which is what a grower actually has: one variety, one
+cup size, one quantity, ready across a window of weeks — "5,000 of TPL-411 in
+2.5in, weeks 12–20". A buyer asking for week 15 draws on that batch, which is
+why the customer page shows the whole window beside every week it appears in.
+Quantity is the pool, not a per-week figure.
+
+Weeks are ISO-8601 (week 1 contains 4 January, weeks start Monday), computed
+independently in the browser and in the worker — the server never trusts a week
+number that arrives from a client, and drops any line outside its batch's
+window.
+
+| | |
+|---|---|
+| `/inventory` | Buyers. Public landing page; the numbers need the access code. |
+| `/inventory-admin` | Staff. Gated by `ADMIN_PASS`. |
+| KV keys | `invcfg` (access code) · `inv:<id>` · `invimg:<id>` · `inq:<ts>-<rand>` |
+
+**Two levels of access, both deliberately simple.** Staff send `x-admin-pass`;
+buyers send `x-inv-code`, one shared code rotated from the admin page — buyers
+should not have to register to ask what is in stock. Both are compared in
+constant time. Photos are the one thing not gated: a browser cannot put a header
+on an `<img src>`, and what the gate would protect is a picture behind a 48-bit
+random id that maps to no code, quantity or week without the catalogue, which is
+gated. The commercial information is the numbers, and the numbers stay behind the
+code.
+
+**Confirming is the only thing that moves stock**, and it is idempotent by
+status — an inquiry already decided cannot be decided again, so a double-click
+cannot deduct the same plants twice. Deduction floors at zero and records the
+shortfall rather than going negative. Declining changes nothing.
+
+Stock can be typed in one batch at a time or pasted/imported as CSV
+(`code, nameEn, nameZh, cup, qty, from, to, year, note`); a row matching an
+existing **code + cup + start week** updates it instead of duplicating, so a
+corrected sheet can be re-imported. Export writes a BOM so Excel reads the
+Chinese.
+
+### Before it works on a fresh deploy
+
+1. **`ADMIN_PASS` must be a secret on the `kmty-site` Pages project.** It
+   currently exists on the *order page* project, which is a different project —
+   without it `/inventory-admin` can never log in and every `/api/inv/admin/*`
+   call returns 401.
+2. **The `LEADS` KV binding must be present** (it already is — the inventory
+   shares that namespace under its own key prefixes).
+3. **Set the buyer access code** in `/inventory-admin → 访问码`. Until it is set,
+   `/inventory` tells buyers it is not open yet. Clearing it closes the page to
+   everyone.
+
+`RESEND_API_KEY` is already configured for the catalog form and the inquiry mail
+reuses it. If mail fails the inquiry is still stored — it is written to KV before
+the send, so a mail outage loses nothing, and the response says `mailed: false`
+with the reason.
 
 ## Deployment
 

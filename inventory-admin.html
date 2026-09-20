@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>库存管理 — KMTY</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="stylesheet" href="fonts/fonts.css?v=4">
+<style>
+  *{box-sizing:border-box;}
+  :root{--ink:#1A1E17;--cream:#F3EEE4;--paper:#F7F3EA;--muted:#55564A;--faint:#8A8474;
+        --green:#4C8C57;--gold:#C6952F;--rust:#B0552F;--line:rgba(26,30,23,.13);
+        --sans:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;
+        --serif:'Fraunces','Noto Serif SC',serif;}
+  body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.55;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 clamp(14px,3vw,30px);}
+  h1{font-family:var(--serif);font-weight:600;font-size:23px;margin:0;}
+  h2{font-family:var(--serif);font-weight:600;font-size:17px;margin:0 0 4px;}
+  .mono{font-family:ui-monospace,Menlo,Consolas,monospace;}
+  header{background:var(--ink);color:var(--cream);padding:14px 0;}
+  header .wrap{display:flex;align-items:center;gap:14px;}
+  header h1{color:var(--cream);font-size:19px;}
+  header .sp{flex:1 1 auto;}
+  header a{color:rgba(243,238,228,.7);font-size:12.5px;text-decoration:none;}
+
+  .tabs{display:flex;gap:6px;padding:16px 0 0;flex-wrap:wrap;}
+  .tab{border:1px solid var(--line);background:#fff;border-radius:11px;padding:8px 16px;font-family:var(--sans);
+       font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer;}
+  .tab.on{background:var(--ink);border-color:var(--ink);color:var(--cream);}
+  .tab .badge{display:inline-block;min-width:18px;padding:0 5px;margin-left:6px;border-radius:999px;
+       background:var(--rust);color:#fff;font-size:11px;line-height:17px;text-align:center;}
+  .panel{padding:18px 0 70px;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:16px 18px;margin-bottom:14px;}
+  .lead{color:var(--muted);font-size:13px;margin:0 0 12px;}
+
+  input,select,textarea,button{font-family:var(--sans);font-size:14px;}
+  input,select,textarea{width:100%;color:var(--ink);background:#fff;border:1px solid var(--line);
+       border-radius:10px;padding:9px 11px;outline:none;}
+  input:focus,select:focus,textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(76,140,87,.13);}
+  label.fld{display:flex;flex-direction:column;gap:4px;font-size:11.5px;letter-spacing:.06em;color:var(--faint);}
+  .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:10px;}
+  .btn{border:0;border-radius:999px;padding:10px 20px;background:var(--ink);color:var(--cream);font-weight:600;cursor:pointer;width:auto;}
+  .btn.sm{padding:6px 13px;font-size:12.5px;}
+  .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);}
+  .btn.ok{background:var(--green);} .btn.no{background:transparent;color:var(--rust);border:1px solid var(--rust);}
+  .btn:disabled{opacity:.45;cursor:default;}
+  .status{font-size:12.5px;color:var(--green);min-height:18px;}
+  .status.bad{color:var(--rust);}
+
+  table{width:100%;border-collapse:collapse;}
+  th{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);text-align:left;padding:7px 9px;font-weight:600;}
+  td{padding:9px;border-top:1px solid var(--line);vertical-align:middle;}
+  .thumb{width:44px;height:44px;border-radius:9px;object-fit:contain;background:var(--paper);}
+  .nothumb{width:44px;height:44px;border-radius:9px;background:var(--paper);display:flex;align-items:center;
+      justify-content:center;color:rgba(26,30,23,.2);font-family:var(--serif);}
+  .num{text-align:right;font-variant-numeric:tabular-nums;}
+  .pill{display:inline-block;font-size:11px;padding:2px 9px;border-radius:999px;background:var(--paper);border:1px solid var(--line);}
+  .pill.pending{background:#FFF6E6;border-color:#E8C88A;color:#8A5E10;}
+  .pill.confirmed{background:#E9F3EB;border-color:#A9CDB2;color:#2F5D3A;}
+  .pill.declined{background:#F4F1EC;color:var(--faint);}
+  .inq{border:1px solid var(--line);border-radius:14px;background:#fff;margin-bottom:12px;overflow:hidden;}
+  .inqhead{display:flex;gap:12px;align-items:center;padding:13px 16px;cursor:pointer;flex-wrap:wrap;}
+  .inqhead .sp{flex:1 1 auto;}
+  .inqbody{display:none;padding:0 16px 16px;border-top:1px solid var(--line);}
+  .inq.open .inqbody{display:block;}
+  .short{color:var(--rust);font-weight:600;}
+  .login{max-width:360px;margin:12vh auto;text-align:center;}
+  @media(max-width:640px){ td,th{padding:7px 5px;font-size:12.5px;} .thumb,.nothumb{width:34px;height:34px;} }
+</style>
+</head>
+<body>
+
+<header><div class="wrap">
+  <h1>库存管理 · Inventory</h1><span class="sp"></span>
+  <a href="/inventory" target="_blank">客户页面 ↗</a>
+</div></header>
+
+<div id="login" class="wrap login">
+  <h2>管理员登录</h2>
+  <p class="lead">输入管理密码以管理库存与询价。</p>
+  <input id="pass" type="password" placeholder="管理密码" autocomplete="current-password">
+  <p><button class="btn" id="go">进入</button></p>
+  <div class="status bad" id="loginErr"></div>
+</div>
+
+<div id="app" hidden>
+  <div class="wrap tabs">
+    <button class="tab on" data-tab="stock">库存 Stock</button>
+    <button class="tab" data-tab="inq">询价 Inquiries <span class="badge" id="pendBadge" hidden>0</span></button>
+    <button class="tab" data-tab="set">访问码 Access</button>
+  </div>
+
+  <!-- ---------- stock ---------- -->
+  <div class="wrap panel" id="p-stock">
+    <div class="card">
+      <h2 id="formTitle">添加批次</h2>
+      <p class="lead">一个批次 = 一个品种、一个杯径、一个数量、一个可供周段。客户按周查看时，凡是落在该周段内的批次都会显示。</p>
+      <div class="row">
+        <label class="fld">花卉编号 Code *<input id="f-code" placeholder="TPL-411" maxlength="24"></label>
+        <label class="fld">英文名 Name (EN) *<input id="f-nameEn" placeholder="Ivory" maxlength="60"></label>
+        <label class="fld">中文名 Name (中文)<input id="f-nameZh" placeholder="象牙白" maxlength="60"></label>
+        <label class="fld">杯径 Cup size<input id="f-cup" list="cups" placeholder="2.5&quot;" maxlength="24"></label>
+      </div>
+      <datalist id="cups">
+        <option value="1.7&quot;"><option value="2.0&quot;"><option value="2.5&quot;"><option value="2.8&quot;">
+        <option value="3.5&quot;"><option value="3.5&quot; spiking"><option value="3.8&quot; flowering">
+      </datalist>
+      <div class="row">
+        <label class="fld">数量 Quantity *<input id="f-qty" type="number" min="0" step="1" placeholder="5000"></label>
+        <label class="fld">起始周 From week *<input id="f-from" type="number" min="1" max="53" placeholder="12"></label>
+        <label class="fld">结束周 To week *<input id="f-to" type="number" min="1" max="53" placeholder="20"></label>
+        <label class="fld">年份 Year<input id="f-year" type="number" min="2024" max="2100"></label>
+      </div>
+      <div class="row">
+        <label class="fld">备注 Note（客户可见，选填）<input id="f-note" maxlength="140" placeholder="大花型 / large flower"></label>
+        <label class="fld">照片 Photo（自动缩小）<input id="f-img" type="file" accept="image/*"></label>
+      </div>
+      <div id="imgWrap" style="display:none;margin-bottom:10px;">
+        <img id="imgPrev" class="thumb" style="width:74px;height:74px;" alt="">
+        <button class="btn ghost sm" type="button" id="imgClear">移除照片</button>
+      </div>
+      <p style="display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:0;">
+        <button class="btn" id="save">保存批次</button>
+        <button class="btn ghost" id="reset" hidden>取消编辑</button>
+        <span class="status" id="saveStatus"></span>
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>批量导入 Bulk import</h2>
+      <p class="lead">从 Excel 直接复制粘贴，或选择 CSV 文件。每行一个批次，列顺序：
+        <b class="mono">编号, 英文名, 中文名, 杯径, 数量, 起始周, 结束周, 年份, 备注</b>。
+        年份与备注可留空。<b>编号＋杯径＋起始周</b>相同的批次会被覆盖，其余新增；照片请在上方逐个上传。</p>
+      <textarea id="csv" rows="4" placeholder="TPL-411, Ivory, 象牙白, 2.5&quot;, 5000, 10, 16, 2026,
+TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
+      <p style="display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:10px 0 0;">
+        <input type="file" id="csvFile" accept=".csv,text/csv,text/plain" style="width:auto;">
+        <button class="btn" id="csvGo">导入</button>
+        <button class="btn ghost" id="csvOut">导出当前库存 CSV</button>
+        <span class="status" id="csvStatus"></span>
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>现有批次 <span class="pill" id="stockCount"></span></h2>
+      <div style="overflow-x:auto;"><table id="stockTable">
+        <thead><tr><th></th><th>编号</th><th>品种</th><th>杯径</th><th class="num">数量</th><th>可供周</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- ---------- inquiries ---------- -->
+  <div class="wrap panel" id="p-inq" hidden>
+    <p class="lead">确认后系统才会扣减库存；拒绝不会改动任何数量。每条询价只能处理一次。</p>
+    <div id="inqList"></div>
+  </div>
+
+  <!-- ---------- access ---------- -->
+  <div class="wrap panel" id="p-set" hidden>
+    <div class="card" style="max-width:520px;">
+      <h2>客户访问码</h2>
+      <p class="lead">客户在 <b>/inventory</b> 输入此访问码后才能看到数量并提交需求。留空则整个库存页面对所有人关闭。至少 4 位。</p>
+      <label class="fld">访问码<input id="s-code" maxlength="40" placeholder="例如 KMTY2026"></label>
+      <p style="display:flex;gap:9px;align-items:center;margin-top:12px;">
+        <button class="btn" id="saveCode">保存</button>
+        <span class="status" id="codeStatus"></span>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script src="inventory-shared.js?v=1"></script>
+<script>
+(function () {
+  'use strict';
+  var api = window.KMTY_INV.api, W = window.KMTY_INV.weeks;
+  var $ = function (id) { return document.getElementById(id); };
+  var pass = '', items = [], inquiries = [], editing = null, newImg;
+
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function st(el, msg, bad) { var e = $(el); e.textContent = msg; e.className = 'status' + (bad ? ' bad' : ''); }
+  function n(v) { return Number(v).toLocaleString('en-US'); }
+
+  /* ---------- login ---------- */
+  function login() {
+    pass = $('pass').value;
+    if (!pass) return;
+    $('go').disabled = true; st('loginErr', '');
+    api.adminItems(pass).then(function (r) {
+      $('go').disabled = false;
+      if (!r.ok || !r.admin) { st('loginErr', '密码不正确', true); return; }
+      try { sessionStorage.setItem('kmty-adm', pass); } catch (e) {}
+      $('login').hidden = true; $('app').hidden = false;
+      items = r.items; paintStock();
+      refreshInquiries(); loadSettings();
+    }).catch(function () { $('go').disabled = false; st('loginErr', '无法连接服务器', true); });
+  }
+  $('go').addEventListener('click', login);
+  $('pass').addEventListener('keydown', function (e) { if (e.key === 'Enter') login(); });
+
+  /* ---------- tabs ---------- */
+  document.querySelectorAll('.tab').forEach(function (t) {
+    t.addEventListener('click', function () {
+      document.querySelectorAll('.tab').forEach(function (x) { x.classList.remove('on'); });
+      t.classList.add('on');
+      ['stock', 'inq', 'set'].forEach(function (k) { $('p-' + k).hidden = k !== t.dataset.tab; });
+    });
+  });
+
+  /* ---------- stock ---------- */
+  function reload() {
+    return api.adminItems(pass).then(function (r) { if (r.ok) { items = r.items; paintStock(); } });
+  }
+  function paintStock() {
+    var tb = $('stockTable').querySelector('tbody');
+    tb.innerHTML = '';
+    $('stockCount').textContent = items.length + ' 批 · ' + n(items.reduce(function (s, i) { return s + i.qty; }, 0)) + ' 株';
+    items.forEach(function (it) {
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>' + (it.img ? '<img class="thumb" src="/api/inv/img?id=' + it.id + '&t=' + it.updatedAt + '" alt="">' : '<span class="nothumb">✽</span>') + '</td>' +
+        '<td class="mono" style="font-size:12px;">' + esc(it.code) + '</td>' +
+        '<td>' + esc(it.nameEn) + (it.nameZh ? '<br><span style="color:var(--faint);font-size:12px;">' + esc(it.nameZh) + '</span>' : '') + '</td>' +
+        '<td>' + (esc(it.cup) || '—') + '</td>' +
+        '<td class="num"><b>' + n(it.qty) + '</b></td>' +
+        '<td>第 ' + it.from + '–' + it.to + ' 周<br><span style="color:var(--faint);font-size:11.5px;">' + it.year + '</span></td>';
+      var td = document.createElement('td');
+      td.style.whiteSpace = 'nowrap';
+      var e = document.createElement('button'); e.className = 'btn ghost sm'; e.textContent = '编辑';
+      e.addEventListener('click', function () { edit(it); });
+      var d = document.createElement('button'); d.className = 'btn no sm'; d.textContent = '删除';
+      d.style.marginLeft = '6px';
+      d.addEventListener('click', function () {
+        if (!confirm('删除 ' + it.code + '（' + (it.cup || '—') + '，' + n(it.qty) + ' 株）？')) return;
+        api.saveItem(pass, { id: it.id, delete: true }).then(reload);
+      });
+      td.appendChild(e); td.appendChild(d); tr.appendChild(td);
+      tb.appendChild(tr);
+    });
+  }
+
+  function edit(it) {
+    editing = it.id; newImg = undefined;
+    $('formTitle').textContent = '编辑批次 · ' + it.code;
+    $('f-code').value = it.code; $('f-nameEn').value = it.nameEn; $('f-nameZh').value = it.nameZh || '';
+    $('f-cup').value = it.cup || ''; $('f-qty').value = it.qty;
+    $('f-from').value = it.from; $('f-to').value = it.to; $('f-year').value = it.year;
+    $('f-note').value = it.note || '';
+    $('f-img').value = '';
+    if (it.img) { $('imgPrev').src = '/api/inv/img?id=' + it.id + '&t=' + it.updatedAt; $('imgWrap').style.display = 'block'; }
+    else $('imgWrap').style.display = 'none';
+    $('reset').hidden = false;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function resetForm() {
+    editing = null; newImg = undefined;
+    $('formTitle').textContent = '添加批次';
+    ['f-code','f-nameEn','f-nameZh','f-cup','f-qty','f-from','f-to','f-note','f-img'].forEach(function (k) { $(k).value = ''; });
+    $('f-year').value = new Date().getUTCFullYear();
+    $('imgWrap').style.display = 'none'; $('reset').hidden = true; st('saveStatus', '');
+  }
+  $('reset').addEventListener('click', resetForm);
+
+  // resize in the browser: a 4000px phone photo has no business in KV, and the
+  // customer page never shows it bigger than ~320 CSS px
+  $('f-img').addEventListener('change', function () {
+    var f = this.files && this.files[0]; if (!f) return;
+    var fr = new FileReader();
+    fr.onload = function () {
+      var img = new Image();
+      img.onload = function () {
+        var max = 760, w = img.width, h = img.height;
+        if (w > max || h > max) { var k = max / Math.max(w, h); w = Math.round(w * k); h = Math.round(h * k); }
+        var c = document.createElement('canvas'); c.width = w; c.height = h;
+        var g = c.getContext('2d');
+        // cut-out photos of blooms usually arrive as PNG or WebP with a
+        // transparent background, and JPEG has no alpha — without this the
+        // background lands as black and every card looks like a night shot
+        g.fillStyle = '#FFFFFF'; g.fillRect(0, 0, w, h);
+        g.drawImage(img, 0, 0, w, h);
+        newImg = c.toDataURL('image/jpeg', 0.84);
+        $('imgPrev').src = newImg; $('imgWrap').style.display = 'block';
+      };
+      img.src = fr.result;
+    };
+    fr.readAsDataURL(f);
+  });
+  $('imgClear').addEventListener('click', function () {
+    newImg = ''; $('imgWrap').style.display = 'none'; $('f-img').value = '';
+  });
+
+  $('save').addEventListener('click', function () {
+    var body = {
+      id: editing || undefined,
+      code: $('f-code').value.trim(), nameEn: $('f-nameEn').value.trim(), nameZh: $('f-nameZh').value.trim(),
+      cup: $('f-cup').value.trim(), qty: $('f-qty').value,
+      from: $('f-from').value, to: $('f-to').value,
+      year: $('f-year').value || new Date().getUTCFullYear(), note: $('f-note').value.trim(),
+    };
+    if (!body.code || !body.nameEn) { st('saveStatus', '编号与英文名为必填', true); return; }
+    if (!body.from || !body.to) { st('saveStatus', '请填写可供周段', true); return; }
+    if (newImg !== undefined) body.img = newImg; else if (editing) body.img = '__keep__';
+    $('save').disabled = true; st('saveStatus', '保存中…');
+    api.saveItem(pass, body).then(function (r) {
+      $('save').disabled = false;
+      if (!r.ok) { st('saveStatus', r.error || '保存失败', true); return; }
+      st('saveStatus', '已保存');
+      resetForm(); reload();
+    }).catch(function () { $('save').disabled = false; st('saveStatus', '无法连接服务器', true); });
+  });
+
+  /* ---------- bulk import ----------
+     Growers keep this in a spreadsheet, so the fastest path in is a paste. The
+     parser handles quoted fields because cup sizes contain an inch mark, and it
+     matches an existing batch on code + cup + start week — the three things
+     that identify a batch — so re-importing a corrected sheet updates rows
+     instead of duplicating them. */
+  function parseCsv(text) {
+    var rows = [], row = [], cell = '', q = false;
+    for (var i = 0; i < text.length; i++) {
+      var c = text[i];
+      if (q) {
+        if (c === '"' && text[i + 1] === '"') { cell += '"'; i++; }
+        else if (c === '"') q = false;
+        else cell += c;
+      } else if (c === '"') q = true;
+      else if (c === ',' || c === '\t') { row.push(cell); cell = ''; }
+      else if (c === '\n' || c === '\r') {
+        if (cell !== '' || row.length) { row.push(cell); rows.push(row); row = []; cell = ''; }
+        if (c === '\r' && text[i + 1] === '\n') i++;
+      } else cell += c;
+    }
+    if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
+    return rows.filter(function (r) { return r.some(function (x) { return String(x).trim() !== ''; }); });
+  }
+
+  function runImport(text) {
+    var rows = parseCsv(text);
+    if (!rows.length) { st('csvStatus', '没有可导入的内容', true); return; }
+    // tolerate a header line
+    var first = rows[0].join(' ').toLowerCase();
+    if (/code|编号/.test(first) && !/^\s*[A-Z]{2,4}-?\d/i.test(rows[0][0] || '')) rows.shift();
+
+    var jobs = [], bad = 0;
+    rows.forEach(function (r) {
+      var g = function (i) { return String(r[i] == null ? '' : r[i]).trim(); };
+      var code = g(0).toUpperCase(), en = g(1), qty = Number(g(4)), from = Number(g(5)), to = Number(g(6));
+      if (!code || !en || !isFinite(qty) || !from || !to) { bad++; return; }
+      var cup = g(3);
+      var hit = items.filter(function (x) { return x.code === code && x.cup === cup && x.from === from; })[0];
+      jobs.push({
+        id: hit ? hit.id : undefined, code: code, nameEn: en, nameZh: g(2), cup: cup,
+        qty: qty, from: from, to: to, year: Number(g(7)) || new Date().getUTCFullYear(), note: g(8),
+        img: hit ? '__keep__' : undefined,
+      });
+    });
+    if (!jobs.length) { st('csvStatus', '每行至少需要 编号 / 英文名 / 数量 / 起止周', true); return; }
+
+    $('csvGo').disabled = true;
+    st('csvStatus', '导入中… 0/' + jobs.length);
+    var done = 0, failed = 0;
+    // one at a time: KV writes are cheap but a burst of them from one browser is
+    // the kind of thing that trips rate limits, and the count is small
+    (function next() {
+      if (!jobs.length) {
+        $('csvGo').disabled = false;
+        st('csvStatus', '完成：' + done + ' 条' + (failed ? '，失败 ' + failed : '') + (bad ? '，跳过 ' + bad + ' 行' : ''), failed > 0);
+        $('csv').value = '';
+        reload();
+        return;
+      }
+      api.saveItem(pass, jobs.shift()).then(function (r) {
+        if (r.ok) done++; else failed++;
+        st('csvStatus', '导入中… ' + (done + failed) + '/' + (done + failed + jobs.length));
+        next();
+      }).catch(function () { failed++; next(); });
+    })();
+  }
+  $('csvGo').addEventListener('click', function () { runImport($('csv').value); });
+  $('csvFile').addEventListener('change', function () {
+    var f = this.files && this.files[0]; if (!f) return;
+    var fr = new FileReader();
+    fr.onload = function () { $('csv').value = fr.result; st('csvStatus', '已读入 ' + f.name + '，点「导入」确认'); };
+    fr.readAsText(f, 'utf-8');
+  });
+  $('csvOut').addEventListener('click', function () {
+    var q = function (v) { v = String(v == null ? '' : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+    var csv = '编号,英文名,中文名,杯径,数量,起始周,结束周,年份,备注\n' +
+      items.map(function (i) { return [i.code, i.nameEn, i.nameZh, i.cup, i.qty, i.from, i.to, i.year, i.note].map(q).join(','); }).join('\n');
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }));  // BOM so Excel reads the Chinese
+    a.download = 'kmty-inventory-' + new Date().toISOString().slice(0, 10) + '.csv';
+    a.click(); URL.revokeObjectURL(a.href);
+  });
+
+  /* ---------- inquiries ---------- */
+  function refreshInquiries() {
+    return api.inquiries(pass).then(function (r) {
+      if (!r.ok) return;
+      inquiries = r.inquiries; paintInquiries();
+    });
+  }
+  function paintInquiries() {
+    var host = $('inqList'); host.innerHTML = '';
+    var pending = inquiries.filter(function (q) { return q.status === 'pending'; }).length;
+    $('pendBadge').hidden = !pending; $('pendBadge').textContent = pending;
+    if (!inquiries.length) { host.innerHTML = '<p class="lead">还没有询价。</p>'; return; }
+
+    inquiries.forEach(function (q) {
+      var total = q.lines.reduce(function (s, l) { return s + l.qty; }, 0);
+      var box = document.createElement('div'); box.className = 'inq';
+      var head = document.createElement('div'); head.className = 'inqhead';
+      head.innerHTML =
+        '<span class="pill ' + q.status + '">' + ({pending:'待处理',confirmed:'已确认',declined:'已拒绝'}[q.status]) + '</span>' +
+        '<b>' + esc(q.buyer.company || q.buyer.name || q.buyer.email) + '</b>' +
+        '<span style="color:var(--faint);font-size:12.5px;">' + n(total) + ' 株 · ' + q.lines.length + ' 项</span>' +
+        '<span class="sp"></span>' +
+        '<span class="mono" style="font-size:11.5px;color:var(--faint);">' + esc(q.ref || '') + '</span>' +
+        '<span style="color:var(--faint);font-size:12px;">' + new Date(q.ts).toLocaleString() + '</span>';
+      head.addEventListener('click', function () { box.classList.toggle('open'); });
+      box.appendChild(head);
+
+      var body = document.createElement('div'); body.className = 'inqbody';
+      var rows = '';
+      // grouped by week, the way production reads it
+      var byWeek = {};
+      q.lines.forEach(function (l) { (byWeek[l.week] = byWeek[l.week] || []).push(l); });
+      Object.keys(byWeek).sort(function (a, b) { return a - b; }).forEach(function (wk) {
+        rows += '<tr><td colspan="5" style="padding-top:13px;font-size:11.5px;letter-spacing:.1em;color:var(--green);font-weight:700;">第 ' + wk + ' 周</td></tr>';
+        byWeek[wk].forEach(function (l) {
+          var live = items.filter(function (i) { return i.id === l.id; })[0];
+          var now = live ? live.qty : null;
+          var over = now !== null && l.qty > now;
+          rows += '<tr>' +
+            '<td class="mono" style="font-size:12px;">' + esc(l.code) + '</td>' +
+            '<td>' + esc(l.nameEn) + (l.nameZh ? ' · ' + esc(l.nameZh) : '') + '</td>' +
+            '<td>' + (esc(l.cup) || '—') + '</td>' +
+            '<td class="num"><b>' + n(l.qty) + '</b></td>' +
+            '<td class="num' + (over ? ' short' : '') + '">' + (now === null ? '已删除' : n(now) + ' 现存' + (over ? '（差 ' + n(l.qty - now) + '）' : '')) + '</td>' +
+          '</tr>';
+        });
+      });
+      var applied = '';
+      if (q.status === 'confirmed' && q.applied && q.applied.length) {
+        applied = '<p class="lead" style="margin-top:12px;">已扣减：' + q.applied.map(function (a) {
+          return esc(a.code) + ' −' + n(a.taken) + (a.short ? '（缺 ' + n(a.short) + '）' : '');
+        }).join('，') + '</p>';
+      }
+      body.innerHTML =
+        '<div style="overflow-x:auto;"><table><thead><tr><th>编号</th><th>品种</th><th>杯径</th><th class="num">需求</th><th class="num">库存</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+        '<p class="lead" style="margin-top:12px;"><b>' + esc(q.buyer.name || '—') + '</b>' + (q.buyer.country ? ' · ' + esc(q.buyer.country) : '') +
+          ' · <a href="mailto:' + esc(q.buyer.email) + '">' + esc(q.buyer.email) + '</a>' + (q.buyer.tel ? ' · ' + esc(q.buyer.tel) : '') + '</p>' +
+        (q.buyer.note ? '<p class="lead" style="background:var(--paper);padding:10px 12px;border-radius:9px;white-space:pre-wrap;">' + esc(q.buyer.note) + '</p>' : '') +
+        applied;
+
+      if (q.status === 'pending') {
+        var act = document.createElement('p');
+        act.style.cssText = 'display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:12px 0 0;';
+        var ok = document.createElement('button'); ok.className = 'btn ok'; ok.textContent = '确认并扣减库存';
+        var no = document.createElement('button'); no.className = 'btn no'; no.textContent = '拒绝';
+        var msg = document.createElement('span'); msg.className = 'status';
+        function decide(action, label) {
+          if (!confirm(action === 'confirm' ? '确认后将从库存中扣减 ' + n(total) + ' 株，且不可撤销。继续？' : '拒绝这条询价？库存不会变动。')) return;
+          ok.disabled = no.disabled = true; msg.textContent = '处理中…';
+          api.decide(pass, q.key, action).then(function (r) {
+            if (!r.ok) { msg.textContent = r.error || '失败'; msg.className = 'status bad'; ok.disabled = no.disabled = false; return; }
+            reload().then(refreshInquiries);
+          }).catch(function () { msg.textContent = '无法连接服务器'; msg.className = 'status bad'; ok.disabled = no.disabled = false; });
+        }
+        ok.addEventListener('click', function () { decide('confirm'); });
+        no.addEventListener('click', function () { decide('decline'); });
+        act.appendChild(ok); act.appendChild(no); act.appendChild(msg);
+        body.appendChild(act);
+      }
+      box.appendChild(body);
+      host.appendChild(box);
+    });
+  }
+
+  /* ---------- settings ---------- */
+  function loadSettings() {
+    api.getSettings(pass).then(function (r) { if (r.ok) $('s-code').value = r.settings.code || ''; });
+  }
+  $('saveCode').addEventListener('click', function () {
+    var code = $('s-code').value.trim();
+    $('saveCode').disabled = true; st('codeStatus', '保存中…');
+    api.setSettings(pass, { code: code }).then(function (r) {
+      $('saveCode').disabled = false;
+      if (!r.ok) { st('codeStatus', r.error || '保存失败', true); return; }
+      st('codeStatus', code ? '已保存，客户现在可用此访问码' : '已清空 — 库存页面对所有人关闭');
+    }).catch(function () { $('saveCode').disabled = false; st('codeStatus', '无法连接服务器', true); });
+  });
+
+  /* ---------- boot ---------- */
+  resetForm();
+  try {
+    var saved = sessionStorage.getItem('kmty-adm');
+    if (saved) { $('pass').value = saved; login(); }
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

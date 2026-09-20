@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Live inventory — KMTY Orchid</title>
+<meta name="description" content="Week-by-week availability of KMTY Phalaenopsis: varieties, cup sizes and quantities, with a request you can send straight to our sales desk.">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="fonts/fonts.css?v=4">
+<style>
+  *{box-sizing:border-box;}
+  :root{
+    --ink:#1A1E17; --cream:#F3EEE4; --paper:#F7F3EA; --muted:#55564A; --faint:#8A8474;
+    --green:#4C8C57; --deep:#2F5D3A; --gold:#C6952F; --rust:#B0552F; --blush:#E7B7CF;
+    --line:rgba(26,30,23,.12); --dark:#141018;
+    --serif:'Fraunces','Playfair Display','Noto Serif SC',serif;
+    --sans:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;
+  }
+  html{-webkit-text-size-adjust:100%;}
+  body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;}
+  a{color:var(--rust);}
+  .wrap{max-width:1240px;margin:0 auto;padding:0 clamp(16px,4vw,40px);}
+  .mono{font-family:ui-monospace,Menlo,Consolas,monospace;}
+
+  /* ---- top bar ---- */
+  header{position:sticky;top:0;z-index:60;background:rgba(243,238,228,.94);backdrop-filter:saturate(1.3) blur(14px);
+    -webkit-backdrop-filter:saturate(1.3) blur(14px);border-bottom:1px solid var(--line);}
+  .bar{display:flex;align-items:center;gap:14px;height:62px;}
+  .mark{font-family:var(--serif);font-weight:700;font-size:19px;letter-spacing:.02em;text-decoration:none;color:var(--ink);}
+  .mark span{color:var(--green);}
+  .spacer{flex:1 1 auto;}
+  .langs{display:flex;gap:2px;padding:3px;border:1px solid var(--line);border-radius:999px;}
+  .langs button{border:0;background:transparent;font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.04em;
+    color:var(--muted);padding:5px 9px;border-radius:999px;cursor:pointer;}
+  .langs button.on{background:var(--ink);color:var(--cream);}
+  .back{font-size:12.5px;text-decoration:none;color:var(--muted);white-space:nowrap;}
+
+  /* ---- gate ---- */
+  .gate{max-width:520px;margin:clamp(40px,9vh,90px) auto;text-align:center;}
+  .gate h1{font-family:var(--serif);font-weight:480;font-size:clamp(30px,5vw,46px);line-height:1.08;margin:0 0 14px;}
+  .gate p{color:var(--muted);margin:0 auto 26px;max-width:42ch;}
+  .codebox{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+  input,select,textarea{font-family:var(--sans);font-size:15px;color:var(--ink);background:#fff;
+    border:1px solid var(--line);border-radius:11px;padding:12px 14px;outline:none;}
+  input:focus,select:focus,textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(76,140,87,.14);}
+  .btn{font-family:var(--sans);font-size:14px;font-weight:600;border:0;border-radius:999px;padding:13px 24px;
+    background:var(--ink);color:var(--cream);cursor:pointer;transition:transform .15s ease,opacity .15s ease;}
+  .btn:hover{transform:translateY(-1px);} .btn:disabled{opacity:.45;cursor:default;transform:none;}
+  .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);}
+  .btn.sm{padding:8px 15px;font-size:13px;}
+  .err{color:var(--rust);font-size:13.5px;min-height:20px;margin-top:10px;}
+
+  /* ---- month strip ---- */
+  .lede{padding:clamp(26px,5vw,48px) 0 0;}
+  .lede h1{font-family:var(--serif);font-weight:480;font-size:clamp(28px,4.4vw,44px);line-height:1.08;margin:0 0 8px;}
+  .lede p{color:var(--muted);max-width:60ch;margin:0;}
+  .months{display:flex;gap:7px;overflow-x:auto;padding:22px 0 6px;scrollbar-width:none;}
+  .months::-webkit-scrollbar{display:none;}
+  .mo{flex:0 0 auto;border:1px solid var(--line);background:#fff;border-radius:13px;padding:9px 15px;cursor:pointer;
+    font-family:var(--sans);font-size:13.5px;font-weight:600;color:var(--muted);position:relative;transition:all .18s ease;}
+  .mo:hover{border-color:var(--green);color:var(--ink);}
+  .mo.on{background:var(--ink);border-color:var(--ink);color:var(--cream);}
+  .mo .dot{display:block;width:5px;height:5px;border-radius:50%;background:var(--green);margin:4px auto 0;}
+  .mo.on .dot{background:var(--blush);}
+  .mo.empty{opacity:.42;}
+
+  /* ---- weeks ---- */
+  .week{padding:30px 0 6px;border-top:1px solid var(--line);margin-top:26px;}
+  .wkhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+  .wkno{font-family:var(--serif);font-weight:700;font-size:clamp(24px,3vw,32px);line-height:1;}
+  .wkdates{font-size:12.5px;color:var(--faint);letter-spacing:.04em;text-transform:uppercase;}
+  .wktot{margin-left:auto;font-size:12.5px;color:var(--muted);}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:clamp(12px,1.6vw,20px);}
+
+  .card{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;
+    transition:box-shadow .2s ease,transform .2s ease,border-color .2s ease;}
+  .card:hover{box-shadow:0 8px 26px rgba(26,30,23,.09);transform:translateY(-2px);}
+  .card.picked{border-color:var(--green);box-shadow:0 0 0 2px rgba(76,140,87,.2);}
+  .shot{aspect-ratio:1/1;background:var(--paper) radial-gradient(circle at 50% 38%,rgba(255,255,255,.9),rgba(0,0,0,.04));
+    display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  .shot img{width:100%;height:100%;object-fit:contain;padding:9%;}
+  .shot .noimg{font-family:var(--serif);font-size:30px;color:rgba(26,30,23,.14);}
+  .cbody{padding:12px 14px 14px;display:flex;flex-direction:column;gap:3px;flex:1 1 auto;}
+  .ccode{font-size:10px;letter-spacing:.14em;color:var(--gold);font-weight:700;}
+  .cname{font-family:var(--serif);font-weight:600;font-size:16px;line-height:1.2;}
+  .czh{font-size:12px;color:var(--faint);}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px;}
+  .chip{font-size:11px;padding:3px 9px;border-radius:999px;background:var(--paper);border:1px solid var(--line);color:var(--muted);}
+  .chip.win{background:rgba(76,140,87,.1);border-color:rgba(76,140,87,.25);color:var(--deep);}
+  .stock{margin-top:9px;font-size:12px;color:var(--muted);}
+  .stock b{font-size:15px;color:var(--ink);font-variant-numeric:tabular-nums;}
+  .meter{height:4px;border-radius:999px;background:rgba(26,30,23,.08);overflow:hidden;margin-top:5px;}
+  .meter i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--green),var(--gold));}
+  .add{display:flex;gap:6px;margin-top:11px;}
+  .add input{flex:1 1 auto;width:100%;padding:9px 11px;font-size:14px;border-radius:9px;font-variant-numeric:tabular-nums;}
+  .add .btn{padding:9px 14px;font-size:13px;border-radius:9px;}
+  .note{font-size:11.5px;color:var(--faint);margin-top:7px;font-style:italic;}
+
+  /* ---- request tray ---- */
+  .tray{position:fixed;left:0;right:0;bottom:0;z-index:70;background:var(--ink);color:var(--cream);
+    transform:translateY(105%);transition:transform .32s cubic-bezier(.2,.8,.3,1);}
+  .tray.up{transform:none;}
+  .trayhead{display:flex;align-items:center;gap:14px;padding:13px clamp(16px,4vw,40px);cursor:pointer;}
+  .traycount{font-family:var(--serif);font-size:19px;font-weight:700;}
+  .traysum{font-size:12.5px;opacity:.72;}
+  .traytoggle{margin-left:auto;display:flex;gap:10px;align-items:center;}
+  .traybody{max-height:0;overflow:hidden;transition:max-height .32s ease;}
+  .tray.open .traybody{max-height:min(74vh,760px);overflow-y:auto;}
+  .lines{padding:0 clamp(16px,4vw,40px) 6px;}
+  .line{display:grid;grid-template-columns:auto 1fr auto auto;gap:12px;align-items:center;
+    padding:11px 0;border-top:1px solid rgba(243,238,228,.14);font-size:13.5px;}
+  .lwk{font-size:11px;letter-spacing:.1em;color:var(--blush);white-space:nowrap;}
+  .lqty{font-variant-numeric:tabular-nums;font-weight:700;}
+  .lx{background:transparent;border:0;color:rgba(243,238,228,.5);cursor:pointer;font-size:17px;line-height:1;padding:2px 4px;}
+  .lx:hover{color:var(--blush);}
+  .form{padding:14px clamp(16px,4vw,40px) 26px;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;}
+  .form label{display:flex;flex-direction:column;gap:5px;font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:rgba(243,238,228,.62);}
+  .form input,.form textarea{background:rgba(243,238,228,.07);border:1px solid rgba(243,238,228,.2);color:var(--cream);}
+  .form input::placeholder,.form textarea::placeholder{color:rgba(243,238,228,.34);}
+  .form input:focus,.form textarea:focus{border-color:var(--blush);box-shadow:0 0 0 3px rgba(231,183,207,.16);}
+  .form .full{grid-column:1/-1;}
+  .form .btn{background:var(--cream);color:var(--ink);}
+  .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;}
+
+  .done{text-align:center;padding:clamp(40px,10vh,90px) 0;}
+  .done .ref{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:20px;background:var(--paper);
+    border:1px solid var(--line);border-radius:12px;padding:12px 20px;display:inline-block;margin:16px 0;}
+  .empty{text-align:center;color:var(--faint);padding:50px 0;font-size:14.5px;}
+  footer{padding:60px 0 120px;color:var(--faint);font-size:12.5px;}
+  @media(max-width:620px){
+    .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
+    .cname{font-size:14.5px;} .shot img{padding:7%;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap bar">
+    <a class="mark" href="/">KMTY<span>.</span></a>
+    <span class="spacer"></span>
+    <a class="back" href="/" data-t="back">← Main site</a>
+    <div class="langs" id="langs"></div>
+  </div>
+</header>
+
+<!-- ============ locked ============ -->
+<section id="gate" class="wrap gate">
+  <h1 data-t="gate.h1">Live inventory, week by week</h1>
+  <p data-t="gate.p">Our current availability — every variety, cup size and quantity, by production week. Buyers can browse it and send a request straight to our sales desk. Ask your KMTY contact for the access code.</p>
+  <div class="codebox">
+    <input id="code" type="password" autocomplete="off" spellcheck="false" data-t-ph="gate.ph" placeholder="Access code" style="min-width:210px;">
+    <button class="btn" id="unlock" data-t="gate.btn">Unlock</button>
+  </div>
+  <div class="err" id="gateErr"></div>
+  <p style="margin-top:34px;font-size:13px;" data-t-html="gate.ask">No code yet? <a href="/#contact">Ask us for one</a> — it takes a minute.</p>
+</section>
+
+<!-- ============ unlocked ============ -->
+<main id="app" hidden>
+  <section class="wrap lede">
+    <h1 data-t="app.h1">What we have, and when</h1>
+    <p data-t="app.p">Pick a month to see it week by week. Quantities are what is uncommitted right now and move as orders are confirmed, so treat them as a live guide rather than a reservation.</p>
+    <div class="months" id="months"></div>
+  </section>
+  <section class="wrap" id="weeks"></section>
+  <footer class="wrap">
+    <span data-t="app.foot">Quantities update as our sales desk confirms orders. Nothing here is reserved until we reply to your request.</span>
+  </footer>
+</main>
+
+<!-- ============ sent ============ -->
+<section id="done" class="wrap done" hidden>
+  <h1 style="font-family:var(--serif);font-weight:480;font-size:clamp(26px,4vw,40px);margin:0;" data-t="done.h1">Request sent</h1>
+  <div class="ref" id="doneRef"></div>
+  <p style="color:var(--muted);max-width:46ch;margin:0 auto;" data-t="done.p">Our sales desk will check it against the production schedule and reply to you by email. Nothing is deducted until we confirm with you.</p>
+  <p style="margin-top:26px;"><button class="btn ghost" id="again" data-t="done.again">Browse again</button></p>
+</section>
+
+<!-- ============ request tray ============ -->
+<div class="tray" id="tray">
+  <div class="trayhead" id="trayhead">
+    <span class="traycount" id="trayCount">0</span>
+    <span class="traysum" id="traySum"></span>
+    <span class="traytoggle"><span class="traysum" id="trayHint" data-t="tray.open">Review &amp; send ▴</span></span>
+  </div>
+  <div class="traybody">
+    <div class="lines" id="trayLines"></div>
+    <form class="form" id="reqForm" autocomplete="on">
+      <label class="full" style="grid-column:1/-1;">
+        <span data-t="f.company">Company</span>
+        <input name="company" required maxlength="80">
+      </label>
+      <label><span data-t="f.name">Your name</span><input name="name" required maxlength="80"></label>
+      <label><span data-t="f.email">Email</span><input name="email" type="email" required maxlength="120"></label>
+      <label><span data-t="f.tel">Phone / WeChat</span><input name="tel" maxlength="40"></label>
+      <label><span data-t="f.country">Destination country</span><input name="country" maxlength="60"></label>
+      <label class="full"><span data-t="f.note">Anything else we should know</span>
+        <textarea name="note" rows="2" maxlength="600"></textarea></label>
+      <div class="hp"><label>Leave this empty<input name="hp" tabindex="-1" autocomplete="off"></label></div>
+      <div class="full" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+        <button class="btn" type="submit" id="send" data-t="f.send">Send request</button>
+        <span class="err" id="sendErr" style="margin:0;color:var(--blush);"></span>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="inventory-shared.js?v=1"></script>
+<script>
+(function () {
+  'use strict';
+  var T = window.KMTY_INV.t, W = window.KMTY_INV.weeks, api = window.KMTY_INV.api;
+  var $ = function (id) { return document.getElementById(id); };
+
+  var state = { code: '', items: [], year: new Date().getUTCFullYear(), month: new Date().getUTCMonth(), cart: [] };
+
+  /* ---------- language ---------- */
+  function paintLangs() {
+    $('langs').innerHTML = '';
+    ['en', 'zh', 'ru', 'vi'].forEach(function (l) {
+      var b = document.createElement('button');
+      b.textContent = { en: 'EN', zh: '中文', ru: 'РУ', vi: 'VI' }[l];
+      if (l === T.lang()) b.className = 'on';
+      b.addEventListener('click', function () { T.set(l); paintLangs(); render(); });
+      $('langs').appendChild(b);
+    });
+  }
+
+  /* ---------- gate ---------- */
+  function unlock() {
+    var code = $('code').value.trim();
+    if (!code) return;
+    $('unlock').disabled = true; $('gateErr').textContent = '';
+    api.unlock(code).then(function (r) {
+      $('unlock').disabled = false;
+      if (!r.ok) { $('gateErr').textContent = r.error === 'no-code' ? T.s('gate.none') : T.s('gate.bad'); return; }
+      state.code = code;
+      try { sessionStorage.setItem('kmty-inv-code', code); } catch (e) {}
+      load();
+    }).catch(function () { $('unlock').disabled = false; $('gateErr').textContent = T.s('gate.net'); });
+  }
+  $('unlock').addEventListener('click', unlock);
+  $('code').addEventListener('keydown', function (e) { if (e.key === 'Enter') unlock(); });
+
+  function load() {
+    api.items(state.code).then(function (r) {
+      if (!r.ok) { show('gate'); return; }
+      state.items = r.items; state.year = r.year;
+      // open on the first month that actually has something, else today's
+      var has = monthsWithStock();
+      if (has.indexOf(state.month) < 0 && has.length) state.month = has[0];
+      show('app'); render();
+    }).catch(function () { show('gate'); $('gateErr').textContent = T.s('gate.net'); });
+  }
+
+  function show(which) {
+    $('gate').hidden = which !== 'gate';
+    $('app').hidden = which !== 'app';
+    $('done').hidden = which !== 'done';
+    $('tray').classList.toggle('up', which === 'app' && state.cart.length > 0);
+  }
+
+  /* ---------- data helpers ---------- */
+  function monthsWithStock() {
+    var out = [];
+    for (var m = 0; m < 12; m++) {
+      var ws = W.weeksOfMonth(state.year, m);
+      for (var i = 0; i < ws.length; i++) {
+        if (itemsInWeek(ws[i].week).length) { out.push(m); break; }
+      }
+    }
+    return out;
+  }
+  function itemsInWeek(w) {
+    return state.items.filter(function (it) { return it.qty > 0 && w >= it.from && w <= it.to; });
+  }
+  function inCart(id, week) {
+    for (var i = 0; i < state.cart.length; i++) if (state.cart[i].id === id && state.cart[i].week === week) return i;
+    return -1;
+  }
+
+  /* ---------- render ---------- */
+  function render() {
+    T.apply(document);
+    renderMonths();
+    renderWeeks();
+    renderTray();
+  }
+
+  function renderMonths() {
+    var box = $('months'); box.innerHTML = '';
+    var has = monthsWithStock();
+    for (var m = 0; m < 12; m++) {
+      (function (m) {
+        var b = document.createElement('button');
+        b.className = 'mo' + (m === state.month ? ' on' : '') + (has.indexOf(m) < 0 ? ' empty' : '');
+        b.innerHTML = T.month(m) + (has.indexOf(m) >= 0 ? '<span class="dot"></span>' : '');
+        b.addEventListener('click', function () { state.month = m; render(); window.scrollTo({ top: $('months').offsetTop - 70, behavior: 'smooth' }); });
+        box.appendChild(b);
+      })(m);
+    }
+  }
+
+  function renderWeeks() {
+    var host = $('weeks'); host.innerHTML = '';
+    var ws = W.weeksOfMonth(state.year, state.month), any = false;
+
+    ws.forEach(function (wk) {
+      var list = itemsInWeek(wk.week);
+      if (!list.length) return;
+      any = true;
+      var sec = document.createElement('div'); sec.className = 'week';
+      var total = list.reduce(function (n, it) { return n + it.qty; }, 0);
+      var head = document.createElement('div'); head.className = 'wkhead';
+      head.innerHTML = '<span class="wkno">' + T.s('wk') + ' ' + wk.week + '</span>' +
+        '<span class="wkdates">' + T.range(wk.start, wk.end) + '</span>' +
+        '<span class="wktot">' + list.length + ' ' + T.s('varieties') + ' · ' + total.toLocaleString('en-US') + ' ' + T.s('plants') + '</span>';
+      sec.appendChild(head);
+
+      var grid = document.createElement('div'); grid.className = 'grid';
+      list.forEach(function (it) { grid.appendChild(card(it, wk.week)); });
+      sec.appendChild(grid);
+      host.appendChild(sec);
+    });
+
+    if (!any) {
+      var e = document.createElement('div'); e.className = 'empty';
+      e.textContent = T.s('none');
+      host.appendChild(e);
+    }
+  }
+
+  function card(it, week) {
+    var d = document.createElement('div');
+    d.className = 'card' + (inCart(it.id, week) >= 0 ? ' picked' : '');
+    // the bar is relative to the biggest batch on the books, so it reads as
+    // "a lot / a little of what we have" rather than against an invented ceiling
+    var top = state.items.reduce(function (m, x) { return Math.max(m, x.qty); }, 1);
+    var pct = Math.max(5, Math.round(it.qty / top * 100));
+    var shot = it.img
+      ? '<img src="/api/inv/img?id=' + it.id + '" alt="" loading="lazy">'
+      : '<span class="noimg">✽</span>';
+    d.innerHTML =
+      '<div class="shot">' + shot + '</div>' +
+      '<div class="cbody">' +
+        '<div class="ccode mono">' + esc(it.code) + '</div>' +
+        '<div class="cname">' + esc(T.lang() === 'zh' && it.nameZh ? it.nameZh : it.nameEn) + '</div>' +
+        (it.nameZh && T.lang() !== 'zh' ? '<div class="czh">' + esc(it.nameZh) + '</div>' : '') +
+        '<div class="chips">' +
+          (it.cup ? '<span class="chip">' + esc(it.cup) + '</span>' : '') +
+          '<span class="chip win">' + T.s('wk') + ' ' + it.from + '–' + it.to + '</span>' +
+        '</div>' +
+        '<div class="stock"><b>' + it.qty.toLocaleString('en-US') + '</b> ' + T.s('available') + '</div>' +
+        '<div class="meter"><i style="width:' + pct + '%"></i></div>' +
+        (it.note ? '<div class="note">' + esc(it.note) + '</div>' : '') +
+      '</div>';
+
+    var add = document.createElement('div'); add.className = 'add';
+    var inp = document.createElement('input');
+    inp.type = 'number'; inp.min = '1'; inp.step = '1'; inp.placeholder = T.s('qty');
+    inp.setAttribute('aria-label', T.s('qty') + ' — ' + it.code);
+    var btn = document.createElement('button'); btn.className = 'btn sm'; btn.textContent = T.s('add');
+    function push() {
+      var q = Math.round(Number(inp.value));
+      if (!isFinite(q) || q < 1) { inp.focus(); return; }
+      var at = inCart(it.id, week);
+      if (at >= 0) state.cart[at].qty += q;
+      else state.cart.push({ id: it.id, week: week, qty: q, code: it.code, nameEn: it.nameEn, nameZh: it.nameZh, cup: it.cup, stock: it.qty });
+      inp.value = '';
+      render();
+      $('tray').classList.add('up');
+    }
+    btn.addEventListener('click', push);
+    inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); push(); } });
+    add.appendChild(inp); add.appendChild(btn);
+    d.querySelector('.cbody').appendChild(add);
+    return d;
+  }
+
+  /* ---------- tray ---------- */
+  function renderTray() {
+    var n = state.cart.length;
+    var total = state.cart.reduce(function (s, l) { return s + l.qty; }, 0);
+    $('trayCount').textContent = n;
+    $('traySum').textContent = n ? (T.s('lines') + ' · ' + total.toLocaleString('en-US') + ' ' + T.s('plants')) : '';
+    $('tray').classList.toggle('up', n > 0);
+    if (!n) $('tray').classList.remove('open');
+
+    var box = $('trayLines'); box.innerHTML = '';
+    state.cart.forEach(function (l, i) {
+      var row = document.createElement('div'); row.className = 'line';
+      row.innerHTML =
+        '<span class="lwk">' + T.s('wk') + ' ' + l.week + '</span>' +
+        '<span>' + '<b class="mono" style="font-size:12px;letter-spacing:.08em;">' + esc(l.code) + '</b> · ' +
+          esc(T.lang() === 'zh' && l.nameZh ? l.nameZh : l.nameEn) + (l.cup ? ' · ' + esc(l.cup) : '') +
+          (l.qty > l.stock ? ' <span style="color:var(--blush);">(' + T.s('over') + ')</span>' : '') + '</span>' +
+        '<span class="lqty">' + l.qty.toLocaleString('en-US') + '</span>';
+      var x = document.createElement('button'); x.className = 'lx'; x.type = 'button';
+      x.setAttribute('aria-label', T.s('remove')); x.textContent = '×';
+      x.addEventListener('click', function () { state.cart.splice(i, 1); render(); });
+      row.appendChild(x);
+      box.appendChild(row);
+    });
+  }
+  $('trayhead').addEventListener('click', function () { $('tray').classList.toggle('open'); });
+
+  /* ---------- submit ---------- */
+  $('reqForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!state.cart.length) return;
+    var f = new FormData(e.target), body = {};
+    ['company', 'name', 'email', 'tel', 'country', 'note', 'hp'].forEach(function (k) { body[k] = f.get(k) || ''; });
+    body.lang = T.lang();
+    body.lines = state.cart.map(function (l) { return { id: l.id, week: l.week, qty: l.qty }; });
+    $('send').disabled = true; $('sendErr').textContent = '';
+    api.inquire(state.code, body).then(function (r) {
+      $('send').disabled = false;
+      if (!r.ok) { $('sendErr').textContent = r.error || T.s('gate.net'); return; }
+      $('doneRef').textContent = r.ref;
+      state.cart = []; renderTray();
+      $('tray').classList.remove('up', 'open');
+      show('done');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }).catch(function () { $('send').disabled = false; $('sendErr').textContent = T.s('gate.net'); });
+  });
+  $('again').addEventListener('click', function () { show('app'); load(); });
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+  /* ---------- boot ---------- */
+  paintLangs();
+  T.apply(document);
+  try {
+    var saved = sessionStorage.getItem('kmty-inv-code');
+    if (saved) { state.code = saved; load(); }
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

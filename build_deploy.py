@@ -32,7 +32,10 @@ OUT = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.path.join(ROOT, 
 
 PAGE = 'KMTY Orchid v5.dc.html'
 LIVE = 'https://www.kmtyorchid.com'
-FILES = ['i18n.js', 'support.js', 'image-slot.js', 'terroir-geo.json', '_headers']
+FILES = ['i18n.js', 'support.js', 'image-slot.js', 'terroir-geo.json', '_headers',
+         # the inventory inquiry pages; the API behind them is imported by the
+         # worker, so inventory-api.js has to travel with it
+         'inventory.html', 'inventory-admin.html', 'inventory-shared.js', 'inventory-api.js']
 TREES = ['fonts', 'vendor']
 WORKER = ('site-worker.js', '_worker.js')
 

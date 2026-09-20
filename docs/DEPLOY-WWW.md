@@ -80,9 +80,25 @@ Check, in the hero and the two sections this release touches:
   none.
 - **#shipping** — four isometric carton drawings, one beside each row, plus
   the freight-facts line above the small print.
+- **/inventory** loads and asks for an access code, and **/inventory-admin**
+  asks for the admin password (see 3a).
 - the hero is the photograph and the headline, with **no globe** — that was
   built and then removed at the owner's request.
 - no horizontal scrollbar at any width.
+
+## 3a. First deploy of the inventory pages
+
+Only needed once, and the first one is easy to miss:
+
+- **`ADMIN_PASS` must exist as a secret on the `kmty-site` project.** It is set
+  on the *order page* project, which is a different project. Without it nobody
+  can log in to `/inventory-admin`. Add it under the project's Settings →
+  Variables and Secrets, then redeploy.
+- After deploying, open `/inventory-admin → 访问码` and set the buyer access
+  code. Until then `/inventory` tells buyers it is not open yet.
+- Check `/inventory` and `/inventory-admin` both load and that a photo shows on
+  a test batch — that exercises KV, the worker import and the image route in one
+  go.
 
 ## 4. Upload
 
@@ -112,8 +128,10 @@ upload becomes a preview and the live domain does not change.
 curl -s https://www.kmtyorchid.com/ > /tmp/live.html
 grep -c 'tabular-nums;">' /tmp/live.html      # 18  (variety codes)
 grep -c 'viewBox="0 0 100 51"' /tmp/live.html # 4   (carton drawings)
-grep -o 'i18n\.js?v=[0-9]*' /tmp/live.html    # i18n.js?v=31
+grep -o 'i18n\.js?v=[0-9]*' /tmp/live.html    # i18n.js?v=32
 grep -c 'data-globe' /tmp/live.html           # 0   (no globe)
+curl -s -o /dev/null -w '%{http_code}\n' https://www.kmtyorchid.com/inventory        # 200
+curl -s https://www.kmtyorchid.com/api/inv/items                                     # {"error":"locked"}
 ```
 
 Before this release those read `0`, `0`, `v=30`, `0`. If they still read the
@@ -130,6 +148,8 @@ runs on those MX rows.
 ## What this release changes
 
 Measured against what was live when it was written: the same nine sections,
-zero images added or removed, three new i18n keys (`sh.wt`, `sh.ctr`,
-`v.note`), and about 7 KB more markup — the carton drawings and the variety
-codes. Nothing else, despite the branch being 55 commits ahead of `main`.
+zero images added or removed, four new i18n keys (`sh.wt`, `sh.ctr`, `v.note`
+and `c.inv`), and about 7 KB more markup — the carton drawings, the variety
+codes and one link into the new inventory page. Plus the inventory pages
+themselves, which are new files and new worker routes rather than changes to
+anything that was already live.

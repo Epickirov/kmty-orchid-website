@@ -1,7 +1,8 @@
 // kmty-site advanced-mode worker.
 // Static passthrough for the whole site (never rewrites .html — that pattern
 // caused a redirect loop once; everything except /api/* goes straight to
-// env.ASSETS), plus POST /api/lead: the catalog-request form endpoint.
+// env.ASSETS), plus POST /api/lead: the catalog-request form endpoint, and
+// /api/inv/* — the inventory inquiry API, which lives in inventory-api.js.
 //
 // /api/lead writes every lead into KV first (never lose one), then emails it to
 // office@kmtybio.com. Primary sender is the Resend HTTP API — shared Worker
@@ -10,12 +11,15 @@
 //   RESEND_API_KEY (secret)  Resend sending key            — primary path
 //   MAIL_FROM      (plain)   KMTY Website <website@kmtyorchid.com>
 //   MAIL_TO        (plain)   office@kmtybio.com
-//   LEADS          (KV)      lead ledger + soft per-IP rate limit
+//   LEADS          (KV)      lead ledger + soft per-IP rate limit, and the
+//                            inventory catalogue (see inventory-api.js)
+//   ADMIN_PASS     (secret)  gates /inventory-admin and /api/inv/admin/*
 // Dormant SMTP fallback (only if RESEND_API_KEY unset and SMTP_ENABLED='1'):
 //   SMTP_HOST (plain)  smtp.qiye.163.com
 //   SMTP_USER (plain)  office@kmtybio.com     — auth user AND From AND To
 //   SMTP_PASS (secret) Netease client authorization code (授权码)
 import { connect } from 'cloudflare:sockets';
+import { handleInventory } from './inventory-api.js';
 
 const JH = { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' };
 const json = (b, s) => new Response(JSON.stringify(b), { status: s || 200, headers: JH });
@@ -191,12 +195,126 @@ async function handleLead(request, env) {
   return json({ ok: true });
 }
 
+/* ---------- inventory inquiry mail ----------
+   This one is read by sales staff standing next to a production schedule, so
+   it is laid out the way they check it: grouped by ISO week, because that is
+   the unit production plans in, with the stock figure at the time of asking
+   beside every line and anything that exceeds it called out. A plain-text part
+   goes alongside, for phones and for whoever forwards it into WeChat. */
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+function groupByWeek(lines) {
+  const weeks = new Map();
+  for (const l of lines) { if (!weeks.has(l.week)) weeks.set(l.week, []); weeks.get(l.week).push(l); }
+  return [...weeks.entries()].sort((a, b) => a[0] - b[0]);
+}
+
+function inquiryHtml(rec) {
+  const G = groupByWeek(rec.lines);
+  const total = rec.lines.reduce((n, l) => n + l.qty, 0);
+  const short = rec.lines.filter(l => l.qty > l.stockAtRequest);
+  const cell = 'padding:9px 12px;border-bottom:1px solid #E6DFD1;font-size:13px;';
+  const head = 'padding:7px 12px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#7A7264;text-align:left;font-weight:600;';
+
+  let rows = '';
+  for (const [week, ls] of G) {
+    rows += `<tr><td colspan="5" style="padding:16px 12px 6px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#4C8C57;font-weight:700;border-bottom:2px solid #4C8C57;">
+      Week ${week} · 第 ${week} 周 <span style="color:#7A7264;font-weight:400;letter-spacing:0;text-transform:none;">— ${ls.reduce((n, l) => n + l.qty, 0).toLocaleString('en-US')} plants</span></td></tr>`;
+    for (const l of ls) {
+      const over = l.qty > l.stockAtRequest;
+      rows += `<tr>
+        <td style="${cell}font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:600;">${esc(l.code)}</td>
+        <td style="${cell}">${esc(l.nameEn)}${l.nameZh ? `<br><span style="color:#7A7264;">${esc(l.nameZh)}</span>` : ''}</td>
+        <td style="${cell}white-space:nowrap;">${esc(l.cup) || '—'}</td>
+        <td style="${cell}text-align:right;font-weight:700;font-size:15px;">${l.qty.toLocaleString('en-US')}</td>
+        <td style="${cell}text-align:right;color:${over ? '#B0552F' : '#7A7264'};white-space:nowrap;">
+          ${l.stockAtRequest.toLocaleString('en-US')}${over ? '<br><b>short ' + (l.qty - l.stockAtRequest).toLocaleString('en-US') + '</b>' : ''}</td>
+      </tr>`;
+    }
+  }
+
+  return `<div style="background:#F3EEE4;padding:24px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans',Helvetica,Arial,sans-serif;color:#1A1E17;">
+  <div style="max-width:660px;margin:0 auto;background:#FFF;border-radius:14px;overflow:hidden;box-shadow:0 2px 18px rgba(26,30,23,.09);">
+    <div style="background:#1A1E17;color:#F3EEE4;padding:20px 24px;">
+      <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;opacity:.72;">Inventory inquiry · 库存询价</div>
+      <div style="font-size:21px;font-weight:700;margin-top:5px;">${esc(rec.buyer.company || rec.buyer.name || rec.buyer.email)}</div>
+      <div style="font-size:12px;opacity:.72;margin-top:5px;font-family:ui-monospace,Menlo,Consolas,monospace;">${esc(rec.ref)}</div>
+    </div>
+    ${short.length ? `<div style="background:#FBEEE7;color:#8E3F1F;padding:11px 24px;font-size:13px;">
+      <b>${short.length} line${short.length > 1 ? 's' : ''} ${short.length > 1 ? 'exceed' : 'exceeds'} the stock we were showing.</b> Check with production before confirming.</div>` : ''}
+    <table style="width:100%;border-collapse:collapse;">
+      <tr><th style="${head}">Code</th><th style="${head}">Variety</th><th style="${head}">Cup</th>
+          <th style="${head}text-align:right;">Wanted</th><th style="${head}text-align:right;">In stock</th></tr>
+      ${rows}
+      <tr><td colspan="3" style="${cell}border-bottom:none;padding-top:14px;font-weight:700;">Total</td>
+          <td style="${cell}border-bottom:none;padding-top:14px;text-align:right;font-weight:700;font-size:16px;">${total.toLocaleString('en-US')}</td>
+          <td style="${cell}border-bottom:none;"></td></tr>
+    </table>
+    <div style="padding:6px 24px 20px;font-size:13px;line-height:1.65;">
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid #E6DFD1;">
+        <b>${esc(rec.buyer.name) || '—'}</b>${rec.buyer.country ? ' · ' + esc(rec.buyer.country) : ''}<br>
+        <a href="mailto:${esc(rec.buyer.email)}" style="color:#B0552F;">${esc(rec.buyer.email)}</a>${rec.buyer.tel ? ' · ' + esc(rec.buyer.tel) : ''}
+      </div>
+      ${rec.buyer.note ? `<div style="margin-top:12px;padding:12px 14px;background:#F7F3EA;border-radius:9px;white-space:pre-wrap;">${esc(rec.buyer.note)}</div>` : ''}
+      <div style="margin-top:16px;padding-top:14px;border-top:1px solid #E6DFD1;color:#55564A;font-size:12px;line-height:1.7;">
+        Reply to this mail to answer the buyer directly.<br>
+        Stock is <b>not</b> reserved yet — open <b>/inventory-admin → 询价</b> and confirm this inquiry to take the plants out of the system, or decline it to leave stock untouched.
+      </div>
+    </div>
+  </div>
+</div>`;
+}
+
+function inquiryText(rec) {
+  let t = 'INVENTORY INQUIRY  ' + rec.ref + '\n\n' +
+    'Company:  ' + (rec.buyer.company || '—') + '\nContact:  ' + (rec.buyer.name || '—') +
+    '\nEmail:    ' + rec.buyer.email + '\nPhone:    ' + (rec.buyer.tel || '—') +
+    '\nCountry:  ' + (rec.buyer.country || '—') + '\n\n';
+  for (const [week, ls] of groupByWeek(rec.lines)) {
+    t += 'WEEK ' + week + '\n';
+    for (const l of ls) {
+      t += '  ' + l.code.padEnd(10) + (l.cup || '—').padEnd(10) +
+        String(l.qty).padStart(7) + '   (in stock ' + l.stockAtRequest + ')' +
+        (l.qty > l.stockAtRequest ? '  ** SHORT ' + (l.qty - l.stockAtRequest) + ' **' : '') + '\n';
+    }
+  }
+  t += '\nTotal: ' + rec.lines.reduce((n, l) => n + l.qty, 0) + ' plants\n';
+  if (rec.buyer.note) t += '\nNote from buyer:\n' + rec.buyer.note + '\n';
+  t += '\nStock is not reserved yet — confirm in /inventory-admin to deduct it.\n';
+  return t;
+}
+
+async function sendInquiryMail(env, rec) {
+  if (!env.RESEND_API_KEY) throw new Error('no mail sender configured');
+  const total = rec.lines.reduce((n, l) => n + l.qty, 0);
+  const r = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { 'authorization': 'Bearer ' + env.RESEND_API_KEY, 'content-type': 'application/json' },
+    body: JSON.stringify({
+      from: env.MAIL_FROM || 'KMTY Website <website@kmtyorchid.com>',
+      to: [env.MAIL_TO || 'office@kmtybio.com'],
+      reply_to: rec.buyer.email,
+      subject: 'Inventory inquiry: ' + (rec.buyer.company || rec.buyer.email) + ' · ' + total.toLocaleString('en-US') + ' plants · ' + rec.ref,
+      text: inquiryText(rec),
+      html: inquiryHtml(rec),
+    }),
+    signal: AbortSignal.timeout(10000),
+  });
+  if (!r.ok) { let t = ''; try { t = await r.text(); } catch (e) {} throw new Error('resend ' + r.status + ': ' + t.slice(0, 140)); }
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname === '/api/lead') {
       if (request.method === 'POST') return handleLead(request, env);
       return json({ ok: false, error: 'method' }, 405);
+    }
+    if (url.pathname.startsWith('/api/inv/')) {
+      const r = await handleInventory(request, env, url, sendInquiryMail);
+      if (r) return r;
+      return json({ ok: false, error: 'not found' }, 404);
     }
     return env.ASSETS.fetch(request);
   },
