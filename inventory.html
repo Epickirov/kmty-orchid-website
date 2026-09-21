@@ -117,10 +117,12 @@
   .fopt:disabled:hover{border-color:var(--line);color:var(--muted);}
   .frange label{display:flex;align-items:center;gap:7px;font-size:10.5px;letter-spacing:.08em;
     text-transform:uppercase;color:var(--faint);font-weight:600;}
-  .frange input{width:78px;padding:7px 9px;border:1px solid var(--line);border-radius:9px;background:#fff;
-    outline:none;font-size:13.5px;font-variant-numeric:tabular-nums;}
-  .frange input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(76,140,87,.14);}
+  .frange input,.frange select{width:78px;padding:7px 9px;border:1px solid var(--line);border-radius:9px;
+    background:#fff;outline:none;font-size:13.5px;font-variant-numeric:tabular-nums;color:var(--ink);}
+  .frange select{width:auto;min-width:104px;}
+  .frange input:focus,.frange select:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(76,140,87,.14);}
   .fdash{color:var(--faint);}
+  .fyear{display:inline-flex;align-items:center;gap:7px;}
   .funit{font-size:12px;color:var(--faint);}
   .ffoot{display:flex;align-items:center;gap:12px;padding-top:12px;border-top:1px solid var(--line);}
   .ffoot .tcount{margin-left:auto;}
@@ -633,8 +635,23 @@
     <div class="fpanel" id="fpanel" hidden>
       <div class="frow"><span class="flabel" data-t="f.cup">Cup size</span><div class="fopts" id="fCup"></div></div>
       <div class="frow"><span class="flabel" data-t="f.colour">Flower colour</span><div class="fopts" id="fColour"></div></div>
-      <div class="frow"><span class="flabel" data-t="f.pattern">Marking</span><div class="fopts" id="fPattern"></div></div>
       <div class="frow"><span class="flabel" data-t="f.stem">Stem</span><div class="fopts" id="fStem"></div></div>
+      <div class="frow"><span class="flabel" data-t="f.qty">Quantity</span>
+        <div class="fopts frange">
+          <label><span data-t="f.atleast">At least</span><input type="number" id="fQtyMin" min="0" step="100" inputmode="numeric"></label>
+          <span class="funit" data-t="plants">plants</span>
+        </div></div>
+      <div class="frow"><span class="flabel" data-t="f.when">Available in</span>
+        <div class="fopts frange">
+          <label><span data-t="f.from">From</span><select id="fMonFrom"></select></label>
+          <span class="fdash">–</span>
+          <label><span data-t="f.to">To</span><select id="fMonTo"></select></label>
+          <span class="fyear" id="fYearWrap" hidden>
+            <label style="margin-left:10px;"><span data-t="f.year">Year</span><select id="fYrFrom"></select></label>
+            <span class="fdash">–</span>
+            <select id="fYrTo" aria-label="Year to"></select>
+          </span>
+        </div></div>
       <div class="frow"><span class="flabel" data-t="f.ns">Flower width (N.S.)</span>
         <div class="fopts frange">
           <label><span data-t="f.min">Min</span><input type="number" id="fNsMin" min="0" max="60" step="0.5" inputmode="decimal"></label>
@@ -882,6 +899,7 @@
     var p = [];
     if (it.cup) p.push([T.s('cup'), it.cup]);
     if (it.stem) p.push([T.s('stem.full'), T.s('stem.' + it.stem)]);
+    if (it.pattern) p.push([T.s('f.pattern'), T.s('m.' + it.pattern)]);
     if (it.ns) p.push([T.s('ns'), T.len(it.ns)]);
     if (it.ht) p.push([T.s('ht'), T.len(it.ht)]);
     if (it.tray > 1) p.push([T.s('tray'), n(it.tray)]);
@@ -905,7 +923,8 @@
     /* every parameter a batch carries. Sets are multi-select — ticking two
        cup sizes means "either", which is how a buyer thinks about them —
        and the two ranges are open at whichever end is left blank. */
-    f: { cup: {}, colour: {}, pattern: {}, stem: {}, nsMin: '', nsMax: '', htMin: '', htMax: '' },
+    f: { cup: {}, colour: {}, stem: {}, nsMin: '', nsMax: '', htMin: '', htMax: '',
+         qtyMin: '', monFrom: '', monTo: '', yrFrom: '', yrTo: '' },
     filtOpen: false,
     from: 1, to: 52, lastRef: '',
   };
@@ -980,12 +999,29 @@
     });
   }
   function anyOn(set) { for (var k in set) if (set[k]) return true; return false; }
+
+  /* Every calendar month a batch's week window touches. A grower's window is
+     given in ISO weeks, but "have you got anything in October" is the question
+     a buyer asks, so the two have to be reconciled somewhere. Memoised on the
+     batch's own identity — this runs for every row on every keystroke. */
+  var MONTHS_OF = {};
+  function monthsOfBatch(it) {
+    var key = it.id + ':' + it.year + ':' + it.from + ':' + it.to;
+    if (MONTHS_OF[key]) return MONTHS_OF[key];
+    var seen = {}, out = [];
+    for (var w = it.from; w <= it.to; w++) {
+      W.monthsOfWeek(it.year, w).forEach(function (m) { if (!seen[m]) { seen[m] = 1; out.push(m); } });
+    }
+    return (MONTHS_OF[key] = out);
+  }
   function activeFilters() {
     var n = 0;
-    ['cup', 'colour', 'pattern', 'stem'].forEach(function (k) {
+    ['cup', 'colour', 'stem'].forEach(function (k) {
       for (var v in S.f[k]) if (S.f[k][v]) n++;
     });
-    ['nsMin', 'nsMax', 'htMin', 'htMax'].forEach(function (k) { if (S.f[k] !== '') n++; });
+    ['nsMin', 'nsMax', 'htMin', 'htMax', 'qtyMin'].forEach(function (k) { if (S.f[k] !== '') n++; });
+    if (S.f.monFrom !== '' || S.f.monTo !== '') n++;        // one window, one filter
+    if (S.f.yrFrom !== '' || S.f.yrTo !== '') n++;
     return n;
   }
 
@@ -999,7 +1035,6 @@
     if (q && (i.code + ' ' + i.nameEn + ' ' + (i.nameZh || '')).toLowerCase().indexOf(q) < 0) return false;
     if (skip !== 'cup' && anyOn(f.cup) && !f.cup[i.cup]) return false;
     if (skip !== 'colour' && anyOn(f.colour) && !f.colour[i.colour]) return false;
-    if (skip !== 'pattern' && anyOn(f.pattern) && !f.pattern[i.pattern]) return false;
     if (skip !== 'stem' && anyOn(f.stem) && !f.stem[i.stem]) return false;
     // an unmeasured batch is not "0 cm wide"; a range simply cannot speak for it
     if (skip !== 'ns' && (f.nsMin !== '' || f.nsMax !== '')) {
@@ -1011,6 +1046,17 @@
       if (!i.ht) return false;
       if (f.htMin !== '' && i.ht < Number(f.htMin)) return false;
       if (f.htMax !== '' && i.ht > Number(f.htMax)) return false;
+    }
+    if (skip !== 'qty' && f.qtyMin !== '' && i.qty < Number(f.qtyMin)) return false;
+    if (skip !== 'when') {
+      if (f.yrFrom !== '' && i.year < Number(f.yrFrom)) return false;
+      if (f.yrTo !== '' && i.year > Number(f.yrTo)) return false;
+      if (f.monFrom !== '' || f.monTo !== '') {
+        var lo = f.monFrom === '' ? 0 : Number(f.monFrom);
+        var hi = f.monTo === '' ? 11 : Number(f.monTo);
+        var inWindow = function (m) { return lo <= hi ? (m >= lo && m <= hi) : (m >= lo || m <= hi); };
+        if (!monthsOfBatch(i).some(inWindow)) return false;
+      }
     }
     return true;
   }
@@ -1069,13 +1115,20 @@
     });
   }
 
+  function fillSelect(el, anyLabel, pairs, current) {
+    var want = '\u0000' + anyLabel + '|' + pairs.map(function (p) { return p[0] + ':' + p[1]; }).join('|');
+    if (el.dataset.built !== want) {          // only rebuild when the list itself changed
+      el.innerHTML = '<option value="">' + esc(anyLabel) + '</option>' +
+        pairs.map(function (p) { return '<option value="' + p[0] + '">' + esc(p[1]) + '</option>'; }).join('');
+      el.dataset.built = want;
+    }
+    el.value = current === '' ? '' : String(current);
+  }
+
   function paintFilters() {
     facet($('fCup'), 'cup', cups().map(function (c) { return { value: c, label: c, field: 'cup' }; }));
     facet($('fColour'), 'colour', KI.colours.map(function (c) {
       return { value: c[0], label: T.s('c.' + c[0]), swatch: c[1], field: 'colour' };
-    }));
-    facet($('fPattern'), 'pattern', KI.patterns.map(function (m) {
-      return { value: m, label: T.s('m.' + m), field: 'pattern' };
     }));
     facet($('fStem'), 'stem', ['SS', 'DS'].map(function (x) {
       return { value: x, label: T.s('stem.' + x), field: 'stem' };
@@ -1091,6 +1144,27 @@
       $(pair[1] + 'Min').value = S.f[pair[0] + 'Min'];
       $(pair[1] + 'Max').value = S.f[pair[0] + 'Max'];
     });
+    // the quantity floor steps in hundreds, and shows the deepest batch as a ceiling
+    var qtys = S.items.map(function (i) { return i.qty; });
+    $('fQtyMin').placeholder = qtys.length ? '0' : '';
+    $('fQtyMin').max = qtys.length ? Math.max.apply(null, qtys) : '';
+    $('fQtyMin').value = S.f.qtyMin;
+
+    /* Months and years offered as selects rather than free text: a buyer asking
+       "anything in October?" should not have to know that October is weeks 40
+       to 44. The year list is the years this grower has actually published. */
+    var yrs = [];
+    S.items.forEach(function (i) { if (yrs.indexOf(i.year) < 0) yrs.push(i.year); });
+    yrs.sort();
+    fillSelect($('fMonFrom'), T.s('f.anym'), T.s('months').map(function (nm, ix) { return [ix, nm]; }), S.f.monFrom);
+    fillSelect($('fMonTo'), T.s('f.anym'), T.s('months').map(function (nm, ix) { return [ix, nm]; }), S.f.monTo);
+    /* A year range is only a question worth asking once a grower has published
+       more than one, which most never will. Hidden rather than shown as a
+       range of one. */
+    $('fYearWrap').hidden = yrs.length < 2;
+    fillSelect($('fYrFrom'), T.s('f.anyy'), yrs.map(function (y) { return [y, y]; }), S.f.yrFrom);
+    fillSelect($('fYrTo'), T.s('f.anyy'), yrs.map(function (y) { return [y, y]; }), S.f.yrTo);
+
     var n_ = activeFilters();
     $('filtN').hidden = !n_; $('filtN').textContent = n_;
     $('filtBtn').classList.toggle('on', n_ > 0);
@@ -1134,8 +1208,26 @@
     if (!t) { $('calWrap').innerHTML = '<table class="cal" id="cal"></table>'; t = $('cal'); }
     t.innerHTML = '';
 
+    /* A month window narrows the columns as well as the rows. "Anything in
+       October?" is answered by a chart of October, not by an October-sized
+       gap in a chart of the whole year. A window that wraps the turn of the
+       year cannot be one contiguous run of columns, so that one is left
+       alone and only the rows are filtered. */
+    var from = S.from, to = S.to;
+    if (S.f.monFrom !== '' || S.f.monTo !== '') {
+      var lo = S.f.monFrom === '' ? 0 : Number(S.f.monFrom);
+      var hi = S.f.monTo === '' ? 11 : Number(S.f.monTo);
+      if (lo <= hi) {
+        var ws = [];
+        for (var mm = lo; mm <= hi; mm++) {
+          W.weeksOfMonth(S.year, mm).forEach(function (x) { ws.push(x.week); });
+        }
+        if (ws.length) { from = Math.min.apply(null, ws); to = Math.max.apply(null, ws); }
+      }
+    }
+
     var weeks = [];
-    for (var w = S.from; w <= S.to; w++) {
+    for (var w = from; w <= to; w++) {
       var d = W.mondayOfWeek(S.year, w);
       var prev = weeks[weeks.length - 1];
       weeks.push({ w: w, d: d, first: !!prev && prev.d.getUTCMonth() !== d.getUTCMonth() });
@@ -1675,7 +1767,14 @@
   $('q').addEventListener('input', function () { S.q = this.value; render(); });
   $('filtBtn').addEventListener('click', function () { S.filtOpen = !S.filtOpen; render(); });
   $('filtClear').addEventListener('click', function () { clearFilters(); render(); });
-  [['fNsMin', 'nsMin'], ['fNsMax', 'nsMax'], ['fHtMin', 'htMin'], ['fHtMax', 'htMax']].forEach(function (pair) {
+  [['fMonFrom', 'monFrom'], ['fMonTo', 'monTo'], ['fYrFrom', 'yrFrom'], ['fYrTo', 'yrTo']].forEach(function (pair) {
+    $(pair[0]).addEventListener('change', function () {
+      S.f[pair[1]] = this.value === '' ? '' : Number(this.value);
+      S.centred = false;                      // the window moved; re-find this week
+      render();
+    });
+  });
+  [['fNsMin', 'nsMin'], ['fNsMax', 'nsMax'], ['fHtMin', 'htMin'], ['fHtMax', 'htMax'], ['fQtyMin', 'qtyMin']].forEach(function (pair) {
     $(pair[0]).addEventListener('input', function () {
       var v = this.value.trim();
       S.f[pair[1]] = v === '' ? '' : Math.max(0, Number(v) || 0);
@@ -1686,7 +1785,8 @@
     });
   });
   function clearFilters() {
-    S.f = { cup: {}, colour: {}, pattern: {}, stem: {}, nsMin: '', nsMax: '', htMin: '', htMax: '' };
+    S.f = { cup: {}, colour: {}, stem: {}, nsMin: '', nsMax: '', htMin: '', htMax: '',
+            qtyMin: '', monFrom: '', monTo: '', yrFrom: '', yrTo: '' };
     S.q = ''; S.availOnly = false; $('q').value = '';
   }
   $('availOnly').addEventListener('click', function () { S.availOnly = !S.availOnly; render(); });

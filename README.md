@@ -388,12 +388,19 @@ the page — column heads, gallery chips, the order pad, the confirmation — as
 underlying ISO week never changes; only the label does.
 
 **One filter panel serves both views**, because both draw from the same
-predicate: cup size, flower colour, marking, stem, and open-ended ranges for
-flower width and plant height. Each option carries how many batches it would
-leave if ticked, counted with that facet's own selection ignored — so the
-number beside "Pink" means "how many if I tick this", not "how many are left
-now that I have". A range excludes a batch the grower never measured rather
-than treating it as zero.
+predicate: cup size, flower colour, stem, a quantity floor, a month and year
+window, and open-ended ranges for flower width and plant height. Each option
+carries how many batches it would leave if ticked, counted with that facet's
+own selection ignored — so the number beside "Pink" means "how many if I tick
+this", not "how many are left now that I have". A range excludes a batch the
+grower never measured rather than treating it as zero, and the year control
+only appears once a grower has published more than one year.
+
+The month window narrows the chart's columns as well as its rows: "anything in
+October?" is answered by a chart of October, not by an October-sized gap in a
+chart of the whole year. A window that wraps the turn of the year cannot be one
+contiguous run of columns, so that case filters rows only. Marking is collected
+on the batch and shown in the stepper's spec sheet, but it is not a filter.
 
 **Buyers can track a request** with the reference and the email they sent it
 from. The reference alone is short and dated, so it is guessable; the pair is
