@@ -84,7 +84,7 @@
       'trayOf': 'tray of %s',
       'pop.add': 'Add',
       'pop.update': 'Update',
-      'pop.trays': '%n trays of %s',
+      'pop.trays': '%n trays of %s', 'pop.trays.1': '%n tray of %s',
       'pop.over': 'more than we hold',
       'pad.h': 'Your request',
       'pad.total': 'Total',
@@ -116,6 +116,21 @@
       'shot.plant': 'Whole plant', 'shot.flower': 'Flower',
       'shot.swap': 'Show this one large',
       'cup': 'Cup',
+      'gate.eyebrow': 'KMTY Orchid · Production calendar',
+      'gate.cap': 'Yunnan · \u22481,900 m elevation',
+      'trays': 'trays', 'trays.1': 'tray', 'lines': 'lines', 'lines.1': 'line',
+      'pad.copy': 'Copy as text', 'pad.copied': 'Copied',
+      'today': 'This week',
+      'done.sum': '%p plants across %l, %w.',
+      'done.w1': 'week %a', 'done.wn': 'weeks %a\u2013%b',
+      'done.ref': 'Your reference',
+      'done.s1': 'We check it against the production schedule',
+      'done.s2': 'Our sales desk replies to you by email',
+      'done.s3': 'Stock moves only once we have confirmed with you',
+      'f.who': 'Who is asking',
+      'f.country.ph': 'Country or city',
+      'f.note.ph': 'Airport, packing, phytosanitary — anything that affects this shipment',
+      'f.reassure': 'Nothing is reserved until our sales desk replies. You will get a reference you can track this request with.',
       'tray': 'Per tray',
     'months': ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
       'mshort': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
@@ -149,7 +164,7 @@
       'trayOf': '每盘 %s 株',
       'pop.add': '加入',
       'pop.update': '更新',
-      'pop.trays': '%n 盘 × %s 株',
+      'pop.trays': '%n 盘 × %s 株', 'pop.trays.1': '%n 盘 × %s 株',
       'pop.over': '超出现有库存',
       'pad.h': '需求清单',
       'pad.total': '合计',
@@ -181,6 +196,21 @@
       'shot.plant': '整株', 'shot.flower': '花朵特写',
       'shot.swap': '放大这张',
       'cup': '杯径',
+      'gate.eyebrow': 'KMTY 兰花 · 排产日历',
+      'gate.cap': '云南 · 海拔约 1,900 米',
+      'trays': '盘', 'trays.1': '盘', 'lines': '项', 'lines.1': '项',
+      'pad.copy': '复制为文本', 'pad.copied': '已复制',
+      'today': '本周',
+      'done.sum': '共 %p 株，%l，%w。',
+      'done.w1': '第 %a 周', 'done.wn': '第 %a\u2013%b 周',
+      'done.ref': '您的单号',
+      'done.s1': '我们对照排产计划核实',
+      'done.s2': '销售部通过邮件回复您',
+      'done.s3': '只有在与您确认之后才会扣减库存',
+      'f.who': '联系方式',
+      'f.country.ph': '国家或城市',
+      'f.note.ph': '机场、包装、检疫证书——任何影响本次发运的事项',
+      'f.reassure': '在销售部回复之前不会预留任何库存。提交后您会收到一个可用于查询进度的单号。',
       'tray': '每盘',
     'months': ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
       'mshort': ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
@@ -214,7 +244,8 @@
       'trayOf': 'лоток по %s',
       'pop.add': 'Добавить',
       'pop.update': 'Обновить',
-      'pop.trays': '%n лотков по %s',
+      'pop.trays': '%n лотков по %s', 'pop.trays.1': '%n лоток по %s',
+      'pop.trays.2': '%n лотка по %s', 'pop.trays.5': '%n лотков по %s',
       'pop.over': 'больше, чем есть',
       'pad.h': 'Ваш запрос',
       'pad.total': 'Итого',
@@ -246,6 +277,22 @@
       'shot.plant': 'Всё растение', 'shot.flower': 'Цветок',
       'shot.swap': 'Показать крупно',
       'cup': 'Горшок',
+      'gate.eyebrow': 'KMTY Orchid · Производственный календарь',
+      'gate.cap': 'Юньнань · \u2248 1 900 м над уровнем моря',
+      'trays': 'лотков', 'trays.1': 'лоток', 'trays.2': 'лотка', 'trays.5': 'лотков',
+      'lines': 'позиций', 'lines.1': 'позиция', 'lines.2': 'позиции', 'lines.5': 'позиций',
+      'pad.copy': 'Скопировать текстом', 'pad.copied': 'Скопировано',
+      'today': 'Эта неделя',
+      'done.sum': '%p шт., %l, %w.',
+      'done.w1': 'неделя %a', 'done.wn': 'недели %a\u2013%b',
+      'done.ref': 'Номер запроса',
+      'done.s1': 'Мы сверяем запрос с планом производства',
+      'done.s2': 'Отдел продаж отвечает вам по электронной почте',
+      'done.s3': 'Склад меняется только после подтверждения с вами',
+      'f.who': 'Кто отправляет запрос',
+      'f.country.ph': 'Страна или город',
+      'f.note.ph': 'Аэропорт, упаковка, фитосанитария — всё, что влияет на эту отгрузку',
+      'f.reassure': 'До ответа отдела продаж ничего не бронируется. Вы получите номер, по которому можно отследить запрос.',
       'tray': 'В лотке',
     'months': ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'],
       'mshort': ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'],
@@ -279,7 +326,7 @@
       'trayOf': 'khay %s cây',
       'pop.add': 'Thêm',
       'pop.update': 'Cập nhật',
-      'pop.trays': '%n khay × %s',
+      'pop.trays': '%n khay × %s', 'pop.trays.1': '%n khay × %s',
       'pop.over': 'vượt tồn kho',
       'pad.h': 'Yêu cầu của bạn',
       'pad.total': 'Tổng',
@@ -311,6 +358,21 @@
       'shot.plant': 'Cả cây', 'shot.flower': 'Hoa',
       'shot.swap': 'Xem ảnh này lớn',
       'cup': 'Chậu',
+      'gate.eyebrow': 'KMTY Orchid · Lịch sản xuất',
+      'gate.cap': 'Vân Nam · độ cao \u2248 1.900 m',
+      'trays': 'khay', 'trays.1': 'khay', 'lines': 'dòng', 'lines.1': 'dòng',
+      'pad.copy': 'Sao chép dạng văn bản', 'pad.copied': 'Đã sao chép',
+      'today': 'Tuần này',
+      'done.sum': '%p cây, %l, %w.',
+      'done.w1': 'tuần %a', 'done.wn': 'tuần %a\u2013%b',
+      'done.ref': 'Mã yêu cầu của bạn',
+      'done.s1': 'Chúng tôi đối chiếu với kế hoạch sản xuất',
+      'done.s2': 'Bộ phận kinh doanh trả lời bạn qua email',
+      'done.s3': 'Tồn kho chỉ thay đổi sau khi đã xác nhận với bạn',
+      'f.who': 'Người gửi yêu cầu',
+      'f.country.ph': 'Quốc gia hoặc thành phố',
+      'f.note.ph': 'Sân bay, đóng gói, kiểm dịch — bất cứ điều gì ảnh hưởng tới lô hàng này',
+      'f.reassure': 'Chưa có gì được giữ cho tới khi bộ phận kinh doanh phản hồi. Bạn sẽ nhận được mã để tra cứu yêu cầu.',
       'tray': 'Mỗi khay',
     'months': ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
       'mshort': ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12'],
@@ -319,6 +381,13 @@
 
   var LANG = 'en';
   try { var saved = localStorage.getItem('kmty-lang'); if (DICT[saved]) LANG = saved; } catch (e) {}
+
+  /* Measurements are taken in centimetres — that is what the ruler in the
+     greenhouse says — but a buyer in Miami or Manchester reads a phalaenopsis
+     spec in inches and should not have to do the arithmetic on a spec sheet.
+     The stored value never changes; only the way it is written down does. */
+  var UNIT = 'cm';
+  try { if (localStorage.getItem('kmty-inv-unit') === 'in') UNIT = 'in'; } catch (e) {}
 
   var T = {
     lang: function () { return LANG; },
@@ -346,6 +415,31 @@
        the trade abbreviation everywhere except Chinese, where 单梗 / 双梗 *is*
        the abbreviation and SS would read as an import. */
     stem: function (c, full) { return c ? T.s('stem.' + c + (full ? '' : '.s')) : ''; },
+    /* "1 lines" is the kind of detail that tells a buyer nobody proof-read the
+       page. English needs two forms, Russian three (1 лоток / 2 лотка /
+       5 лотков), Chinese and Vietnamese none. */
+    pl: function (count, base) {
+      var d = DICT[LANG] || DICT.en;
+      var pick = function (k) { return d[k] || DICT.en[k] || d[base] || base; };
+      if (LANG === 'ru') {
+        var m10 = count % 10, m100 = count % 100;
+        if (m10 === 1 && m100 !== 11) return pick(base + '.1');
+        if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return pick(base + '.2');
+        return pick(base + '.5');
+      }
+      if (LANG === 'en') return count === 1 ? pick(base + '.1') : pick(base);
+      return d[base] || base;                       // zh and vi do not inflect
+    },
+    unit: function () { return UNIT; },
+    setUnit: function (u) {
+      UNIT = u === 'in' ? 'in' : 'cm';
+      try { localStorage.setItem('kmty-inv-unit', UNIT); } catch (e) {}
+    },
+    /* a length held in cm, written the way the reader measures */
+    len: function (cm) {
+      if (!cm) return '';
+      return UNIT === 'in' ? (Math.round(cm / 2.54 * 10) / 10) + '\u2033' : cm + ' cm';
+    },
     /* The measurements as a buyer writes them down. Anything not recorded is
        left out rather than shown as a zero or a dash — a blank in a spec line
        is noise, and a zero is a lie. */
@@ -353,8 +447,8 @@
       var out = [];
       if (it.cup) out.push(it.cup);
       if (it.stem && !skipStem) out.push(T.stem(it.stem));
-      if (it.ns) out.push(T.s('ns') + ' ' + it.ns + ' cm');
-      if (it.ht) out.push(T.s('ht') + ' ' + it.ht + ' cm');
+      if (it.ns) out.push(T.s('ns') + ' ' + T.len(it.ns));
+      if (it.ht) out.push(T.s('ht') + ' ' + T.len(it.ht));
       return out;
     },
     /* skipStem is for the places that already show the SS/DS badge: saying it
