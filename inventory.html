@@ -67,8 +67,11 @@
     backdrop-filter:saturate(1.3) blur(14px);-webkit-backdrop-filter:saturate(1.3) blur(14px);
     border-bottom:1px solid var(--line);}
   .bar{display:flex;align-items:center;gap:12px;height:58px;}
-  .mark{font-family:var(--serif);font-weight:700;font-size:18px;text-decoration:none;color:var(--ink);white-space:nowrap;}
-  .mark span{color:var(--green);}
+  .mark{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--ink);white-space:nowrap;}
+  .mark img{height:27px;width:auto;display:block;flex:0 0 auto;}
+  .mark .wm{font-family:var(--serif);font-weight:700;font-size:18px;letter-spacing:-.01em;}
+  .mark .wm i{font-style:normal;color:var(--green);}
+  @media(max-width:420px){ .mark .wm{display:none;} }   /* the mark alone carries it */
   .sp{flex:1 1 auto;}
   .back{font-size:12.5px;text-decoration:none;color:var(--muted);white-space:nowrap;}
   .seg{display:flex;padding:3px;border:1px solid var(--line);border-radius:999px;background:#fff;gap:2px;}
@@ -216,6 +219,46 @@
     font-size:9px;letter-spacing:.09em;font-weight:700;line-height:15px;
     background:rgba(47,93,58,.1);color:var(--deep);border:1px solid rgba(47,93,58,.22);}
   .sb.ds{background:rgba(198,149,47,.15);color:#8A6412;border-color:rgba(198,149,47,.34);}
+
+  /* ---------- the two codes that name no single colour ----------
+     W, P, R and Y ride --t like anything else. These two cannot: a white
+     flower drawn at 30% alpha over cream is invisible, so it is drawn as
+     white with an edge; a red lip is the stripe through it that it actually
+     is; and a mix is a run across the range rather than a colour at all. */
+  .cx-W .avb,.cx-C .avb{background:rgba(255,255,255,.94);border-color:rgba(26,30,23,.26);}
+  .cx-W .avb:hover,.cx-C .avb:hover{background:#fff;border-color:rgba(26,30,23,.42);}
+  .cx-W .avb.s,.cx-C .avb.s{border-left-color:rgba(26,30,23,.34);}
+  .cx-W .avb.e,.cx-C .avb.e{border-right-color:rgba(26,30,23,.34);}
+  .cx-C .avb{background-image:linear-gradient(to bottom,transparent 41%,
+    rgba(156,34,51,.62) 41%,rgba(156,34,51,.62) 59%,transparent 59%);}
+  /* One `.avb` is drawn per week cell, so a gradient across the bar restarts
+     every 62px and reads as a rendering fault. A repeating pattern with a
+     period of its own is the same idea said on purpose. */
+  .cx-X .avb{border-color:rgba(26,30,23,.22);
+    background:repeating-linear-gradient(112deg,rgba(224,185,58,.42) 0px,rgba(222,111,172,.46) 15px,
+      rgba(140,106,194,.44) 30px,rgba(156,34,51,.42) 45px,rgba(224,185,58,.42) 58px);}
+  .cx-X .avb:hover{background:repeating-linear-gradient(112deg,rgba(224,185,58,.7) 0px,rgba(222,111,172,.74) 15px,
+      rgba(140,106,194,.72) 30px,rgba(156,34,51,.7) 45px,rgba(224,185,58,.7) 58px);}
+  /* the picked state stays the deep green everywhere, so selection never has
+     to compete with hue for the reader's attention */
+  .cx-W .avb.picked,.cx-C .avb.picked,.cx-X .avb.picked{background:var(--deep);border-color:var(--deep);}
+
+  /* the same three, as the stripe down the sticky column and the card's rule */
+  .cx-W .vc::before{background:#FCFAF6;box-shadow:inset 0 0 0 1px rgba(26,30,23,.28);}
+  .cx-C .vc::before{background:linear-gradient(to bottom,#FCFAF6 36%,#9C2233 36%,#9C2233 64%,#FCFAF6 64%);
+    box-shadow:inset 0 0 0 1px rgba(26,30,23,.2);}
+  .cx-X .vc::before{background:linear-gradient(to bottom,#E0B93A,#DE6FAC 38%,#8C6AC2 70%,#9C2233);}
+  .cx-X .vmeter .track i{background:linear-gradient(90deg,#E0B93A,#DE6FAC 38%,#8C6AC2 70%,#9C2233);}
+  .cx-C .vmeter .track i{background:linear-gradient(to bottom,#F0EBE0 36%,#9C2233 36%,#9C2233 64%,#F0EBE0 64%);}
+  .gcard.cx-W .gbody{border-top-color:#E4DED2;}
+  .gcard.cx-C .gbody{border-image:linear-gradient(90deg,#F0EBE0 0 45%,#9C2233 45% 55%,#F0EBE0 55%) 1;}
+  .gcard.cx-X .gbody{border-image:linear-gradient(90deg,#E0B93A,#DE6FAC 38%,#8C6AC2 70%,#9C2233) 1;}
+  .pline.cx-W::before{background:#EFEAE0;box-shadow:inset 0 0 0 1px rgba(26,30,23,.22);}
+  .pline.cx-C::before{background:linear-gradient(to bottom,#F3EFE6 36%,#9C2233 36%,#9C2233 64%,#F3EFE6 64%);}
+  .pline.cx-X::before{background:linear-gradient(to bottom,#E0B93A,#DE6FAC 38%,#8C6AC2 70%,#9C2233);}
+  .cx-W .vmeter .track i,.cx-C .vmeter .track i{box-shadow:inset 0 0 0 1px rgba(26,30,23,.24);}
+  .fopt .sw.sw-C{background:linear-gradient(to bottom,#F6F3EC 36%,#9C2233 36%,#9C2233 64%,#F6F3EC 64%) !important;}
+  .fopt .sw.sw-X{background:linear-gradient(135deg,#E0B93A,#DE6FAC 38%,#8C6AC2 70%,#9C2233) !important;}
 
   /* ---------- the availability bar ----------
      The bar is tinted with the variety's own bloom colour, sampled from its
@@ -552,6 +595,12 @@
     .filters::-webkit-scrollbar{display:none;}
     .filters > *{flex:0 0 auto;}
     .tcount{flex:0 0 auto;margin-left:0;font-size:11.5px;}
+  }
+  /* The bar carries the mark, two toggles, two links and four languages, and
+     the labels are longest in Russian — so where it wraps is decided by the
+     widest translation, not by the phone. Below 900 it wraps to two rows
+     rather than pushing the page sideways. */
+  @media(max-width:900px){
     .bar{height:auto;flex-wrap:wrap;padding:8px 0;gap:7px 9px;}
     .bar .sp{display:none;}
     .seg button{padding:5px 10px;font-size:11.5px;}
@@ -576,7 +625,10 @@
 
 <header>
   <div class="wrap bar">
-    <a class="mark" href="/">KMTY<span>.</span></a>
+    <a class="mark" href="/" aria-label="KMTY Orchid">
+      <img src="images/logo.png" alt="" aria-hidden="true">
+      <span class="wm">KMTY<i>.</i></span>
+    </a>
     <div class="seg" id="viewSeg" hidden>
       <button data-view="cal" class="on" data-t="view.cal">Calendar</button>
       <button data-view="gal" data-t="view.gal">Gallery</button>
@@ -753,7 +805,7 @@
   </div>
 </aside>
 
-<script src="inventory-shared.js?v=3"></script>
+<script src="inventory-shared.js?v=4"></script>
 <script>
 (function () {
   'use strict';
@@ -785,94 +837,16 @@
      the saturated middle, which is where the colour of a bloom actually lives.
      A cut-out that is genuinely white leaves nothing to average, and the row
      keeps the house green rather than being tinted a dirty grey. */
-  var TINT = {};
-  function hslToRgb(h, s, l) {                       // h in turns, s/l in 0..1
-    var a = s * Math.min(l, 1 - l);
-    var f = function (n) {
-      var k = (n + h * 12) % 12;
-      return Math.round(255 * (l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1))));
-    };
-    return [f(0), f(8), f(4)];
-  }
-  function sampleTint(it, onDone) {
-    var key = it.id + ':' + it.updatedAt;
-    if (TINT[key]) { onDone(TINT[key]); return; }
-    /* Only the flower cut-out is sampled, never the plant shot. A plant is
-       photographed on a bench against whatever the greenhouse looks like, and
-       the largest saturated region in that frame is the background — sampling
-       it would key the chart to the wall behind the crop. */
-    if (!hasShot(it, 'flower')) return;
-    var img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = function () {
-      try {
-        var n = 28, c = document.createElement('canvas'); c.width = c.height = n;
-        var g = c.getContext('2d', { willReadFrequently: true });
-        g.drawImage(img, 0, 0, n, n);
-        var d = g.getImageData(0, 0, n, n).data;
-        /* Bucket by hue rather than averaging straight across: a magenta bloom
-           with a yellow lip averages to mud, but its dominant 15° bucket is
-           still magenta. Buckets are weighted by saturation, so a large washed
-           region cannot outvote the petal in front of it. */
-        var NB = 24, w = new Array(NB).fill(0), px = [];
-        for (var i = 0; i < d.length; i += 4) {
-          if (d[i + 3] < 128) continue;                                  // transparent cut-out edge
-          var R = d[i], G = d[i + 1], Bl = d[i + 2];
-          var mx = Math.max(R, G, Bl), mn = Math.min(R, G, Bl), ch = mx - mn;
-          var l = (mx + mn) / 510;
-          var s = ch === 0 ? 0 : ch / (255 - Math.abs(mx + mn - 255));
-          if (s < 0.2 || l < 0.18 || l > 0.92) continue;                 // shadow, paper, white throat
-          var h6 = mx === R ? ((G - Bl) / ch + 6) % 6
-                 : mx === G ? (Bl - R) / ch + 2
-                 : (R - G) / ch + 4;
-          var turn = h6 / 6;                                             // 0..1
-          var bk = Math.floor(turn * NB) % NB;
-          w[bk] += s; px.push([bk, turn, s]);
-        }
-        if (px.length < 10) return;                                      // an honestly white bloom
-        var best = 0, tot = 0;
-        for (var k = 0; k < NB; k++) { tot += w[k]; if (w[k] > w[best]) best = k; }
-        if (w[best] / tot < 0.16) return;                                // no hue actually dominates
-        // circular mean of the winning bucket and its neighbours
-        var sx = 0, sy = 0, hits = 0, sats = [];
-        for (var j = 0; j < px.length; j++) {
-          var dist = Math.min(Math.abs(px[j][0] - best), NB - Math.abs(px[j][0] - best));
-          if (dist > 1) continue;
-          var ang = px[j][1] * 2 * Math.PI;
-          sx += Math.cos(ang); sy += Math.sin(ang); sats.push(px[j][2]); hits++;
-        }
-        if (hits < 8) return;
-        /* A white phalaenopsis is not colourless in a photograph — its shadows
-           are warm, and they carry a perfectly consistent dominant hue. Left
-           alone, that paints the Snow White row butter yellow. What separates
-           a real colour from a warm cast is how *strong* the saturation gets,
-           not how much of the frame it covers: measured across this library,
-           white blooms top out around a mean of .34 and a 90th percentile of
-           .54, while the faintest genuinely coloured one starts at .44 / .71.
-           Both signals have to clear the gap before a row is tinted. */
-        sats.sort(function (a, b) { return a - b; });
-        var mean = sats.reduce(function (s, v) { return s + v; }, 0) / hits;
-        var p90 = sats[Math.floor(hits * 0.9)];
-        if (mean < 0.40 || p90 < 0.62) return;
-        var hue = Math.atan2(sy, sx) / (2 * Math.PI); if (hue < 0) hue += 1;
-        /* Keep the hue, standardise the weight. A pale butter yellow and a deep
-           magenta must read with the same force at 20% alpha, or the chart
-           becomes a brightness map and the eye starts ranking varieties by how
-           dark their photograph happened to be. Hue is the only free variable. */
-        TINT[key] = hslToRgb(hue, 0.58, 0.5).join(',');
-        onDone(TINT[key]);
-      } catch (e) { /* a tainted canvas just means no tint; the chart still works */ }
-    };
-    img.src = photo(it, 'flower');
-  }
-  /* paint the tint onto every element of this variety that carries one */
-  function applyTint(it) {
-    sampleTint(it, function (t) {
-      var sel = '[data-vid="' + it.id + '"]';
-      Array.prototype.forEach.call(document.querySelectorAll(sel), function (el) {
-        el.style.setProperty('--t', t);
-      });
-    });
+  /* The bar, the stripe down the sticky column and the card's rule all take
+     their colour from the second letter of the code. Flat colour for W, P, R
+     and Y; the two that name no single colour get a class instead, because a
+     mix and a red lip cannot be one rgb triple. */
+  function paintColour(it, el) {
+    var k = KI.colourKey(it.code);
+    if (!k) return;                                  // unkeyed: the warm stone default
+    var c = KI.codeColours[k];
+    el.style.setProperty('--t', c.rgb);
+    el.classList.add('cx-' + k);
   }
 
   /* Percent of the published pool still available. Batches saved before this
@@ -975,7 +949,11 @@
       S.from = Math.max(1, lo);
       S.to = Math.min(W.weeksInYear(S.year), Math.max(hi, S.from + 7));
       show('app'); render();
-    }).catch(function () { show('gate'); $('gateErr').textContent = T.s('gate.net'); });
+    /* Two handlers rather than .catch: a network failure belongs on the gate,
+       but a bug in render() must not be disguised as one. With .catch the
+       throw was swallowed and the page simply showed the access screen again,
+       which is the most misleading thing it could have done. */
+    }, function () { show('gate'); $('gateErr').textContent = T.s('gate.net'); });
   }
 
   function show(which) {
@@ -1034,7 +1012,7 @@
     var q = S.q.trim().toLowerCase();
     if (q && (i.code + ' ' + i.nameEn + ' ' + (i.nameZh || '')).toLowerCase().indexOf(q) < 0) return false;
     if (skip !== 'cup' && anyOn(f.cup) && !f.cup[i.cup]) return false;
-    if (skip !== 'colour' && anyOn(f.colour) && !f.colour[i.colour]) return false;
+    if (skip !== 'colour' && anyOn(f.colour) && !f.colour[KI.colourKey(i.code)]) return false;
     if (skip !== 'stem' && anyOn(f.stem) && !f.stem[i.stem]) return false;
     // an unmeasured batch is not "0 cm wide"; a range simply cannot speak for it
     if (skip !== 'ns' && (f.nsMin !== '' || f.nsMax !== '')) {
@@ -1098,14 +1076,15 @@
     host.innerHTML = '';
     options.forEach(function (o) {
       var val = o.value, count = S.items.filter(function (i) {
-        return i[o.field] === val && matches(i, key);
+        var have = o.field === '_ck' ? KI.colourKey(i.code) : i[o.field];
+        return have === val && matches(i, key);
       }).length;
       var b = document.createElement('button');
       b.type = 'button';
       b.className = 'fopt' + (S.f[key][val] ? ' on' : '');
       b.disabled = !count && !S.f[key][val];
       b.setAttribute('aria-pressed', S.f[key][val] ? 'true' : 'false');
-      b.innerHTML = (o.swatch ? '<span class="sw" style="background:' + o.swatch + '"></span>' : '') +
+      b.innerHTML = (o.swatch ? '<span class="sw ' + (o.swatchClass || '') + '" style="background:' + o.swatch + '"></span>' : '') +
         esc(o.label) + '<span class="fn">' + count + '</span>';
       b.addEventListener('click', function () {
         S.f[key][val] = !S.f[key][val];
@@ -1127,8 +1106,9 @@
 
   function paintFilters() {
     facet($('fCup'), 'cup', cups().map(function (c) { return { value: c, label: c, field: 'cup' }; }));
-    facet($('fColour'), 'colour', KI.colours.map(function (c) {
-      return { value: c[0], label: T.s('c.' + c[0]), swatch: c[1], field: 'colour' };
+    facet($('fColour'), 'colour', KI.codeOrder.map(function (k) {
+      return { value: k, label: T.s('k.' + k), swatch: KI.codeColours[k].hex,
+               swatchClass: 'sw-' + k, field: '_ck' };
     }));
     facet($('fStem'), 'stem', ['SS', 'DS'].map(function (x) {
       return { value: x, label: T.s('stem.' + x), field: 'stem' };
@@ -1272,8 +1252,9 @@
     var tb = document.createElement('tbody');
     rows.forEach(function (it) {
       var tr = document.createElement('tr');
-      tr.dataset.vid = it.id;                    // every tinted element carries the id
+      tr.dataset.vid = it.id;
       tr.dataset.tray = it.tray || 0;
+      paintColour(it, tr);
       var td = document.createElement('td'); td.className = 'name';
       var sh = shots(it);
       td.innerHTML =
@@ -1325,7 +1306,6 @@
       tb.appendChild(tr);
     });
     t.appendChild(tb);
-    rows.forEach(applyTint);
 
     /* Put this week in view rather than leaving the reader at whatever week
        the earliest batch happens to start in. Once only — re-centring on
@@ -1348,6 +1328,7 @@
     rows.forEach(function (it) {
       var d = document.createElement('div'); d.className = 'gcard';
       d.dataset.vid = it.id;
+      paintColour(it, d);
       var sh = shots(it);
       d.innerHTML =
         '<div class="gshot' + (sh.length ? '' : ' empty') + '">' +
@@ -1417,7 +1398,6 @@
       d.querySelector('.gbody').appendChild(wk);
       host.appendChild(d);
     });
-    rows.forEach(applyTint);
   }
 
   /* ---------------- quantity popover ----------------
@@ -1627,6 +1607,7 @@
         var psh = shots(it);
         row.dataset.vid = it.id;
         row.className = 'pline' + (l.qty > it.qty ? ' over' : '');
+        paintColour(it, row);
         row.innerHTML =
           (psh.length ? '<img class="pthumb" src="' + photo(it, psh[0]) + '" alt="" loading="lazy">' : '') +
           '<div class="pm"><div class="pn">' + esc(nm(it)) + '</div>' +
@@ -1643,7 +1624,6 @@
         x.addEventListener('click', function () { setQty(it, l.week, 0); });
         row.appendChild(edit); row.appendChild(x);
         body.appendChild(row);
-        applyTint(it);
       });
     });
   }

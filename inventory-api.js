@@ -27,7 +27,7 @@
 // The specs beside them are the three figures a buyer quotes back at you:
 //   tray  plants per inner box — defaulted from the cup size (see BOX_BY_CUP)
 //   stem  SS (single stem, 单梗) or DS (dual stem, 双梗)
-//   colour/pattern  the flower's family and marking, for the buyer's filter
+//   pattern  the marking on the bloom; the colour is the code's second letter
 //   ns    natural spread — the width of one open flower, in cm
 //   ht    plant height, in cm
 // They sit on the batch rather than on the variety because the same variety is
@@ -77,16 +77,10 @@ export function boxForCup(cup) {
   return BOX_BY_CUP[Number(m[1]).toFixed(1)] || 0;
 }
 
-/* Colour and pattern, taken from the vocabulary the main site's variety wall
-   already uses, grouped into families a buyer would actually filter by. They
-   are two fields because a phalaenopsis is both at once — a bloom is pink AND
-   spotted, and one dropdown cannot say that.
-
-   The colour is declared rather than derived. The chart still tints itself
-   from the photograph, which is the true bloom; this is what the grower says
-   it is, and a filter has to be right every time or a buyer silently misses
-   stock they would have bought. */
-const COLOURS = ['white', 'cream', 'yellow', 'peach', 'pink', 'magenta', 'red', 'purple'];
+/* The marking on the bloom. Colour is NOT stored: it is the second letter of
+   the code (W white, P pink, R red, Y yellow, X mixed, C white with a red
+   lip), so it needs no field, cannot drift from the code, and is right the
+   moment a batch is created. Marking is not in the code, so it is. */
 const PATTERNS = ['solid', 'bicolour', 'spotted', 'edged'];
 function oneOf(v, allowed) {
   const s = String(v == null ? '' : v).trim().toLowerCase();
@@ -163,8 +157,7 @@ function cleanItem(b, prev) {
     qty0: int(b.qty, 0, 9999999, 0),
     tray: int(b.tray, 0, 10000, 0) || boxForCup(b.cup),   // plants per inner box
     stem: stemOf(b.stem),                  // 'SS' | 'DS' | ''
-    colour: oneOf(b.colour, COLOURS),      // '' when the grower has not said
-    pattern: oneOf(b.pattern, PATTERNS),
+    pattern: oneOf(b.pattern, PATTERNS),   // '' when the grower has not said
     ns: dec1(b.ns, 0, 60),                 // natural spread, cm; 0 = not recorded
     ht: dec1(b.ht, 0, 300),                // plant height, cm; 0 = not recorded
     from: weeks[0],
@@ -270,7 +263,7 @@ async function submitInquiry(request, env, sendMail) {
       id: item.id, code: item.code, nameEn: item.nameEn, nameZh: item.nameZh,
       cup: item.cup, week, qty, year: item.year, tray: item.tray,
       stem: item.stem, ns: item.ns, ht: item.ht,               // the grade that was on offer
-      colour: item.colour, pattern: item.pattern,
+      pattern: item.pattern,
       stockAtRequest: item.qty,                                // what staff should sanity-check against
     });
   }

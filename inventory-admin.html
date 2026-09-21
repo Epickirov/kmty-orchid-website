@@ -25,6 +25,13 @@
   header h1{color:var(--cream);font-size:19px;}
   header .sp{flex:1 1 auto;}
   header a{color:rgba(243,238,228,.7);font-size:12.5px;text-decoration:none;}
+  .hlogo{height:26px;width:auto;display:block;flex:0 0 auto;}
+  /* what the second letter of the code means, shown as the grower types it —
+     the colour is read off the code, never entered */
+  .ckey{display:flex;align-items:center;gap:6px;margin-top:5px;font-size:11.5px;color:var(--muted);
+       letter-spacing:0;min-height:17px;}
+  .ckey i{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-shadow:inset 0 0 0 1px rgba(26,30,23,.2);}
+  .ckey.none{color:var(--rust);}
 
   .tabs{display:flex;gap:6px;padding:16px 0 0;flex-wrap:wrap;}
   .tab{border:1px solid var(--line);background:#fff;border-radius:11px;padding:8px 16px;font-family:var(--sans);
@@ -98,6 +105,7 @@
 <body>
 
 <header><div class="wrap">
+  <img src="images/logo.png" alt="" aria-hidden="true" class="hlogo">
   <h1>库存管理 · Inventory</h1><span class="sp"></span>
   <a href="/inventory" target="_blank">客户页面 ↗</a>
 </div></header>
@@ -123,7 +131,8 @@
       <h2 id="formTitle">添加批次</h2>
       <p class="lead">一个批次 = 一个品种、一个杯径、一个数量、一个可供周段。客户按周查看时，凡是落在该周段内的批次都会显示。</p>
       <div class="row">
-        <label class="fld">花卉编号 Code *<input id="f-code" placeholder="TPL-411" maxlength="24"></label>
+        <label class="fld">花卉编号 Code *<input id="f-code" placeholder="TPL-411" maxlength="24">
+          <span class="ckey" id="codeKey"></span></label>
         <label class="fld">英文名 Name (EN) *<input id="f-nameEn" placeholder="Ivory" maxlength="60"></label>
         <label class="fld">中文名 Name (中文)<input id="f-nameZh" placeholder="象牙白" maxlength="60"></label>
         <label class="fld">杯径 Cup size<input id="f-cup" list="cups" placeholder="2.5&quot;" maxlength="24"></label>
@@ -150,13 +159,6 @@
       </div>
 
       <div class="row">
-        <label class="fld">花色 Colour<select id="f-colour">
-          <option value="">未标注 —</option>
-          <option value="white">白 White</option><option value="cream">象牙 Cream</option>
-          <option value="yellow">金黄 Yellow</option><option value="peach">蜜桃 Peach</option>
-          <option value="pink">粉 Pink</option><option value="magenta">洋红 Magenta</option>
-          <option value="red">酒红 Red</option><option value="purple">淡紫 Purple</option>
-        </select></label>
         <label class="fld">花纹 Marking<select id="f-pattern">
           <option value="">未标注 —</option>
           <option value="solid">纯色 Solid</option><option value="bicolour">双色 Two-tone</option>
@@ -197,7 +199,7 @@
     <div class="card">
       <h2>批量导入 Bulk import</h2>
       <p class="lead">从 Excel 直接复制粘贴，或选择 CSV 文件。每行一个批次，列顺序：
-        <b class="mono">编号, 英文名, 中文名, 杯径, 数量, 起始周, 结束周, 年份, 备注, 每内箱株数, 梗数, 花径, 株高, 花色, 花纹</b>。
+        <b class="mono">编号, 英文名, 中文名, 杯径, 数量, 起始周, 结束周, 年份, 备注, 每内箱株数, 梗数, 花径, 株高, 花纹</b>。
         年份之后各列均可留空；梗数填 <b class="mono">SS</b>／<b class="mono">单梗</b> 或 <b class="mono">DS</b>／<b class="mono">双梗</b>，花径与株高以厘米计。
         <b>编号＋杯径＋起始周</b>相同的批次会被覆盖，其余新增；两张照片请在上方逐个上传。</p>
       <textarea id="csv" rows="4" placeholder="TPL-411, Ivory, 象牙白, 2.5&quot;, 5000, 10, 16, 2026, , 60, DS, 11.5, 62
@@ -239,7 +241,7 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
   </div>
 </div>
 
-<script src="inventory-shared.js?v=3"></script>
+<script src="inventory-shared.js?v=4"></script>
 <script>
 (function () {
   'use strict';
@@ -325,7 +327,7 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
     $('f-code').value = it.code; $('f-nameEn').value = it.nameEn; $('f-nameZh').value = it.nameZh || '';
     $('f-cup').value = it.cup || ''; $('f-qty').value = it.qty; $('f-tray').value = it.tray || '';
     $('f-stem').value = it.stem || ''; $('f-ns').value = it.ns || ''; $('f-ht').value = it.ht || '';
-    $('f-colour').value = it.colour || ''; $('f-pattern').value = it.pattern || '';
+    $('f-pattern').value = it.pattern || ''; syncCodeKey();
     $('f-from').value = it.from; $('f-to').value = it.to; $('f-year').value = it.year;
     $('f-note').value = it.note || '';
     shotPlant.reset(); shotFlower.reset(); syncBox();
@@ -339,7 +341,7 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
     $('formTitle').textContent = '添加批次';
     ['f-code','f-nameEn','f-nameZh','f-cup','f-qty','f-tray','f-ns','f-ht','f-from','f-to','f-note']
       .forEach(function (k) { $(k).value = ''; });
-    $('f-stem').value = ''; $('f-colour').value = ''; $('f-pattern').value = '';
+    $('f-stem').value = ''; $('f-pattern').value = ''; syncCodeKey();
     $('f-year').value = new Date().getUTCFullYear();
     shotPlant.reset(); shotFlower.reset(); syncBox();
     $('reset').hidden = true; st('saveStatus', '');
@@ -385,7 +387,7 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
      undefined = leave the stored photo alone, '' = remove it, a data URL =
      replace it. Two slots, so an edit that touches only the bloom leaves the
      plant shot exactly where it was. */
-  function photoField(fileId, prevId, noneId, clearId, max, keepAlpha, onLoad) {
+  function photoField(fileId, prevId, noneId, clearId, max, keepAlpha) {
     var f = { pending: undefined };
     function paint(src) {
       $(prevId).hidden = !src; $(noneId).hidden = !!src; $(clearId).hidden = !src;
@@ -396,7 +398,6 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
       st('saveStatus', '处理图片中…');
       shrink(file, max, keepAlpha).then(function (url) {
         f.pending = url; paint(url); st('saveStatus', '');
-        if (onLoad) onLoad(url);
       }).catch(function () { st('saveStatus', '这张图片读不出来，请换一张', true); });
     });
     $(clearId).addEventListener('click', function () { f.pending = ''; paint(''); $(fileId).value = ''; });
@@ -422,53 +423,31 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
   $('f-cup').addEventListener('input', syncBox);
   $('f-cup').addEventListener('change', syncBox);
 
-  /* Read the dominant hue out of the bloom that was just uploaded and offer it
-     as the colour, so nobody has to classify a photograph they are looking at.
-     Only ever a suggestion, and only into an empty field — the grower's own
-     answer is never overwritten, because they can see the plant and we are
-     looking at 28x28 pixels of it. */
-  function suggestColour(dataUrl) {
-    if ($('f-colour').value) return;
-    var img = new Image();
-    img.onload = function () {
-      try {
-        var n = 28, c = document.createElement('canvas'); c.width = c.height = n;
-        var g = c.getContext('2d', { willReadFrequently: true });
-        g.drawImage(img, 0, 0, n, n);
-        var d = g.getImageData(0, 0, n, n).data, sx = 0, sy = 0, sats = [], hits = 0;
-        for (var i = 0; i < d.length; i += 4) {
-          if (d[i + 3] < 128) continue;
-          var R = d[i], G = d[i + 1], B = d[i + 2];
-          var mx = Math.max(R, G, B), mn = Math.min(R, G, B), ch = mx - mn;
-          var l = (mx + mn) / 510, sat = ch === 0 ? 0 : ch / (255 - Math.abs(mx + mn - 255));
-          if (sat < 0.2 || l < 0.18 || l > 0.92) continue;
-          var h6 = mx === R ? ((G - B) / ch + 6) % 6 : mx === G ? (B - R) / ch + 2 : (R - G) / ch + 4;
-          var a = h6 / 6 * 2 * Math.PI;
-          sx += Math.cos(a); sy += Math.sin(a); sats.push(sat); hits++;
-        }
-        // the same test the customer page uses to tell a real colour from the
-        // warm shadows of a white bloom
-        sats.sort(function (a, b) { return a - b; });
-        var mean = hits ? sats.reduce(function (t, v) { return t + v; }, 0) / hits : 0;
-        var p90 = hits ? sats[Math.floor(hits * 0.9)] : 0;
-        if (hits < 8 || mean < 0.40 || p90 < 0.62) { pick('white'); return; }
-        var deg = (Math.atan2(sy, sx) / (2 * Math.PI) * 360 + 360) % 360;
-        pick(deg < 10 || deg >= 350 ? 'red'
-           : deg < 45 ? 'peach' : deg < 75 ? 'yellow'
-           : deg < 255 ? '' : deg < 295 ? 'purple'
-           : deg < 325 ? 'magenta' : 'pink');
-      } catch (e) {}
-    };
-    img.src = dataUrl;
-    function pick(v) {
-      if (!v || $('f-colour').value) return;
-      $('f-colour').value = v;
-      st('saveStatus', '花色已按图片推断为「' + $('f-colour').selectedOptions[0].textContent.trim() + '」，可手动更改');
+  /* The second letter of the prefix is the colour: W white, P pink, R red,
+     Y yellow, X a mix, C a white flower with a red lip. Shown here so a
+     mistyped code is caught while the batch is being entered rather than
+     after a buyer has filtered by it. */
+  var CODE_COLOURS = {
+    W: ['白 White', '#F6F3EC'], P: ['粉 Pink', '#DE6FAC'], R: ['红 Red', '#9C2233'],
+    Y: ['黄 Yellow', '#E0B93A'], C: ['白花红唇 White, red lip', '#F6F3EC'],
+    X: ['混色 Mixed', 'linear-gradient(135deg,#E0B93A,#DE6FAC 38%,#8C6AC2 70%,#9C2233)'],
+  };
+  function syncCodeKey() {
+    var m = /^[A-Z]([A-Z])[A-Z]?-/.exec($('f-code').value.trim().toUpperCase());
+    var hit = m && CODE_COLOURS[m[1]];
+    var el = $('codeKey');
+    if (!hit) {
+      el.className = 'ckey' + ($('f-code').value.trim() ? ' none' : '');
+      el.textContent = $('f-code').value.trim() ? '编号第二个字母无法识别花色' : '';
+      return;
     }
+    el.className = 'ckey';
+    el.innerHTML = '<i style="background:' + hit[1] + '"></i>花色 ' + hit[0] + '（按编号）';
   }
+  $('f-code').addEventListener('input', syncCodeKey);
 
   var shotPlant = photoField('f-img', 'imgPrev', 'imgNone', 'imgClear', 760, false);
-  var shotFlower = photoField('f-img2', 'imgPrev2', 'imgNone2', 'imgClear2', 620, true, suggestColour);
+  var shotFlower = photoField('f-img2', 'imgPrev2', 'imgNone2', 'imgClear2', 620, true);
 
   $('save').addEventListener('click', function () {
     var body = {
@@ -476,7 +455,7 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
       code: $('f-code').value.trim(), nameEn: $('f-nameEn').value.trim(), nameZh: $('f-nameZh').value.trim(),
       cup: $('f-cup').value.trim(), qty: $('f-qty').value, tray: $('f-tray').value || 0,
       stem: $('f-stem').value, ns: $('f-ns').value || 0, ht: $('f-ht').value || 0,
-      colour: $('f-colour').value, pattern: $('f-pattern').value,
+      pattern: $('f-pattern').value,
       from: $('f-from').value, to: $('f-to').value,
       year: $('f-year').value || new Date().getUTCFullYear(), note: $('f-note').value.trim(),
     };
@@ -538,7 +517,7 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
         tray: Number(g(9)) || 0,
         // the server takes SS / DS / 单梗 / 双梗 / 1 / 2, so a grower's own sheet imports as written
         stem: g(10), ns: Number(g(11)) || 0, ht: Number(g(12)) || 0,
-        colour: g(13), pattern: g(14),
+        pattern: g(13),
         img: hit ? '__keep__' : undefined, img2: hit ? '__keep__' : undefined,
       });
     });
@@ -573,11 +552,11 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
   });
   $('csvOut').addEventListener('click', function () {
     var q = function (v) { v = String(v == null ? '' : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
-    var csv = '编号,英文名,中文名,杯径,数量,起始周,结束周,年份,备注,每内箱株数,梗数,花径,株高,花色,花纹\n' +
+    var csv = '编号,英文名,中文名,杯径,数量,起始周,结束周,年份,备注,每内箱株数,梗数,花径,株高,花纹\n' +
       items.map(function (i) {
         return [i.code, i.nameEn, i.nameZh, i.cup, i.qty, i.from, i.to, i.year, i.note,
                 i.tray || '', i.stem || '', i.ns || '', i.ht || '',
-                i.colour || '', i.pattern || ''].map(q).join(',');
+                i.pattern || ''].map(q).join(',');
       }).join('\n');
     var a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }));  // BOM so Excel reads the Chinese

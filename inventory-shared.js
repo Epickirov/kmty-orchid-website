@@ -76,17 +76,35 @@
   }
 
   /* ---------------- flower colour ----------------
-     The families a buyer filters by, grouped from the vocabulary the main
-     site's variety wall already uses — its eighteen descriptors are shades and
-     markings of these eight. The hex beside each is the swatch on the filter
-     chip, not the chart's tint: the chart still samples the real photograph.
+     The house code already says what colour a flower is: the second letter of
+     the prefix. TWL-114 is white, TPL-321 is pink, TRL-361 red, TYL-579
+     yellow. Two letters are not initials and have to be learned — X is a mix,
+     and C is a white flower with a red lip.
 
-     Colour and marking are separate because a phalaenopsis is both at once.
-     A bloom is pink AND spotted, and one dropdown cannot say that. */
-  var COLOURS = [
-    ['white',   '#F4F1EA'], ['cream',   '#EFE0BC'], ['yellow', '#E6C43F'], ['peach',  '#E6A068'],
-    ['pink',    '#E88CC0'], ['magenta', '#C4459B'], ['red',    '#A33148'], ['purple', '#8C6AC2'],
-  ];
+     Reading it off the code beats any other source. It needs no data entry, it
+     cannot drift from what the grower actually calls the plant, and it is
+     right the moment a batch is created. (An earlier build sampled the hue out
+     of the flower photograph, which was ingenious and strictly worse: it
+     guessed, and it could only guess once a photograph existed.)
+
+     W, P, R and Y are drawn as flat colour. The other two cannot be, because
+     neither names one: a mix is shown as a run through the range, and a red
+     lip as the red stripe through white that it is. */
+  var CODE_COLOURS = {
+    W: { hex: '#F6F3EC', rgb: '246,243,236', pale: true },
+    P: { hex: '#DE6FAC', rgb: '222,111,172' },
+    R: { hex: '#9C2233', rgb: '156,34,51' },
+    Y: { hex: '#E0B93A', rgb: '224,185,58' },
+    C: { hex: '#F6F3EC', rgb: '246,243,236', pale: true, lip: '156,34,51' },
+    X: { hex: '#DE6FAC', rgb: '222,111,172', mix: true },
+  };
+  var CODE_ORDER = ['W', 'C', 'P', 'R', 'Y', 'X'];
+  /* The letter, or '' when a code does not follow the scheme — an unkeyed row
+     falls back to a warm stone rather than being guessed at. */
+  function colourKey(code) {
+    var m = /^[A-Z]([A-Z])[A-Z]?-/.exec(String(code == null ? '' : code).toUpperCase());
+    return m && CODE_COLOURS[m[1]] ? m[1] : '';
+  }
   var PATTERNS = ['solid', 'bicolour', 'spotted', 'edged'];
 
   /* ---------------- copy ---------------- */
@@ -160,8 +178,8 @@
       'f.qty': 'Quantity', 'f.atleast': 'At least',
       'f.when': 'Available in', 'f.year': 'Year',
       'f.from': 'From', 'f.to': 'To', 'f.anym': 'Any month', 'f.anyy': 'Any year',
-      'c.white': 'White', 'c.cream': 'Cream', 'c.yellow': 'Yellow', 'c.peach': 'Peach',
-      'c.pink': 'Pink', 'c.magenta': 'Magenta', 'c.red': 'Red', 'c.purple': 'Purple',
+      'k.W': 'White', 'k.P': 'Pink', 'k.R': 'Red', 'k.Y': 'Yellow',
+      'k.C': 'White, red lip', 'k.X': 'Mixed',
       'm.solid': 'Solid', 'm.bicolour': 'Two-tone', 'm.spotted': 'Spotted', 'm.edged': 'Edged',
       'gate.eyebrow': 'KMTY Orchid · Production calendar',
       'gate.cap': 'Yunnan · \u22481,900 m elevation',
@@ -253,8 +271,8 @@
       'f.qty': '数量', 'f.atleast': '不少于',
       'f.when': '可供时间', 'f.year': '年份',
       'f.from': '从', 'f.to': '至', 'f.anym': '不限月份', 'f.anyy': '不限年份',
-      'c.white': '白', 'c.cream': '象牙', 'c.yellow': '金黄', 'c.peach': '蜜桃',
-      'c.pink': '粉', 'c.magenta': '洋红', 'c.red': '酒红', 'c.purple': '淡紫',
+      'k.W': '白', 'k.P': '粉', 'k.R': '红', 'k.Y': '黄',
+      'k.C': '白花红唇', 'k.X': '混色',
       'm.solid': '纯色', 'm.bicolour': '双色', 'm.spotted': '星点', 'm.edged': '镶边',
       'gate.eyebrow': 'KMTY 兰花 · 排产日历',
       'gate.cap': '云南 · 海拔约 1,900 米',
@@ -347,8 +365,8 @@
       'f.qty': 'Количество', 'f.atleast': 'Не менее',
       'f.when': 'Есть в наличии', 'f.year': 'Год',
       'f.from': 'С', 'f.to': 'По', 'f.anym': 'Любой месяц', 'f.anyy': 'Любой год',
-      'c.white': 'Белый', 'c.cream': 'Кремовый', 'c.yellow': 'Жёлтый', 'c.peach': 'Персиковый',
-      'c.pink': 'Розовый', 'c.magenta': 'Пурпурный', 'c.red': 'Красный', 'c.purple': 'Фиолетовый',
+      'k.W': 'Белый', 'k.P': 'Розовый', 'k.R': 'Красный', 'k.Y': 'Жёлтый',
+      'k.C': 'Белый, красная губа', 'k.X': 'Смешанный',
       'm.solid': 'Однотонный', 'm.bicolour': 'Двухцветный', 'm.spotted': 'Крапчатый', 'm.edged': 'С каймой',
       'gate.eyebrow': 'KMTY Orchid · Производственный календарь',
       'gate.cap': 'Юньнань · \u2248 1 900 м над уровнем моря',
@@ -441,8 +459,8 @@
       'f.qty': 'Số lượng', 'f.atleast': 'Ít nhất',
       'f.when': 'Có hàng trong', 'f.year': 'Năm',
       'f.from': 'Từ', 'f.to': 'Đến', 'f.anym': 'Mọi tháng', 'f.anyy': 'Mọi năm',
-      'c.white': 'Trắng', 'c.cream': 'Kem', 'c.yellow': 'Vàng', 'c.peach': 'Đào',
-      'c.pink': 'Hồng', 'c.magenta': 'Đỏ tím', 'c.red': 'Đỏ', 'c.purple': 'Tím',
+      'k.W': 'Trắng', 'k.P': 'Hồng', 'k.R': 'Đỏ', 'k.Y': 'Vàng',
+      'k.C': 'Trắng, môi đỏ', 'k.X': 'Pha trộn',
       'm.solid': 'Trơn', 'm.bicolour': 'Hai màu', 'm.spotted': 'Đốm', 'm.edged': 'Viền',
       'gate.eyebrow': 'KMTY Orchid · Lịch sản xuất',
       'gate.cap': 'Vân Nam · độ cao \u2248 1.900 m',
@@ -618,7 +636,7 @@
 
   window.KMTY_INV = {
     t: T, api: api, photo: photo, hasShot: hasShot,
-    colours: COLOURS, patterns: PATTERNS,
+    codeColours: CODE_COLOURS, codeOrder: CODE_ORDER, colourKey: colourKey, patterns: PATTERNS,
     weeks: { mondayOfWeek: mondayOfWeek, weeksInYear: weeksInYear, weeksOfMonth: weeksOfMonth,
              isoWeekNow: isoWeekNow, monthsOfWeek: monthsOfWeek, weekOfMonth: weekOfMonth },
   };
