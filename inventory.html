@@ -910,8 +910,9 @@
     Array.prototype.forEach.call(box.children, function (b) { b.classList.toggle('on', !!S.cups[b.dataset.cup]); });
     $('availOnly').classList.toggle('on', S.availOnly);
     var v = visible();
-    $('count').textContent = v.length + ' ' + T.s('varieties') + ' · ' +
-      n(v.reduce(function (s, i) { return s + i.qty; }, 0)) + ' ' + T.s('plants');
+    var tot = v.reduce(function (s, i) { return s + i.qty; }, 0);
+    $('count').textContent = v.length + ' ' + T.pl(v.length, 'varieties') + ' · ' +
+      n(tot) + ' ' + T.pl(tot, 'plants');
   }
 
   /* Nothing matched. The old copy sent the reader off to pick another month,
@@ -1216,8 +1217,15 @@
     padOpener = document.activeElement;
     $('pad').classList.add('open'); $('scrim').classList.add('on');
     $('pad').setAttribute('aria-modal', 'true');
+    /* Focus lands after the panel has finished sliding, or the browser scrolls
+       the page to chase a field that is still moving. But somebody who starts
+       typing straight away is already somewhere in the pad by then, and yanking
+       them back to the first field mid-word loses what they typed — so only
+       take focus if nobody else has. */
     var first = $('pad').querySelector('#rq-company');
-    if (first) setTimeout(function () { first.focus(); }, 320);
+    if (first) setTimeout(function () {
+      if (!$('pad').contains(document.activeElement)) first.focus();
+    }, 320);
   }
   function closePad() {
     var wasOpen = $('pad').classList.contains('open');
@@ -1248,7 +1256,7 @@
     var total = 0, trays = 0;
     S.cart.forEach(function (l) { total += l.qty; trays += traysOf(l, itemById(l.id)); });
     $('padCount').textContent = S.cart.length;
-    $('padSum').textContent = n(total) + ' ' + T.s('plants');
+    $('padSum').textContent = n(total) + ' ' + T.pl(total, 'plants');
     $('padTotal').textContent = n(total);
     $('padMeta').innerHTML =
       (trays ? '<b>' + n(trays) + '</b> ' + esc(T.pl(trays, 'trays')) + '<br>' : '') +
@@ -1257,7 +1265,7 @@
     $('padCopy').hidden = !S.cart.length;
     // announce the running order rather than letting it change in silence
     $('cartLive').textContent = S.cart.length
-      ? S.cart.length + ' ' + T.pl(S.cart.length, 'lines') + ', ' + n(total) + ' ' + T.s('plants')
+      ? S.cart.length + ' ' + T.pl(S.cart.length, 'lines') + ', ' + n(total) + ' ' + T.pl(total, 'plants')
       : T.s('pad.empty');
     if (!S.cart.length) closePad();
 
@@ -1321,7 +1329,7 @@
         out.push('  ' + it.code + '  ' + nm(it) + '  ' + T.specShort(it) + '  ' + n(l.qty));
       });
     });
-    out.push('', T.s('pad.total') + ': ' + n(total) + ' ' + T.s('plants'));
+    out.push('', T.s('pad.total') + ': ' + n(total) + ' ' + T.pl(total, 'plants'));
     return out.join('\n');
   }
   function copyTo(btn, txt) {
@@ -1369,7 +1377,7 @@
       try { localStorage.setItem('kmty-inv-ref', r.ref); } catch (e) {}
       $('doneRef').textContent = r.ref;
       $('doneSum').innerHTML = T.s('done.sum')
-        .replace('%p', '<b>' + n(sum.plants) + '</b>')
+        .replace('%p', '<b>' + n(sum.plants) + '</b> ' + esc(T.pl(sum.plants, 'plants')))
         .replace('%l', '<b>' + sum.lines + '</b> ' + esc(T.pl(sum.lines, 'lines')))
         .replace('%w', sum.lo === sum.hi
           ? T.s('done.w1').replace('%a', '<b>' + sum.lo + '</b>')
