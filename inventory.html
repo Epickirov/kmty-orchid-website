@@ -245,17 +245,20 @@
   .btn.danger{background:transparent;color:var(--rustink);border:1px solid rgba(176,85,47,.4);}
 
   /* ---------- gallery ---------- */
-  .gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(212px,1fr));gap:15px;padding-bottom:30px;}
+  .gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(236px,1fr));gap:16px;padding-bottom:30px;}
   .gcard{background:#fff;border:1px solid var(--line);border-radius:17px;overflow:hidden;display:flex;flex-direction:column;
     transition:box-shadow .2s ease,transform .2s ease;}
   .gcard:hover{box-shadow:0 8px 26px rgba(26,30,23,.09);transform:translateY(-2px);}
-  .gshot{aspect-ratio:1/1;background:var(--paper) radial-gradient(circle at 50% 38%,#fff,rgba(0,0,0,.04));
-    position:relative;}
+  .gshot{aspect-ratio:4/4.6;background:var(--paper) radial-gradient(circle at 50% 36%,#fff,rgba(0,0,0,.05));
+    position:relative;
+    /* growers photograph on whatever bench they have; an inset hairline puts
+       every one of them in the same window so the grid reads as a set */
+    box-shadow:inset 0 0 0 1px rgba(26,30,23,.05);}
   /* a variety with no photograph yet gets the house mark rather than a blank
      white square, which reads as a failed load */
   .gshot.empty::before{content:'✽';position:absolute;inset:0;display:flex;align-items:center;
     justify-content:center;font-family:var(--serif);font-size:34px;color:rgba(26,30,23,.13);}
-  .gshot img.gmain{width:100%;height:100%;object-fit:contain;padding:8%;}
+  .gshot img.gmain{width:100%;height:100%;object-fit:contain;padding:7%;}
   /* the other shot as a swatch on the corner. Tapping it swaps the two, which
      is the whole interaction — no lightbox, no carousel dots to hunt for. */
   .ginset{position:absolute;right:9px;bottom:9px;width:31%;aspect-ratio:1/1;border-radius:50%;
@@ -264,17 +267,11 @@
   .ginset img{width:100%;height:100%;object-fit:cover;display:block;}
   .ginset:hover,.ginset:focus-visible{transform:scale(1.07);}
   .gtag{position:absolute;left:9px;top:9px;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;
-    background:rgba(255,255,255,.74);color:var(--faint);padding:2px 7px;border-radius:999px;
+    background:rgba(255,255,255,.82);color:var(--muted);padding:3px 8px;border-radius:999px;
     backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
   .gbody{padding:11px 13px 13px;flex:1 1 auto;display:flex;flex-direction:column;}
   /* spec sheet: two columns of label → figure, hairline-ruled like a datasheet */
-  .gspec{display:grid;grid-template-columns:1fr 1fr;gap:3px 11px;margin-top:9px;}
-  .gspec div{display:flex;justify-content:space-between;align-items:baseline;gap:6px;
-    font-size:11px;padding-bottom:3px;border-bottom:1px solid var(--line2);min-width:0;}
-  .gspec div:last-child:nth-child(odd){grid-column:1/-1;}
-  .gspec dt{color:var(--faint);margin:0;white-space:nowrap;}
-  .gspec dd{margin:0;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .gcard .vsub{white-space:normal;font-size:11.5px;line-height:1.45;margin-top:3px;}
   .gspan{margin-top:11px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;
     color:var(--faint);font-weight:600;}
   .gwks{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;}
@@ -286,7 +283,7 @@
   .gwk.more{background:transparent;border-style:dashed;color:var(--faint);}
   .gwk.more:hover{background:var(--paper);color:var(--ink);}
   /* the bloom colour again, as the card's own rule */
-  .gcard .gbody{border-top:2px solid rgb(var(--t));}
+  .gcard .gbody{border-top:3px solid rgb(var(--t));}
 
   /* ---------- order pad ---------- */
   .padbtn{position:fixed;right:clamp(14px,2.4vw,30px);bottom:22px;z-index:90;display:none;
@@ -779,19 +776,16 @@
     if (it.tray > 1) p.push([T.s('tray'), n(it.tray)]);
     return p;
   }
-  function specGrid(it) {
-    var p = specPairs(it).filter(function (x) { return x[0] !== T.s('tray'); });
-    if (!p.length) return '';
-    return '<dl class="gspec">' + p.map(function (x) {
-      return '<div><dt>' + esc(x[0]) + '</dt><dd>' + esc(x[1]) + '</dd></div>';
-    }).join('') + '</dl>';
-  }
   function specSheet(it) {
     var p = specPairs(it);
     if (!p.length) return '';
     return '<dl class="pspec">' + p.map(function (x) {
       return '<div><dt>' + esc(x[0]) + '</dt><dd>' + esc(x[1]) + '</dd></div>';
     }).join('') + '</dl>';
+  }
+
+  function rememberedRef() {
+    try { return localStorage.getItem('kmty-inv-ref') || ''; } catch (e) { return ''; }
   }
 
   var S = {
@@ -1066,15 +1060,15 @@
       d.innerHTML =
         '<div class="gshot' + (sh.length ? '' : ' empty') + '">' +
           (sh.length ? '<img class="gmain" src="' + photo(it, sh[0]) + '" alt="' + esc(nm(it)) + '" loading="lazy">' +
-                       '<span class="gtag">' + esc(T.s('shot.' + sh[0])) + '</span>' : '') +
+                       '<span class="gtag" hidden></span>' : '') +
           (sh.length > 1 ? '<button class="ginset" type="button" title="' + esc(T.s('shot.swap')) + '">' +
                            '<img src="' + photo(it, sh[1]) + '" alt="' + esc(T.s('shot.' + sh[1])) + '" loading="lazy"></button>' : '') +
         '</div>' +
         '<div class="gbody">' +
           '<div class="vcode mono">' + esc(it.code) + stemBadge(it) + '</div>' +
           '<div class="vname" style="font-size:18px;">' + esc(nm(it)) + '</div>' +
-          specGrid(it) +
-          '<div style="margin-top:9px;font-size:12px;color:var(--muted);"><b class="tnum" style="font-size:15px;color:var(--ink);">' +
+          '<div class="vsub">' + esc(T.specLine(it, true)) + '</div>' +
+          '<div style="margin-top:10px;font-size:12px;color:var(--muted);"><b class="tnum" style="font-size:16px;color:var(--ink);">' +
             n(it.qty) + '</b> ' + esc(T.s('avail')) + '</div>' +
           (it.note ? '<div class="vsub" style="font-style:italic;margin-top:5px;">' + esc(it.note) + '</div>' : '') +
         '</div>';
@@ -1089,7 +1083,8 @@
           order.reverse();
           d.querySelector('.gmain').src = photo(it, order[0]);
           d.querySelector('.gmain').alt = nm(it) + ' — ' + T.s('shot.' + order[0]);
-          d.querySelector('.gtag').textContent = T.s('shot.' + order[0]);
+          var tag = d.querySelector('.gtag');
+          tag.textContent = T.s('shot.' + order[0]); tag.hidden = false;
           inset.querySelector('img').src = photo(it, order[1]);
           inset.querySelector('img').alt = T.s('shot.' + order[1]);
         });
@@ -1371,6 +1366,7 @@
       $('send').disabled = false;
       if (!r.ok) { $('sendErr').textContent = r.error || T.s('gate.net'); return; }
       S.lastRef = r.ref; S.lastSum = sum;
+      try { localStorage.setItem('kmty-inv-ref', r.ref); } catch (e) {}
       $('doneRef').textContent = r.ref;
       $('doneSum').innerHTML = T.s('done.sum')
         .replace('%p', '<b>' + n(sum.plants) + '</b>')
@@ -1410,7 +1406,11 @@
   }
   $('stGo').addEventListener('click', track);
   $('stMail').addEventListener('keydown', function (e) { if (e.key === 'Enter') track(); });
-  $('toStatus').addEventListener('click', function (e) { e.preventDefault(); $('stRef').value = S.lastRef || $('stRef').value; show('track'); T.apply(document); });
+  $('toStatus').addEventListener('click', function (e) {
+    e.preventDefault();
+    $('stRef').value = S.lastRef || $('stRef').value || rememberedRef();
+    show('track'); T.apply(document);
+  });
   $('stBack').addEventListener('click', function () { show('app'); render(); });
   $('goTrack').addEventListener('click', function () { $('stRef').value = S.lastRef; show('track'); T.apply(document); });
   $('again').addEventListener('click', function () { show('app'); load(); });
