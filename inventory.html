@@ -223,49 +223,98 @@
   /* ---------- the two codes that name no single colour ----------
      W, P, R and Y ride --t like anything else. These two cannot: a white
      flower drawn at 30% alpha over cream is invisible, so it is drawn as
-     white with an edge; a red lip is the stripe through it that it actually
-     is; and a mix is a run across the range rather than a colour at all. */
-  .cx-W .avb,.cx-C .avb{background:rgba(255,255,255,.94);border-color:rgba(26,30,23,.26);}
-  .cx-W .avb:hover,.cx-C .avb:hover{background:#fff;border-color:rgba(26,30,23,.42);}
+     white with an edge; a red lip is red dots on that white; and a mix is a
+     run across the spectrum rather than a colour at all.
+
+     Both patterns tile inside each week cell, and one `.avb` is drawn per
+     week — so a tile that does not divide the cell exactly leaves a seam at
+     every cell edge that reads as a rendering fault. Week columns are not a
+     fixed width, so sizePatterns() measures each bar and sets its own --dotx
+     and --xs; the values below are only the fallback for the first paint. */
+  .cx-W .avb,.cx-C .avb{background-color:rgba(255,255,255,.94);border-color:rgba(26,30,23,.26);}
+  .cx-W .avb:hover,.cx-C .avb:hover{background-color:#fff;border-color:rgba(26,30,23,.42);}
   .cx-W .avb.s,.cx-C .avb.s{border-left-color:rgba(26,30,23,.34);}
   .cx-W .avb.e,.cx-C .avb.e{border-right-color:rgba(26,30,23,.34);}
-  .cx-C .avb{background-image:linear-gradient(to bottom,transparent 41%,
-    rgba(156,34,51,.62) 41%,rgba(156,34,51,.62) 59%,transparent 59%);}
-  /* One `.avb` is drawn per week cell, so a gradient across the bar restarts
-     every 62px and reads as a rendering fault. A repeating pattern with a
-     period of its own is the same idea said on purpose. */
+
+  /* C — a white flower with a red lip: red polka dots on white. Two layers of
+     the same tile, the second shifted half a tile across, which is what makes
+     the rows sit between one another instead of in a square grid. */
+  .cx-C .avb{
+    --doty:13px; --dotr:2px;
+    background-image:
+      radial-gradient(circle at 50% 25%,rgba(156,34,51,.8) var(--dotr),transparent calc(var(--dotr) + .5px)),
+      radial-gradient(circle at 50% 75%,rgba(156,34,51,.8) var(--dotr),transparent calc(var(--dotr) + .5px));
+    background-size:var(--dotx,calc(var(--wcol) / 6)) var(--doty);
+    background-position:0 0,calc(var(--dotx,calc(var(--wcol) / 6)) / 2) 0;
+    background-repeat:repeat;}
+  .cx-C .avb:hover{background-image:
+      radial-gradient(circle at 50% 25%,rgba(156,34,51,1) var(--dotr),transparent calc(var(--dotr) + .5px)),
+      radial-gradient(circle at 50% 75%,rgba(156,34,51,1) var(--dotr),transparent calc(var(--dotr) + .5px));}
+  body.compact .cx-C .avb{--doty:8.5px;--dotr:1.5px;}
+
+  /* X — a mix: rainbow diagonals. Six hard-edged bands at 45°, one cycle per
+     --xs * 6 along the gradient axis, with --xs set per bar so a whole number
+     of cycles lands across it. */
   .cx-X .avb{border-color:rgba(26,30,23,.22);
-    background:repeating-linear-gradient(112deg,rgba(224,185,58,.42) 0px,rgba(222,111,172,.46) 15px,
-      rgba(140,106,194,.44) 30px,rgba(156,34,51,.42) 45px,rgba(224,185,58,.42) 58px);}
-  .cx-X .avb:hover{background:repeating-linear-gradient(112deg,rgba(224,185,58,.7) 0px,rgba(222,111,172,.74) 15px,
-      rgba(140,106,194,.72) 30px,rgba(156,34,51,.7) 45px,rgba(224,185,58,.7) 58px);}
+    background-color:transparent;
+    background-image:repeating-linear-gradient(135deg,
+      rgba(156,34,51,.46) 0,rgba(156,34,51,.46) var(--xs,3.65px),
+      rgba(210,118,47,.46) var(--xs,3.65px),rgba(210,118,47,.46) calc(var(--xs,3.65px) * 2),
+      rgba(224,185,58,.46) calc(var(--xs,3.65px) * 2),rgba(224,185,58,.46) calc(var(--xs,3.65px) * 3),
+      rgba(91,143,98,.46) calc(var(--xs,3.65px) * 3),rgba(91,143,98,.46) calc(var(--xs,3.65px) * 4),
+      rgba(74,127,168,.46) calc(var(--xs,3.65px) * 4),rgba(74,127,168,.46) calc(var(--xs,3.65px) * 5),
+      rgba(140,106,194,.46) calc(var(--xs,3.65px) * 5),rgba(140,106,194,.46) calc(var(--xs,3.65px) * 6));}
+  .cx-X .avb:hover{background-image:repeating-linear-gradient(135deg,
+      rgba(156,34,51,.78) 0,rgba(156,34,51,.78) var(--xs,3.65px),
+      rgba(210,118,47,.78) var(--xs,3.65px),rgba(210,118,47,.78) calc(var(--xs,3.65px) * 2),
+      rgba(224,185,58,.78) calc(var(--xs,3.65px) * 2),rgba(224,185,58,.78) calc(var(--xs,3.65px) * 3),
+      rgba(91,143,98,.78) calc(var(--xs,3.65px) * 3),rgba(91,143,98,.78) calc(var(--xs,3.65px) * 4),
+      rgba(74,127,168,.78) calc(var(--xs,3.65px) * 4),rgba(74,127,168,.78) calc(var(--xs,3.65px) * 5),
+      rgba(140,106,194,.78) calc(var(--xs,3.65px) * 5),rgba(140,106,194,.78) calc(var(--xs,3.65px) * 6));}
   /* the picked state stays the deep green everywhere, so selection never has
      to compete with hue for the reader's attention */
   .cx-W .avb.picked,.cx-C .avb.picked,.cx-X .avb.picked{background:var(--deep);border-color:var(--deep);}
 
-  /* the same three, as the stripe down the sticky column and the card's rule */
+  /* The same three as the 3px stripe down the sticky column, the card's rule
+     and the meter. A stripe that narrow cannot hold a dot or a diagonal, so
+     each pattern is reduced to the thing it is made of: C to the rhythm of its
+     dots, X to the run of colour its bands step through. */
   .cx-W .vc::before{background:#FCFAF6;box-shadow:inset 0 0 0 1px rgba(26,30,23,.28);}
-  .cx-C .vc::before{background:linear-gradient(to bottom,#FCFAF6 36%,#9C2233 36%,#9C2233 64%,#FCFAF6 64%);
+  .cx-C .vc::before{background:repeating-linear-gradient(to bottom,
+    #FCFAF6 0,#FCFAF6 2.5px,#9C2233 2.5px,#9C2233 5.5px);
     box-shadow:inset 0 0 0 1px rgba(26,30,23,.2);}
-  .cx-X .vc::before{background:linear-gradient(to bottom,#E0B93A,#DE6FAC 38%,#8C6AC2 70%,#9C2233);}
-  .cx-X .vmeter .track i{background:linear-gradient(90deg,#E0B93A,#DE6FAC 38%,#8C6AC2 70%,#9C2233);}
-  .cx-C .vmeter .track i{background:linear-gradient(to bottom,#F0EBE0 36%,#9C2233 36%,#9C2233 64%,#F0EBE0 64%);}
+  .cx-X .vc::before{background:linear-gradient(to bottom,#9C2233,#D2762F 20%,#E0B93A 40%,
+    #5B8F62 60%,#4A7FA8 80%,#8C6AC2);}
+  .cx-X .vmeter .track i{background:linear-gradient(90deg,#9C2233,#D2762F 20%,#E0B93A 40%,
+    #5B8F62 60%,#4A7FA8 80%,#8C6AC2);}
+  .cx-C .vmeter .track i{background:repeating-linear-gradient(90deg,
+    #F0EBE0 0,#F0EBE0 2px,#9C2233 2px,#9C2233 4.5px);}
   .gcard.cx-W .gbody{border-top-color:#E4DED2;}
-  .gcard.cx-C .gbody{border-image:linear-gradient(90deg,#F0EBE0 0 45%,#9C2233 45% 55%,#F0EBE0 55%) 1;}
-  .gcard.cx-X .gbody{border-image:linear-gradient(90deg,#E0B93A,#DE6FAC 38%,#8C6AC2 70%,#9C2233) 1;}
+  .gcard.cx-C .gbody{border-image:repeating-linear-gradient(90deg,
+    #F0EBE0 0,#F0EBE0 3px,#9C2233 3px,#9C2233 6.5px) 1;}
+  .gcard.cx-X .gbody{border-image:linear-gradient(90deg,#9C2233,#D2762F 20%,#E0B93A 40%,
+    #5B8F62 60%,#4A7FA8 80%,#8C6AC2) 1;}
   .pline.cx-W::before{background:#EFEAE0;box-shadow:inset 0 0 0 1px rgba(26,30,23,.22);}
-  .pline.cx-C::before{background:linear-gradient(to bottom,#F3EFE6 36%,#9C2233 36%,#9C2233 64%,#F3EFE6 64%);}
-  .pline.cx-X::before{background:linear-gradient(to bottom,#E0B93A,#DE6FAC 38%,#8C6AC2 70%,#9C2233);}
+  .pline.cx-C::before{background:repeating-linear-gradient(to bottom,
+    #F3EFE6 0,#F3EFE6 2.5px,#9C2233 2.5px,#9C2233 5.5px);}
+  .pline.cx-X::before{background:linear-gradient(to bottom,#9C2233,#D2762F 20%,#E0B93A 40%,
+    #5B8F62 60%,#4A7FA8 80%,#8C6AC2);}
   .cx-W .vmeter .track i,.cx-C .vmeter .track i{box-shadow:inset 0 0 0 1px rgba(26,30,23,.24);}
-  .fopt .sw.sw-C{background:linear-gradient(to bottom,#F6F3EC 36%,#9C2233 36%,#9C2233 64%,#F6F3EC 64%) !important;}
-  .fopt .sw.sw-X{background:linear-gradient(135deg,#E0B93A,#DE6FAC 38%,#8C6AC2 70%,#9C2233) !important;}
+  /* the filter chip is the legend for the bar, so it carries the same two
+     patterns — at 13px, three dots and three bands is all that fits, and all
+     that is needed to recognise them */
+  .fopt .sw.sw-C{background:#F6F3EC !important;
+    background-image:radial-gradient(circle at 50% 50%,#9C2233 1.5px,transparent 1.7px) !important;
+    background-size:6.5px 6.5px !important;background-position:1px 1px !important;}
+  .fopt .sw.sw-X{background:repeating-linear-gradient(135deg,
+    #9C2233 0,#9C2233 2.2px,#D2762F 2.2px,#D2762F 4.4px,#E0B93A 4.4px,#E0B93A 6.6px,
+    #5B8F62 6.6px,#5B8F62 8.8px,#4A7FA8 8.8px,#4A7FA8 11px,#8C6AC2 11px,#8C6AC2 13.2px) !important;}
 
   /* ---------- the availability bar ----------
-     The bar is tinted with the variety's own bloom colour, sampled from its
-     flower photograph at render time. Two channels, two meanings: hue says
-     which flower, and the dark fill says you have committed a number to it —
-     so a pale butter yellow never has to carry white text to prove it is
-     selected. */
+     The bar is tinted with the variety's own bloom colour, read off the second
+     letter of its code. Two channels, two meanings: hue says which flower, and
+     the dark fill says you have committed a number to it — so a pale butter
+     yellow never has to carry white text to prove it is selected. */
   td.wk{position:relative;height:var(--row);}
   .avb{position:absolute;top:50%;transform:translateY(-50%);left:0;right:0;height:26px;
     background:rgba(var(--t),.3);border-top:1px solid rgba(var(--t),.55);border-bottom:1px solid rgba(var(--t),.55);
@@ -1319,7 +1368,44 @@
           .getPropertyValue('--namecol')) - 40);
       }
     }
+    sizePatterns();
   }
+
+  /* The C and X bars are patterns tiled inside each week cell, and a tile that
+     does not divide the cell exactly leaves a seam at every cell edge.
+
+     Nothing static can give that divisor. `table.cal` is `max-content` with
+     `min-width:100%`, so filtering down to a couple of months stretches the
+     ten remaining columns to fill the scroller — 62px becomes 90px. Worse,
+     the browser hands out the leftover sub-pixels unevenly, so neighbouring
+     columns come back 61.33px and 62px in the same chart, and the two pill
+     caps are 3px narrower again.
+
+     So each bar is measured and sized to itself: a whole number of tiles
+     across its own width, which puts its right edge at the start of a tile
+     and the next bar's left edge at the start of the next one. Reads first,
+     writes after, so the loop does not thrash layout. */
+  function sizePatterns() {
+    var t = $('cal'); if (!t) return;
+    var bars = t.querySelectorAll('tr.cx-C .avb, tr.cx-X .avb');
+    var w = [], i;
+    for (i = 0; i < bars.length; i++) w.push(bars[i].getBoundingClientRect().width);
+    for (i = 0; i < bars.length; i++) {
+      if (!(w[i] > 1)) continue;                            // display:none, or not laid out yet
+      var s = bars[i].style;
+      // ~10.5px of dot pitch and ~31px of rainbow cycle, rounded to fit whole
+      s.setProperty('--dotx', (w[i] / Math.max(4, Math.round(w[i] / 10.5))).toFixed(3) + 'px');
+      // six bands to a cycle, measured along the 45° axis — hence the cos
+      s.setProperty('--xs',
+        (w[i] / Math.max(1, Math.round(w[i] / 31)) * 0.70710678 / 6).toFixed(3) + 'px');
+    }
+  }
+  /* A resize changes the column width without changing what is on the chart,
+     so re-measure rather than re-render. */
+  var sizeT;
+  window.addEventListener('resize', function () {
+    clearTimeout(sizeT); sizeT = setTimeout(sizePatterns, 120);
+  });
 
   function renderGal() {
     var host = $('galWrap'); host.innerHTML = '';
