@@ -10,8 +10,16 @@
 <style>
   *{box-sizing:border-box;}
   :root{
-    --ink:#1A1E17; --cream:#F3EEE4; --paper:#F7F3EA; --muted:#55564A; --faint:#8A8474;
+    --ink:#1A1E17; --cream:#F3EEE4; --paper:#F7F3EA; --muted:#55564A; --faint:#6E6A5C;
     --green:#4C8C57; --deep:#2F5D3A; --gold:#C6952F; --rust:#B0552F; --blush:#E7B7CF;
+    /* --gold is a fill; at 2.4:1 on cream it cannot carry text, and the variety
+       code is text a buyer reads out on the phone. --goldink is the same hue
+       taken down to 4.6:1, which is where WCAG AA starts. */
+    --goldink:#8A6412;
+    /* --rust is the brand's warm accent and stays exactly as the rest of the
+       site draws it; --rustink is the same colour taken to 4.9:1 so it can
+       carry a link, a warning or the week number without failing AA. */
+    --rustink:#A54D28;
     --line:rgba(26,30,23,.12); --line2:rgba(26,30,23,.07);
     --serif:'Fraunces','Playfair Display','Noto Serif SC',serif;
     --sans:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;
@@ -37,7 +45,7 @@
   .eyebrow{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);
     font-weight:600;}
   body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--sans);font-size:14.5px;line-height:1.5;}
-  a{color:var(--rust);}
+  a{color:var(--rustink);}
   .wrap{max-width:1560px;margin:0 auto;padding:0 clamp(14px,2.4vw,30px);}
   .mono{font-family:ui-monospace,Menlo,Consolas,monospace;}
   .tnum{font-variant-numeric:tabular-nums;}
@@ -108,8 +116,8 @@
   /* This week runs as a thread down the whole chart rather than a tick in the
      header — a buyer scanning row forty still knows where today is. */
   th.wk.now{background:#FAEFE8;}
-  th.wk.now .wkno{color:var(--rust);}
-  th.wk.now .wkdt{color:var(--rust);font-weight:700;letter-spacing:.1em;text-transform:uppercase;}
+  th.wk.now .wkno{color:var(--rustink);}
+  th.wk.now .wkdt{color:var(--rustink);font-weight:700;letter-spacing:.1em;text-transform:uppercase;}
   th.wk.now::after{content:'';position:absolute;left:0;bottom:0;width:100%;height:2px;background:var(--rust);}
   th.wk{position:relative;}
   td.wk.now{box-shadow:inset 1px 0 0 rgba(176,85,47,.34),inset -1px 0 0 rgba(176,85,47,.34);}
@@ -135,7 +143,7 @@
     object-fit:cover;background:#fff;box-shadow:0 0 0 2px #fff,0 1px 4px rgba(26,30,23,.22);}
   .cal tbody tr:hover .vflo{box-shadow:0 0 0 2px #FCFAF6,0 1px 4px rgba(26,30,23,.22);}
   .vmeta{min-width:0;flex:1 1 auto;}
-  .vcode{font-size:9.5px;letter-spacing:.13em;color:var(--gold);font-weight:700;
+  .vcode{font-size:9.5px;letter-spacing:.13em;color:var(--goldink);font-weight:700;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .vname{font-family:var(--serif);font-weight:600;font-size:15.5px;line-height:1.14;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -143,6 +151,11 @@
   .vqty{text-align:right;flex:0 0 auto;}
   .vqty b{font-size:13.5px;font-weight:700;}
   .vqty span{display:block;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);}
+  /* How deep this batch is against the deepest one on screen. The figure is
+     exact; this is for scanning forty rows and seeing which are thin. */
+  .vmeter{height:3px;border-radius:2px;background:rgba(26,30,23,.08);margin-top:4px;overflow:hidden;}
+  .vmeter i{display:block;height:100%;border-radius:2px;background:rgb(var(--t));opacity:.75;}
+  body.compact .vmeter{display:none;}
 
   /* stem grade: one plant, one spike (SS) or two (DS). DS is the better grade,
      so it takes the gold the site already spends on its premium marks. */
@@ -221,7 +234,7 @@
     padding:9px 6px;border:1px solid var(--line);border-radius:9px;outline:none;font-variant-numeric:tabular-nums;}
   .stepper input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(76,140,87,.13);}
   .phint{font-size:11.5px;color:var(--muted);margin:8px 0 0;min-height:16px;}
-  .phint.warn{color:var(--rust);}
+  .phint.warn{color:var(--rustink);}
   .pacts{display:flex;gap:7px;margin-top:11px;}
   .btn{border:0;border-radius:999px;padding:10px 18px;background:var(--ink);color:var(--cream);
     font-weight:600;font-size:13.5px;cursor:pointer;}
@@ -229,7 +242,7 @@
   .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);}
   .btn.sm{padding:7px 13px;font-size:12.5px;}
   .btn.wide{width:100%;justify-content:center;}
-  .btn.danger{background:transparent;color:var(--rust);border:1px solid rgba(176,85,47,.4);}
+  .btn.danger{background:transparent;color:var(--rustink);border:1px solid rgba(176,85,47,.4);}
 
   /* ---------- gallery ---------- */
   .gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(212px,1fr));gap:15px;padding-bottom:30px;}
@@ -313,8 +326,8 @@
   .pline .pc{font-size:10.5px;color:var(--faint);}
   .pline .pq{font-weight:700;font-variant-numeric:tabular-nums;font-size:14px;}
   .pline .px{border:0;background:transparent;color:var(--faint);cursor:pointer;font-size:17px;padding:0 2px;line-height:1;}
-  .pline .px:hover{color:var(--rust);}
-  .pline.over .pq{color:var(--rust);}
+  .pline .px:hover{color:var(--rustink);}
+  .pline.over .pq{color:var(--rustink);}
   .padfoot{border-top:1px solid var(--line);padding:14px 18px 18px;background:var(--paper);
     box-shadow:0 -10px 22px rgba(26,30,23,.07);position:relative;z-index:1;}
   /* the running total, as three figures a buyer checks before sending:
@@ -400,7 +413,7 @@
   .mid input{padding:12px 14px;border:1px solid var(--line);border-radius:11px;background:#fff;outline:none;min-width:200px;}
   .mid input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(76,140,87,.14);}
   .row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
-  .err{color:var(--rust);font-size:13px;min-height:19px;margin-top:9px;}
+  .err{color:var(--rustink);font-size:13px;min-height:19px;margin-top:9px;}
   /* ---------- the moment it is sent ----------
      A buyer has just committed several thousand plants to a season. The old
      screen answered with four lines of grey text in the middle of an empty
@@ -438,6 +451,26 @@
   /* The control strip does not fit one 390px row — it was running 760px wide
      and taking the whole page sideways with it. Let it wrap; the spacer that
      pushes the right-hand group away on a desktop is exactly what stops it. */
+  /* ---------- on paper ----------
+     A buyer prints this and carries it into a meeting with their own grower
+     or their own buyer, so the chart has to survive the trip: chrome off,
+     the scroller unrolled, and the bloom colours forced through — a chart
+     whose only colour channel is dropped by the printer is just a grid. */
+  @media print{
+    header,.tools,.padbtn,.pad,.scrim,#gate,#done,#track,.pop{display:none !important;}
+    body{background:#fff;font-size:10px;}
+    .wrap{max-width:none;padding:0;}
+    .scroller{max-height:none;overflow:visible;border:0;border-radius:0;}
+    table.cal{width:100%;}
+    .vname{font-size:11px;} .vsub,.vcode{font-size:8px;}
+    .vthumb,.vflo,.vshots{display:none;}          /* photographs cost a fortune in toner */
+    .vc{padding-left:9px;}
+    .avb,.vc::before,.sb,th.wk.now{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .cal tbody tr{break-inside:avoid;}
+    footer{font-size:9px;color:#555;}
+    @page{size:A4 landscape;margin:10mm;}
+  }
+
   @media(max-width:760px){
     /* 229px of chrome before a single plant appeared. The filters become one
        row the thumb can sweep, which is how a phone shows a chip set anyway. */
@@ -576,10 +609,11 @@
 <button class="padbtn" id="padBtn">
   <b id="padCount">0</b><span id="padSum"></span>
 </button>
+<div class="sr" id="cartLive" role="status" aria-live="polite" aria-atomic="true"></div>
 <div class="scrim" id="scrim"></div>
-<aside class="pad" id="pad" aria-label="Order pad">
+<aside class="pad" id="pad" role="dialog" aria-labelledby="padTitle">
   <div class="padhead">
-    <h3 data-t="pad.h">Your request</h3>
+    <h3 id="padTitle" data-t="pad.h">Your request</h3>
     <button class="padclose" id="padClose" aria-label="Close">×</button>
   </div>
   <div class="padbody" id="padBody"></div>
@@ -915,6 +949,7 @@
     var weeks = [];
     for (var w = S.from; w <= S.to; w++) weeks.push({ w: w, d: W.mondayOfWeek(S.year, w) });
     var nowW = W.isoWeekNow();
+    var maxQty = rows.reduce(function (m, i) { return Math.max(m, i.qty); }, 1);
 
     // month band + week header
     var thead = document.createElement('thead');
@@ -969,7 +1004,9 @@
             '<div class="vname">' + esc(nm(it)) + '</div>' +
             '<div class="vsub">' + esc(T.specLine(it, true)) + '</div>' +
           '</div>' +
-          '<div class="vqty tnum"><b>' + n(it.qty) + '</b><span>' + esc(T.s('avail')) + '</span></div>' +
+          '<div class="vqty tnum"><b>' + n(it.qty) + '</b><span>' + esc(T.s('avail')) + '</span>' +
+          '<div class="vmeter"><i style="width:' + Math.max(4, Math.round(it.qty / maxQty * 100)) + '%"></i></div>' +
+        '</div>' +
         '</div>';
       tr.appendChild(td);
 
@@ -983,7 +1020,7 @@
         var q = qtyOf(it.id, x.w);
         var bar = document.createElement('div');
         bar.className = 'avb' + (x.w === it.from ? ' s' : '') + (x.w === it.to ? ' e' : '') +
-          (q ? ' picked' : '') + (!q && it.qty < 500 ? ' thin' : '');
+          (q ? ' picked' : '') + (!q && it.qty < maxQty * 0.1 ? ' thin' : '');
         bar.setAttribute('role', 'button'); bar.tabIndex = 0;
         bar.setAttribute('aria-label', it.code + ' ' + T.s('wk') + ' ' + x.w);
         if (q) bar.innerHTML = '<span class="bq">' + n(q) + '</span>';
@@ -1174,9 +1211,37 @@
     else input.select();
   }
 
-  /* ---------------- order pad ---------------- */
-  function openPad() { $('pad').classList.add('open'); $('scrim').classList.add('on'); }
-  function closePad() { $('pad').classList.remove('open'); $('scrim').classList.remove('on'); }
+  /* ---------------- order pad ----------------
+     The pad is a modal panel over a scrim, so it has to behave like one: focus
+     moves into it, Tab cycles inside it rather than walking off into a chart
+     nobody can see, and closing hands focus back to whatever opened it. */
+  var padOpener = null;
+  function openPad() {
+    if ($('pad').classList.contains('open')) return;
+    padOpener = document.activeElement;
+    $('pad').classList.add('open'); $('scrim').classList.add('on');
+    $('pad').setAttribute('aria-modal', 'true');
+    var first = $('pad').querySelector('#rq-company');
+    if (first) setTimeout(function () { first.focus(); }, 320);
+  }
+  function closePad() {
+    var wasOpen = $('pad').classList.contains('open');
+    $('pad').classList.remove('open'); $('scrim').classList.remove('on');
+    $('pad').removeAttribute('aria-modal');
+    if (wasOpen && padOpener && padOpener.isConnected) { try { padOpener.focus(); } catch (e) {} }
+    padOpener = null;
+  }
+  var FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]),textarea:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])';
+  $('pad').addEventListener('keydown', function (e) {
+    if (e.key !== 'Tab') return;
+    var f = Array.prototype.filter.call(this.querySelectorAll(FOCUSABLE), function (el) {
+      return el.offsetParent !== null;                     // skip anything hidden
+    });
+    if (!f.length) return;
+    var first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
   $('padBtn').addEventListener('click', openPad);
   $('padClose').addEventListener('click', closePad);
   $('scrim').addEventListener('click', closePad);
@@ -1195,6 +1260,10 @@
       '<b>' + S.cart.length + '</b> ' + esc(T.pl(S.cart.length, 'lines'));
     $('padBtn').classList.toggle('show', S.cart.length > 0 && !$('app').hidden);
     $('padCopy').hidden = !S.cart.length;
+    // announce the running order rather than letting it change in silence
+    $('cartLive').textContent = S.cart.length
+      ? S.cart.length + ' ' + T.pl(S.cart.length, 'lines') + ', ' + n(total) + ' ' + T.s('plants')
+      : T.s('pad.empty');
     if (!S.cart.length) closePad();
 
     var body = $('padBody'); body.innerHTML = '';
@@ -1223,7 +1292,7 @@
           (psh.length ? '<img class="pthumb" src="' + photo(it, psh[0]) + '" alt="" loading="lazy">' : '') +
           '<div class="pm"><div class="pn">' + esc(nm(it)) + '</div>' +
             '<div class="pc"><span class="mono">' + esc(it.code) + '</span> · ' + esc(T.specShort(it)) +
-            (l.qty > it.qty ? ' · <span style="color:var(--rust);">' + esc(T.s('over')) + '</span>' : '') + '</div></div>' +
+            (l.qty > it.qty ? ' · <span style="color:var(--rustink);">' + esc(T.s('over')) + '</span>' : '') + '</div></div>' +
           '<div class="pq tnum">' + n(l.qty) + '</div>';
         var edit = document.createElement('button');
         edit.className = 'px'; edit.type = 'button'; edit.textContent = '✎';

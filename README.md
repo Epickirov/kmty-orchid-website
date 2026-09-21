@@ -336,6 +336,32 @@ toggle serves both a buyer skimming photographs and one entering forty lines.
 Search and cup-size filters narrow the rows; clicking any week on a bar opens a
 quantity stepper.
 
+**The chart is keyed to the crop.** Each variety's flower cut-out is sampled in
+the browser and the dominant hue tints its availability bar and the stripe down
+the sticky column. Nobody types a colour; it follows the photograph. Only the
+cut-out is read — a plant shot's largest saturated region is the greenhouse
+behind it — and the dominant 15° hue bucket wins, so a magenta bloom with a
+yellow lip does not average to mud. A white phalaenopsis is not colourless in a
+photograph (its shadows are warm and consistently hued), so a row is tinted only
+when saturation clears both a mean of 0.40 and a 90th percentile of 0.62;
+measured across this library, white tops out at 0.34 / 0.54 and the faintest
+genuinely coloured bloom starts at 0.44 / 0.71. Rows that fail fall back to a
+warm stone, never the house green — a green bar beside a magenta one reads as a
+green flower. Every tint is normalised to one saturation and lightness, so hue
+is the only free variable and the chart cannot become a brightness map.
+
+**Colour tokens come in fills and inks.** `--gold` and `--rust` are brand fills
+at roughly 2.4:1 and 4.3:1 on cream, which is fine behind a shape and not fine
+under text. `--goldink` and `--rustink` are the same hues taken to ≥4.6:1 so the
+variety code, links and warnings clear WCAG AA. A sweep over both pages in all
+four languages at desktop and phone width reports no contrast failure and no
+clipped label.
+
+**It prints.** Buyers carry the availability chart into meetings, so `@media
+print` drops the chrome and the photographs, unrolls the scroller, forces the
+bloom colours through (`print-color-adjust: exact` — a chart whose only colour
+channel the printer drops is just a grid) and sets A4 landscape.
+
 **Quantities snap to the tray.** A batch can carry a tray size (60 for a 2.5in
 plug, 8 for a 3.8in flowering pot); the stepper moves in whole trays, a typed
 number snaps to the nearest one, and the popover says so before you commit —
