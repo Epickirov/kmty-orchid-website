@@ -296,7 +296,11 @@ bench, how the spike arches — and identifies the variety in a list. The *flowe
 shot (`invimg2:<id>`) is a close-up or cut-out of one current bloom, for the
 colour break and the lip. The measurements are `stem` (`SS` single / `DS` dual,
 entered as SS/DS or 单梗/双梗), `ns` (natural spread, the width of one open
-flower, cm) and `ht` (plant height, cm). All five are optional: what the grower
+flower, cm) and `ht` (plant height, cm). `colour` and `pattern` are declared
+rather than derived — the chart still tints itself from the photograph, which
+is the true bloom, but a filter has to be right every time or a buyer silently
+misses stock they would have bought. The staff page reads the uploaded cut-out
+and suggests a colour; the grower confirms it. All five are optional: what the grower
 has not measured is left out rather than shown as a dash, because a spec sheet
 full of blanks says only that nobody measured. The specs sit on the batch, not
 the variety, since the same variety is graded and sold several ways.
@@ -362,19 +366,42 @@ print` drops the chrome and the photographs, unrolls the scroller, forces the
 bloom colours through (`print-color-adjust: exact` — a chart whose only colour
 channel the printer drops is just a grid) and sets A4 landscape.
 
-**Quantities snap to the tray.** A batch can carry a tray size (60 for a 2.5in
-plug, 8 for a 3.8in flowering pot); the stepper moves in whole trays, a typed
-number snaps to the nearest one, and the popover says so before you commit —
-a part tray is not something production can pick. The server enforces the same
-rule, so a hand-made request cannot get around it. Leave the tray blank and no
-multiple is enforced.
+**Quantities move in whole inner boxes, and the cup size decides how many.**
+3.8in is 16 to a box, 3.5in is 20, 2.8in and 3.0in are 24 (`BOX_BY_CUP` in
+`inventory-api.js`). A grower never types it for a flowering size; plugs and
+young plants are packed to order, so those still take whatever is entered, and
+an explicit figure always beats the table. The stepper moves a box at a time, a
+typed number snaps to the nearest one and says so before you commit, and the
+server enforces the same rule so a hand-made request cannot get around it.
+
+**Every batch records what was published.** `qty0` is what the grower last
+declared; confirming an inquiry lowers `qty` and never touches it, so the
+calendar can show what share of the offer is still there. Saving the batch
+again resets it, because a grower re-entering the figure is declaring a new
+pool — which also stops a corrected typo leaving the bar at 60% for ever.
+
+**Week numbers can be read as months.** ISO weeks are the trade's unit and the
+axis the whole book is built on, but "week 37" means nothing until you know it
+is the second week of September. A switch in the toolbar relabels every week on
+the page — column heads, gallery chips, the order pad, the confirmation — as
+`Sep W2`, or `Sep–Oct` for a week that straddles the turn of a month. The
+underlying ISO week never changes; only the label does.
+
+**One filter panel serves both views**, because both draw from the same
+predicate: cup size, flower colour, marking, stem, and open-ended ranges for
+flower width and plant height. Each option carries how many batches it would
+leave if ticked, counted with that facet's own selection ignored — so the
+number beside "Pink" means "how many if I tick this", not "how many are left
+now that I have". A range excludes a batch the grower never measured rather
+than treating it as zero.
 
 **Buyers can track a request** with the reference and the email they sent it
 from. The reference alone is short and dated, so it is guessable; the pair is
 not, and it is exactly what the buyer has to hand.
 
 Stock can be typed in one batch at a time or pasted/imported as CSV
-(`code, nameEn, nameZh, cup, qty, from, to, year, note, tray, stem, ns, ht`);
+(`code, nameEn, nameZh, cup, qty, from, to, year, note, box, stem, ns, ht,
+colour, pattern`);
 everything from `year` on may be left blank, and photos are uploaded per batch
 rather than through the sheet. A row matching an
 existing **code + cup + start week** updates it instead of duplicating, so a

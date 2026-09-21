@@ -88,10 +88,50 @@
   .fchip:hover{border-color:var(--green);}
   .tcount{font-size:12.5px;color:var(--faint);margin-left:auto;white-space:nowrap;}
   .filters{display:flex;gap:6px;align-items:center;flex-wrap:wrap;min-width:0;}
-  /* the greenhouse measures in centimetres; Miami and Manchester read inches */
+  /* week numbers are the trade's unit, months are how everyone else reads */
   .seg.units{padding:2px;}
   .seg.units button{padding:5px 11px;font-size:11.5px;}
 
+
+  /* ---------- the filter panel ----------
+     Everything a batch actually carries, in one place, serving the calendar
+     and the gallery alike because both draw from the same filtered list.
+     Opens in the flow rather than over the chart: a buyer narrowing a search
+     wants to watch the rows disappear, not have them hidden behind a sheet. */
+  .fpanel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:4px 16px 14px;
+    margin-bottom:12px;}
+  .frow{display:flex;gap:14px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--line2);}
+  .frow:last-of-type{border-bottom:0;}
+  .flabel{flex:0 0 150px;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);font-weight:600;padding-top:6px;}
+  .fopts{flex:1 1 auto;display:flex;gap:6px;flex-wrap:wrap;align-items:center;min-width:0;}
+  .fopt{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-size:12.5px;
+    font-weight:600;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+    white-space:nowrap;transition:border-color .14s var(--ease),background .14s var(--ease);}
+  .fopt:hover{border-color:var(--green);color:var(--ink);}
+  .fopt.on{background:var(--deep);border-color:var(--deep);color:#fff;}
+  .fopt .sw{width:13px;height:13px;border-radius:50%;flex:0 0 auto;
+    box-shadow:inset 0 0 0 1px rgba(26,30,23,.16);}
+  .fopt .fn{font-weight:400;opacity:.62;font-variant-numeric:tabular-nums;}
+  .fopt:disabled{opacity:.38;cursor:default;}
+  .fopt:disabled:hover{border-color:var(--line);color:var(--muted);}
+  .frange label{display:flex;align-items:center;gap:7px;font-size:10.5px;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--faint);font-weight:600;}
+  .frange input{width:78px;padding:7px 9px;border:1px solid var(--line);border-radius:9px;background:#fff;
+    outline:none;font-size:13.5px;font-variant-numeric:tabular-nums;}
+  .frange input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(76,140,87,.14);}
+  .fdash{color:var(--faint);}
+  .funit{font-size:12px;color:var(--faint);}
+  .ffoot{display:flex;align-items:center;gap:12px;padding-top:12px;border-top:1px solid var(--line);}
+  .ffoot .tcount{margin-left:auto;}
+  #filtN{display:inline-block;margin-left:7px;min-width:17px;padding:0 5px;border-radius:999px;
+    background:var(--deep);color:#fff;font-size:10.5px;line-height:17px;text-align:center;}
+  #filtBtn.on{background:var(--paper);border-color:var(--deep);color:var(--ink);}
+  @media(max-width:760px){
+    .frow{flex-direction:column;gap:7px;}
+    .flabel{flex:none;padding-top:0;}
+    .fpanel{padding:2px 13px 12px;}
+  }
   /* ---------- calendar ---------- */
   .scroller{overflow:auto;border:1px solid var(--line);border-radius:14px;background:#fff;
     max-height:calc(100vh - 210px);overscroll-behavior-x:contain;}
@@ -106,9 +146,16 @@
   th.name,td.name{width:var(--namecol);min-width:var(--namecol);}
   th.wk,td.wk{width:var(--wcol);min-width:var(--wcol);text-align:center;border-bottom:1px solid var(--line2);}
   th.wk{border-left:1px solid var(--line2);}
-  .mo-band{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);
-    padding:8px 0 4px;border-left:1px solid var(--line2);background:var(--paper);font-weight:600;}
+  .mo-band{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);
+    padding:8px 0 4px;background:var(--paper);font-weight:700;}
   .mo-band.alt{color:var(--deep);}          /* alternating months, so the rhythm reads */
+  /* Where one month ends and the next begins, drawn the whole height of the
+     chart. In month mode the columns count 1..5 and start again, and without
+     this the reader has to keep glancing back up at the band to know which
+     month they have got to. */
+  th.mstart,td.wk.mstart{border-left:1px solid rgba(26,30,23,.2);}
+  .mo-band{border-left:1px solid rgba(26,30,23,.2);}
+  .mo-band:first-child{border-left:0;}
   .wkno{font-family:var(--serif);font-weight:600;font-size:16px;line-height:1;padding-top:4px;
     font-variant-numeric:tabular-nums;}
   .wkdt{font-size:9px;color:var(--faint);padding:3px 0 8px;letter-spacing:.04em;}
@@ -151,10 +198,14 @@
   .vqty{text-align:right;flex:0 0 auto;}
   .vqty b{font-size:13.5px;font-weight:700;}
   .vqty span{display:block;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);}
-  /* How deep this batch is against the deepest one on screen. The figure is
-     exact; this is for scanning forty rows and seeing which are thin. */
-  .vmeter{height:3px;border-radius:2px;background:rgba(26,30,23,.08);margin-top:4px;overflow:hidden;}
-  .vmeter i{display:block;height:100%;border-radius:2px;background:rgb(var(--t));opacity:.75;}
+  /* How much of what the grower published is still here. The figure above is
+     exact; this is for scanning forty rows and seeing which are running out. */
+  .vmeter{display:flex;align-items:center;gap:5px;margin-top:4px;justify-content:flex-end;}
+  .vmeter .track{flex:0 0 auto;width:40px;height:3px;border-radius:2px;background:rgba(26,30,23,.1);overflow:hidden;}
+  .vmeter .track i{display:block;height:100%;border-radius:2px;background:rgb(var(--t));opacity:.8;}
+  .vmeter b{font-size:9px;font-weight:700;color:var(--faint);font-variant-numeric:tabular-nums;letter-spacing:.02em;}
+  .vmeter.low b{color:var(--rustink);}
+  .vmeter.low .track i{background:var(--rustink);opacity:.9;}
   body.compact .vmeter{display:none;}
 
   /* stem grade: one plant, one spike (SS) or two (DS). DS is the better grade,
@@ -203,6 +254,26 @@
   body.compact .vqty b{font-size:12.5px;}
   body.compact .avb{height:17px;}
 
+
+  /* ---------- hover preview ----------
+     The row thumbnail is 46px, which is enough to recognise a variety you
+     already know and not enough to judge one you do not. Resting on it opens
+     both shots at a size where the colour break and the habit are actually
+     readable, without leaving the chart or committing to a click. */
+  .peek{position:fixed;z-index:97;pointer-events:none;background:#fff;border:1px solid var(--line);
+    border-radius:16px;box-shadow:0 18px 50px rgba(26,30,23,.24);padding:12px;width:330px;
+    opacity:0;transform:translateY(4px);transition:opacity .16s var(--ease),transform .16s var(--ease);}
+  .peek.on{opacity:1;transform:none;}
+  .peek .pk{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:9px;}
+  .peek .pk figure{margin:0;min-width:0;}
+  .peek .pk img{width:100%;aspect-ratio:1/1;object-fit:contain;border-radius:11px;display:block;
+    background:var(--paper) radial-gradient(circle at 50% 36%,#fff,rgba(0,0,0,.05));}
+  .peek .pk figcaption{margin-top:5px;font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--faint);text-align:center;}
+  .peek h5{margin:11px 0 1px;font-family:var(--serif);font-size:16px;font-weight:600;}
+  .peek .pkmeta{font-size:11.5px;color:var(--muted);}
+  .peek .pkcode{font-size:9.5px;letter-spacing:.13em;color:var(--goldink);font-weight:700;}
+  @media(hover:none){ .peek{display:none;} }     /* a tap should open the stepper, not a card */
   /* ---------- quantity popover ---------- */
   .pop{position:fixed;z-index:95;background:#fff;border:1px solid var(--line);border-radius:14px;
     box-shadow:0 14px 44px rgba(26,30,23,.2);padding:14px;width:296px;max-width:calc(100vw - 24px);}
@@ -547,13 +618,41 @@
         <input id="q" type="search" data-t-ph="f.search" placeholder="Search code or variety">
       </div>
       <div class="filters">
-        <div id="cupChips" style="display:flex;gap:6px;"></div>
+        <button class="fchip" id="filtBtn" aria-expanded="false" aria-controls="fpanel">
+          <span data-t="f.filters">Filters</span><b id="filtN" hidden></b>
+        </button>
         <button class="fchip" id="availOnly" data-t="f.avail">In stock only</button>
-        <div class="seg units" id="unitSeg" aria-label="Units">
-          <button data-unit="cm">cm</button><button data-unit="in">inch</button>
+        <div class="seg units" id="wkSeg" aria-label="Week labels">
+          <button data-wk="num" data-t="wkmode.num">Week</button><button data-wk="month" data-t="wkmode.month">Month</button>
         </div>
       </div>
       <span class="tcount" id="count"></span>
+    </div>
+
+    <!-- every parameter a batch carries, in one panel, for both views -->
+    <div class="fpanel" id="fpanel" hidden>
+      <div class="frow"><span class="flabel" data-t="f.cup">Cup size</span><div class="fopts" id="fCup"></div></div>
+      <div class="frow"><span class="flabel" data-t="f.colour">Flower colour</span><div class="fopts" id="fColour"></div></div>
+      <div class="frow"><span class="flabel" data-t="f.pattern">Marking</span><div class="fopts" id="fPattern"></div></div>
+      <div class="frow"><span class="flabel" data-t="f.stem">Stem</span><div class="fopts" id="fStem"></div></div>
+      <div class="frow"><span class="flabel" data-t="f.ns">Flower width (N.S.)</span>
+        <div class="fopts frange">
+          <label><span data-t="f.min">Min</span><input type="number" id="fNsMin" min="0" max="60" step="0.5" inputmode="decimal"></label>
+          <span class="fdash">–</span>
+          <label><span data-t="f.max">Max</span><input type="number" id="fNsMax" min="0" max="60" step="0.5" inputmode="decimal"></label>
+          <span class="funit">cm</span>
+        </div></div>
+      <div class="frow"><span class="flabel" data-t="f.ht">Plant height</span>
+        <div class="fopts frange">
+          <label><span data-t="f.min">Min</span><input type="number" id="fHtMin" min="0" max="300" step="1" inputmode="numeric"></label>
+          <span class="fdash">–</span>
+          <label><span data-t="f.max">Max</span><input type="number" id="fHtMax" min="0" max="300" step="1" inputmode="numeric"></label>
+          <span class="funit">cm</span>
+        </div></div>
+      <div class="ffoot">
+        <button class="btn ghost sm" type="button" id="filtClear" data-t="f.clear">Clear all</button>
+        <span class="tcount" id="filtShowing"></span>
+      </div>
     </div>
     <div id="calWrap" class="scroller"><table class="cal" id="cal"></table></div>
     <div id="galWrap" class="gal" hidden></div>
@@ -642,7 +741,7 @@
 (function () {
   'use strict';
   var T = window.KMTY_INV.t, W = window.KMTY_INV.weeks, api = window.KMTY_INV.api;
-  var photo = window.KMTY_INV.photo, hasShot = window.KMTY_INV.hasShot;
+  var photo = window.KMTY_INV.photo, hasShot = window.KMTY_INV.hasShot, KI = window.KMTY_INV;
   var $ = function (id) { return document.getElementById(id); };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
     return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
@@ -759,6 +858,18 @@
     });
   }
 
+  /* Percent of the published pool still available. Batches saved before this
+     field existed have no opening figure, so they fall back to showing depth
+     against the biggest batch on screen rather than inventing a percentage. */
+  function meterHtml(it, maxQty) {
+    var pct = it.qty0 ? Math.round(it.qty / it.qty0 * 100) : null;
+    var fill = pct === null ? Math.round(it.qty / maxQty * 100) : pct;
+    return '<div class="vmeter' + (pct !== null && pct <= 25 ? ' low' : '') + '">' +
+      (pct === null ? '' : '<b>' + pct + '%</b>') +
+      '<span class="track"><i style="width:' + Math.max(3, Math.min(100, fill)) + '%"></i></span>' +
+    '</div>';
+  }
+
   function stemBadge(it) {
     return it.stem ? '<span class="sb' + (it.stem === 'DS' ? ' ds' : '') + '" title="' +
       esc(T.s('stem.' + it.stem)) + '">' + esc(T.stem(it.stem)) + '</span>' : '';
@@ -790,7 +901,12 @@
 
   var S = {
     code: '', items: [], year: new Date().getUTCFullYear(), cart: [],
-    view: 'cal', dens: 'cosy', q: '', cups: {}, availOnly: false,
+    view: 'cal', dens: 'cosy', q: '', availOnly: false,
+    /* every parameter a batch carries. Sets are multi-select — ticking two
+       cup sizes means "either", which is how a buyer thinks about them —
+       and the two ranges are open at whichever end is left blank. */
+    f: { cup: {}, colour: {}, pattern: {}, stem: {}, nsMin: '', nsMax: '', htMin: '', htMax: '' },
+    filtOpen: false,
     from: 1, to: 52, lastRef: '',
   };
   try {
@@ -853,21 +969,52 @@
   }
 
   /* ---------------- filtering ---------------- */
+  /* the cup sizes this grower actually stocks, in the order the trade lists
+     them — 1.7in before 3.8in, not alphabetically, where "10" sorts before "2" */
   function cups() {
     var seen = {}, out = [];
     S.items.forEach(function (i) { if (i.cup && !seen[i.cup]) { seen[i.cup] = 1; out.push(i.cup); } });
-    return out.sort();
-  }
-  function visible() {
-    var q = S.q.trim().toLowerCase();
-    var anyCup = Object.keys(S.cups).some(function (k) { return S.cups[k]; });
-    return S.items.filter(function (i) {
-      if (S.availOnly && i.qty <= 0) return false;
-      if (anyCup && !S.cups[i.cup]) return false;
-      if (q && (i.code + ' ' + i.nameEn + ' ' + (i.nameZh || '')).toLowerCase().indexOf(q) < 0) return false;
-      return true;
+    return out.sort(function (a, b) {
+      var na = parseFloat(a) || 0, nb = parseFloat(b) || 0;
+      return na - nb || a.localeCompare(b);
     });
   }
+  function anyOn(set) { for (var k in set) if (set[k]) return true; return false; }
+  function activeFilters() {
+    var n = 0;
+    ['cup', 'colour', 'pattern', 'stem'].forEach(function (k) {
+      for (var v in S.f[k]) if (S.f[k][v]) n++;
+    });
+    ['nsMin', 'nsMax', 'htMin', 'htMax'].forEach(function (k) { if (S.f[k] !== '') n++; });
+    return n;
+  }
+
+  /* One predicate for both views. `skip` lets a facet count its own options
+     without counting itself out — the number beside "Pink" has to mean "how
+     many if I tick this", not "how many are left now that I have". */
+  function matches(i, skip) {
+    var f = S.f;
+    if (S.availOnly && i.qty <= 0) return false;
+    var q = S.q.trim().toLowerCase();
+    if (q && (i.code + ' ' + i.nameEn + ' ' + (i.nameZh || '')).toLowerCase().indexOf(q) < 0) return false;
+    if (skip !== 'cup' && anyOn(f.cup) && !f.cup[i.cup]) return false;
+    if (skip !== 'colour' && anyOn(f.colour) && !f.colour[i.colour]) return false;
+    if (skip !== 'pattern' && anyOn(f.pattern) && !f.pattern[i.pattern]) return false;
+    if (skip !== 'stem' && anyOn(f.stem) && !f.stem[i.stem]) return false;
+    // an unmeasured batch is not "0 cm wide"; a range simply cannot speak for it
+    if (skip !== 'ns' && (f.nsMin !== '' || f.nsMax !== '')) {
+      if (!i.ns) return false;
+      if (f.nsMin !== '' && i.ns < Number(f.nsMin)) return false;
+      if (f.nsMax !== '' && i.ns > Number(f.nsMax)) return false;
+    }
+    if (skip !== 'ht' && (f.htMin !== '' || f.htMax !== '')) {
+      if (!i.ht) return false;
+      if (f.htMin !== '' && i.ht < Number(f.htMin)) return false;
+      if (f.htMax !== '' && i.ht > Number(f.htMax)) return false;
+    }
+    return true;
+  }
+  function visible() { return S.items.filter(function (i) { return matches(i); }); }
 
   /* ---------------- cart ---------------- */
   function at(id, week) {
@@ -886,6 +1033,7 @@
 
   /* ---------------- render ---------------- */
   function render() {
+    closePeek();
     T.apply(document);
     document.body.classList.toggle('compact', S.dens === 'compact');
     $('densSeg').hidden = !(S.view === 'cal');
@@ -896,19 +1044,65 @@
     renderPad();
   }
 
-  function paintTools() {
-    var box = $('cupChips');
-    if (box.childElementCount !== cups().length) {
-      box.innerHTML = '';
-      cups().forEach(function (c) {
-        var b = document.createElement('button');
-        b.className = 'fchip'; b.textContent = c;
-        b.addEventListener('click', function () { S.cups[c] = !S.cups[c]; render(); });
-        b.dataset.cup = c; box.appendChild(b);
+  /* Build one facet: a row of options, each carrying how many batches it would
+     leave if ticked. An option nothing would match is shown disabled rather
+     than hidden, so the set of sizes a grower offers stays legible even when
+     none of them is available this month. */
+  function facet(host, key, options) {
+    host.innerHTML = '';
+    options.forEach(function (o) {
+      var val = o.value, count = S.items.filter(function (i) {
+        return i[o.field] === val && matches(i, key);
+      }).length;
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'fopt' + (S.f[key][val] ? ' on' : '');
+      b.disabled = !count && !S.f[key][val];
+      b.setAttribute('aria-pressed', S.f[key][val] ? 'true' : 'false');
+      b.innerHTML = (o.swatch ? '<span class="sw" style="background:' + o.swatch + '"></span>' : '') +
+        esc(o.label) + '<span class="fn">' + count + '</span>';
+      b.addEventListener('click', function () {
+        S.f[key][val] = !S.f[key][val];
+        render();
       });
-    }
-    Array.prototype.forEach.call(box.children, function (b) { b.classList.toggle('on', !!S.cups[b.dataset.cup]); });
+      host.appendChild(b);
+    });
+  }
+
+  function paintFilters() {
+    facet($('fCup'), 'cup', cups().map(function (c) { return { value: c, label: c, field: 'cup' }; }));
+    facet($('fColour'), 'colour', KI.colours.map(function (c) {
+      return { value: c[0], label: T.s('c.' + c[0]), swatch: c[1], field: 'colour' };
+    }));
+    facet($('fPattern'), 'pattern', KI.patterns.map(function (m) {
+      return { value: m, label: T.s('m.' + m), field: 'pattern' };
+    }));
+    facet($('fStem'), 'stem', ['SS', 'DS'].map(function (x) {
+      return { value: x, label: T.s('stem.' + x), field: 'stem' };
+    }));
+    // the ranges show the grower's actual spread as placeholders, so a buyer
+    // types inside what exists rather than guessing at it
+    [['ns', 'fNs'], ['ht', 'fHt']].forEach(function (pair) {
+      var vals = S.items.map(function (i) { return i[pair[0]]; }).filter(Boolean);
+      var lo = vals.length ? Math.min.apply(null, vals) : '';
+      var hi = vals.length ? Math.max.apply(null, vals) : '';
+      $(pair[1] + 'Min').placeholder = lo === '' ? '' : String(lo);
+      $(pair[1] + 'Max').placeholder = hi === '' ? '' : String(hi);
+      $(pair[1] + 'Min').value = S.f[pair[0] + 'Min'];
+      $(pair[1] + 'Max').value = S.f[pair[0] + 'Max'];
+    });
+    var n_ = activeFilters();
+    $('filtN').hidden = !n_; $('filtN').textContent = n_;
+    $('filtBtn').classList.toggle('on', n_ > 0);
+    $('filtBtn').setAttribute('aria-expanded', S.filtOpen ? 'true' : 'false');
+    $('fpanel').hidden = !S.filtOpen;
+    $('filtShowing').textContent = T.s('f.showing')
+      .replace('%n', visible().length).replace('%t', S.items.length);
+  }
+
+  function paintTools() {
     $('availOnly').classList.toggle('on', S.availOnly);
+    paintFilters();
     var v = visible();
     var tot = v.reduce(function (s, i) { return s + i.qty; }, 0);
     $('count').textContent = v.length + ' ' + T.pl(v.length, 'varieties') + ' · ' +
@@ -926,8 +1120,7 @@
         '<button class="btn ghost sm" type="button" data-clear>' + esc(T.s('none.clear')) + '</button>' +
       '</div>';
     host.querySelector('[data-clear]').addEventListener('click', function () {
-      S.q = ''; S.cups = {}; S.availOnly = false; $('q').value = '';
-      render();
+      clearFilters(); render();
     });
   }
 
@@ -942,7 +1135,11 @@
     t.innerHTML = '';
 
     var weeks = [];
-    for (var w = S.from; w <= S.to; w++) weeks.push({ w: w, d: W.mondayOfWeek(S.year, w) });
+    for (var w = S.from; w <= S.to; w++) {
+      var d = W.mondayOfWeek(S.year, w);
+      var prev = weeks[weeks.length - 1];
+      weeks.push({ w: w, d: d, first: !!prev && prev.d.getUTCMonth() !== d.getUTCMonth() });
+    }
     var nowW = W.isoWeekNow();
     var maxQty = rows.reduce(function (m, i) { return Math.max(m, i.qty); }, 1);
 
@@ -968,12 +1165,13 @@
     head.innerHTML = '<th class="name"></th>';
     weeks.forEach(function (x) {
       var th = document.createElement('th');
-      th.className = 'wk' + (x.w === nowW ? ' now' : '');
+      th.className = 'wk' + (x.w === nowW ? ' now' : '') + (x.first ? ' mstart' : '');
       var end = new Date(x.d); end.setUTCDate(x.d.getUTCDate() + 6);
       // the current week says so in words; a rust underline alone is a code
       // the reader has to be taught
-      th.innerHTML = '<div class="wkno">' + x.w + '</div><div class="wkdt">' +
-        esc(x.w === nowW ? T.s('today') : T.dayRange(x.d, end)) + '</div>';
+      th.innerHTML = '<div class="wkno">' +
+        (T.weekMode() === 'month' ? W.weekOfMonth(S.year, x.w) : x.w) + '</div>' +
+        '<div class="wkdt">' + esc(x.w === nowW ? T.s('today') : T.dayRange(x.d, end)) + '</div>';
       head.appendChild(th);
     });
     thead.appendChild(head);
@@ -1000,14 +1198,15 @@
             '<div class="vsub">' + esc(T.specLine(it, true)) + '</div>' +
           '</div>' +
           '<div class="vqty tnum"><b>' + n(it.qty) + '</b><span>' + esc(T.s('avail')) + '</span>' +
-          '<div class="vmeter"><i style="width:' + Math.max(4, Math.round(it.qty / maxQty * 100)) + '%"></i></div>' +
+          meterHtml(it, maxQty) +
         '</div>' +
         '</div>';
       tr.appendChild(td);
+      wirePeek(td.querySelector('.vshots'), it);
 
       weeks.forEach(function (x) {
         var cell = document.createElement('td');
-        cell.className = 'wk' + (x.w === nowW ? ' now' : '');
+        cell.className = 'wk' + (x.w === nowW ? ' now' : '') + (x.first ? ' mstart' : '');
         var inWin = x.w >= it.from && x.w <= it.to && it.qty > 0;
         if (!inWin) { cell.classList.add('out'); tr.appendChild(cell); return; }
         // a batch inside its last few hundred is hatched rather than solid
@@ -1017,7 +1216,7 @@
         bar.className = 'avb' + (x.w === it.from ? ' s' : '') + (x.w === it.to ? ' e' : '') +
           (q ? ' picked' : '') + (!q && it.qty < maxQty * 0.1 ? ' thin' : '');
         bar.setAttribute('role', 'button'); bar.tabIndex = 0;
-        bar.setAttribute('aria-label', it.code + ' ' + T.s('wk') + ' ' + x.w);
+        bar.setAttribute('aria-label', it.code + ' ' + T.week(S.year, x.w, true));
         if (q) bar.innerHTML = '<span class="bq">' + n(q) + '</span>';
         var open = function (e, seed) { e.stopPropagation(); popover(bar, it, x.w, seed); };
         bar.addEventListener('click', open);
@@ -1076,6 +1275,7 @@
 
       /* swap the two shots in place — the big frame and the corner swatch trade
          sources, so the card never reflows and never loses its week chips */
+      wirePeek(d.querySelector('.gshot'), it);
       var inset = d.querySelector('.ginset');
       if (inset) {
         var order = sh.slice();
@@ -1095,15 +1295,15 @@
          few weeks to click, and keep the rest one tap away. */
       var wk = document.createElement('div'); wk.className = 'gwks';
       var span = document.createElement('div'); span.className = 'gspan';
-      span.textContent = T.s('wk') + ' ' + it.from + '–' + it.to;
+      span.textContent = T.weekSpan(S.year, it.from, it.to);
       var all = [], w;
       for (w = it.from; w <= it.to; w++) all.push(w);
       var SHOW = 5;
       function chip(w) {
         var b = document.createElement('button');
         b.className = 'gwk' + (qtyOf(it.id, w) ? ' picked' : '');
-        b.textContent = w + (qtyOf(it.id, w) ? ' · ' + n(qtyOf(it.id, w)) : '');
-        b.setAttribute('aria-label', T.s('wk') + ' ' + w);
+        b.textContent = T.week(S.year, w) + (qtyOf(it.id, w) ? ' · ' + n(qtyOf(it.id, w)) : '');
+        b.setAttribute('aria-label', T.week(S.year, w, true));
         b.addEventListener('click', function (e) { e.stopPropagation(); popover(b, it, w); });
         return b;
       }
@@ -1151,7 +1351,7 @@
       }).join('') + '</div>' : '') +
       '<h4>' + esc(nm(it)) + '</h4>' +
       '<div class="pmeta"><span class="mono">' + esc(it.code) + '</span> · ' +
-        esc(T.s('wk')) + ' ' + week + ' · ' + n(it.qty) + ' ' + esc(T.s('avail')) + '</div>' +
+        esc(T.week(S.year, week, true)) + ' · ' + n(it.qty) + ' ' + esc(T.s('avail')) + '</div>' +
       specSheet(it) +
       /* Opening at nothing costs a buyer a step on every single line, and a
          tray is the smallest thing production can pick — so that is where the
@@ -1206,6 +1406,50 @@
     if (seed) { var v = input.value; input.value = ''; input.value = v; }
     else input.select();
   }
+
+
+  /* ---------------- hover preview ----------------
+     Pointer devices only: on a touch screen there is no hover, and a tap
+     belongs to the stepper. Held behind a short delay so sweeping the cursor
+     down a column of forty rows does not strobe. */
+  var peek = null, peekTimer = null;
+  function closePeek() {
+    if (peekTimer) { clearTimeout(peekTimer); peekTimer = null; }
+    if (peek) { peek.remove(); peek = null; }
+  }
+  function openPeek(anchor, it) {
+    closePeek();
+    var sh = shots(it);
+    if (!sh.length) return;
+    peek = document.createElement('div');
+    peek.className = 'peek';
+    peek.innerHTML =
+      '<div class="pk">' + sh.map(function (k) {
+        return '<figure><img src="' + photo(it, k) + '" alt=""><figcaption>' +
+          esc(T.s('shot.' + k)) + '</figcaption></figure>';
+      }).join('') + '</div>' +
+      '<h5>' + esc(nm(it)) + '</h5>' +
+      '<div class="pkcode mono">' + esc(it.code) + '</div>' +
+      '<div class="pkmeta">' + esc(T.specLine(it)) + '</div>';
+    document.body.appendChild(peek);
+    var r = anchor.getBoundingClientRect();
+    var left = Math.min(window.innerWidth - peek.offsetWidth - 12, r.right + 12);
+    if (left < 12) left = 12;
+    var top = Math.min(window.innerHeight - peek.offsetHeight - 12,
+                       Math.max(12, r.top + r.height / 2 - peek.offsetHeight / 2));
+    peek.style.left = left + 'px'; peek.style.top = top + 'px';
+    requestAnimationFrame(function () { if (peek) peek.classList.add('on'); });
+  }
+  function wirePeek(el, it) {
+    el.addEventListener('mouseenter', function () {
+      if (!window.matchMedia('(hover:hover)').matches) return;
+      peekTimer = setTimeout(function () { openPeek(el, it); }, 220);
+    });
+    el.addEventListener('mouseleave', closePeek);
+    el.addEventListener('focusin', function () { openPeek(el, it); });
+    el.addEventListener('focusout', closePeek);
+  }
+  window.addEventListener('scroll', closePeek, true);
 
   /* ---------------- order pad ----------------
      The pad is a modal panel over a scrim, so it has to behave like one: focus
@@ -1280,7 +1524,7 @@
       var mon = W.mondayOfWeek(S.year, wk);
       var h = document.createElement('div'); h.className = 'pweek';
       h.innerHTML =
-        '<b>' + esc(T.s('wk')) + ' ' + wk + '</b>' +
+        '<b>' + esc(T.week(S.year, wk, true)) + '</b>' +
         '<span class="pwdt">' + esc(T.dayRange(mon, mon)) + '</span>' +
         '<span class="pwn">' + n(sub) +
           (subT ? ' <i>· ' + n(subT) + ' ' + esc(T.pl(subT, 'trays')) + '</i>' : '') + '</span>';
@@ -1322,7 +1566,7 @@
     var byWeek = {};
     S.cart.forEach(function (l) { (byWeek[l.week] = byWeek[l.week] || []).push(l); });
     Object.keys(byWeek).map(Number).sort(function (a, b) { return a - b; }).forEach(function (wk) {
-      out.push(T.s('wk').toUpperCase() + ' ' + wk);
+      out.push(T.week(S.year, wk, true).toUpperCase());
       byWeek[wk].forEach(function (l) {
         var it = itemById(l.id); if (!it) return;
         total += l.qty;
@@ -1379,9 +1623,13 @@
       $('doneSum').innerHTML = T.s('done.sum')
         .replace('%p', '<b>' + n(sum.plants) + '</b> ' + esc(T.pl(sum.plants, 'plants')))
         .replace('%l', '<b>' + sum.lines + '</b> ' + esc(T.pl(sum.lines, 'lines')))
-        .replace('%w', sum.lo === sum.hi
-          ? T.s('done.w1').replace('%a', '<b>' + sum.lo + '</b>')
-          : T.s('done.wn').replace('%a', '<b>' + sum.lo).replace('%b', sum.hi + '</b>'));
+        .replace('%w', '<b>' + esc(
+          T.weekMode() === 'month'
+            ? T.weekSpan(S.year, sum.lo, sum.hi)
+            : sum.lo === sum.hi
+              ? T.s('done.w1').replace('%a', sum.lo)
+              : T.s('done.wn').replace('%a', sum.lo).replace('%b', sum.hi)
+        ) + '</b>');
       S.cart = []; renderPad(); closePad(); show('done');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }).catch(function () { $('send').disabled = false; $('sendErr').textContent = T.s('gate.net'); });
@@ -1398,7 +1646,7 @@
       var lines = r.lines.map(function (l) {
         return '<div class="pline"><div class="pm"><div class="pn">' + esc(T.lang() === 'zh' && l.nameZh ? l.nameZh : l.nameEn) +
           '</div><div class="pc"><span class="mono">' + esc(l.code) + '</span> · ' + esc(T.specShort(l)) +
-          ' · ' + esc(T.s('wk')) + ' ' + l.week + '</div></div><div class="pq tnum">' + n(l.qty) + '</div></div>';
+          ' · ' + esc(T.week(S.year, l.week, true)) + '</div></div><div class="pq tnum">' + n(l.qty) + '</div></div>';
       }).join('');
       var applied = r.applied && r.applied.length
         ? '<p class="pc" style="margin:10px 0 0;color:var(--muted);">' + esc(T.s('st.set')) + ' ' +
@@ -1425,6 +1673,22 @@
 
   /* ---------------- toolbar wiring ---------------- */
   $('q').addEventListener('input', function () { S.q = this.value; render(); });
+  $('filtBtn').addEventListener('click', function () { S.filtOpen = !S.filtOpen; render(); });
+  $('filtClear').addEventListener('click', function () { clearFilters(); render(); });
+  [['fNsMin', 'nsMin'], ['fNsMax', 'nsMax'], ['fHtMin', 'htMin'], ['fHtMax', 'htMax']].forEach(function (pair) {
+    $(pair[0]).addEventListener('input', function () {
+      var v = this.value.trim();
+      S.f[pair[1]] = v === '' ? '' : Math.max(0, Number(v) || 0);
+      render();
+      // re-render rebuilt the panel, so put the caret back where it was
+      var el = $(pair[0]); el.focus();
+      try { el.setSelectionRange(el.value.length, el.value.length); } catch (e) {}
+    });
+  });
+  function clearFilters() {
+    S.f = { cup: {}, colour: {}, pattern: {}, stem: {}, nsMin: '', nsMax: '', htMin: '', htMax: '' };
+    S.q = ''; S.availOnly = false; $('q').value = '';
+  }
   $('availOnly').addEventListener('click', function () { S.availOnly = !S.availOnly; render(); });
   $('viewSeg').addEventListener('click', function (e) {
     var b = e.target.closest('[data-view]'); if (!b) return;
@@ -1438,13 +1702,13 @@
     Array.prototype.forEach.call(this.children, function (x) { x.classList.toggle('on', x === b); });
     render();
   });
-  $('unitSeg').addEventListener('click', function (e) {
-    var b = e.target.closest('[data-unit]'); if (!b) return;
-    T.setUnit(b.dataset.unit); paintUnits(); render();
+  $('wkSeg').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-wk]'); if (!b) return;
+    T.setWeekMode(b.dataset.wk); paintWeekMode(); render();
   });
-  function paintUnits() {
-    Array.prototype.forEach.call($('unitSeg').children, function (b) {
-      b.classList.toggle('on', b.dataset.unit === T.unit());
+  function paintWeekMode() {
+    Array.prototype.forEach.call($('wkSeg').children, function (b) {
+      b.classList.toggle('on', b.dataset.wk === T.weekMode());
     });
   }
 
@@ -1454,7 +1718,7 @@
     Array.prototype.forEach.call($('densSeg').children, function (b) { b.classList.toggle('on', b.dataset.dens === S.dens); });
   })();
   paintLangs();
-  paintUnits();
+  paintWeekMode();
   T.apply(document);
   try { var saved = sessionStorage.getItem('kmty-inv-code'); if (saved) { S.code = saved; load(); } } catch (e) {}
 })();

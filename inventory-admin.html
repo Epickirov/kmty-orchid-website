@@ -134,7 +134,7 @@
       </datalist>
       <div class="row">
         <label class="fld">数量 Quantity *<input id="f-qty" type="number" min="0" step="1" placeholder="5000"></label>
-        <label class="fld">每盘株数 Tray（选填）<input id="f-tray" type="number" min="0" max="10000" step="1" placeholder="60"></label>
+        <label class="fld">每内箱株数 Inner box（按杯径自动）<input id="f-tray" type="number" min="0" max="10000" step="1" placeholder="按杯径自动"></label>
         <label class="fld">起始周 From week *<input id="f-from" type="number" min="1" max="53" placeholder="12"></label>
         <label class="fld">结束周 To week *<input id="f-to" type="number" min="1" max="53" placeholder="20"></label>
         <label class="fld">年份 Year<input id="f-year" type="number" min="2024" max="2100"></label>
@@ -147,8 +147,25 @@
         </select></label>
         <label class="fld">花径 N.S.（厘米）<input id="f-ns" type="number" min="0" max="60" step="0.1" placeholder="11.5"></label>
         <label class="fld">株高 Height（厘米）<input id="f-ht" type="number" min="0" max="300" step="0.5" placeholder="62"></label>
+      </div>
+
+      <div class="row">
+        <label class="fld">花色 Colour<select id="f-colour">
+          <option value="">未标注 —</option>
+          <option value="white">白 White</option><option value="cream">象牙 Cream</option>
+          <option value="yellow">金黄 Yellow</option><option value="peach">蜜桃 Peach</option>
+          <option value="pink">粉 Pink</option><option value="magenta">洋红 Magenta</option>
+          <option value="red">酒红 Red</option><option value="purple">淡紫 Purple</option>
+        </select></label>
+        <label class="fld">花纹 Marking<select id="f-pattern">
+          <option value="">未标注 —</option>
+          <option value="solid">纯色 Solid</option><option value="bicolour">双色 Two-tone</option>
+          <option value="spotted">星点 Spotted</option><option value="edged">镶边 Edged</option>
+        </select></label>
         <label class="fld">备注 Note（客户可见，选填）<input id="f-note" maxlength="140" placeholder="大花型 / large flower"></label>
       </div>
+
+      <p class="lead" id="boxHint" style="margin:-4px 0 10px;font-size:12px;color:var(--green);"></p>
 
       <div class="shots">
         <div class="shot">
@@ -180,7 +197,7 @@
     <div class="card">
       <h2>批量导入 Bulk import</h2>
       <p class="lead">从 Excel 直接复制粘贴，或选择 CSV 文件。每行一个批次，列顺序：
-        <b class="mono">编号, 英文名, 中文名, 杯径, 数量, 起始周, 结束周, 年份, 备注, 每盘株数, 梗数, 花径, 株高</b>。
+        <b class="mono">编号, 英文名, 中文名, 杯径, 数量, 起始周, 结束周, 年份, 备注, 每内箱株数, 梗数, 花径, 株高, 花色, 花纹</b>。
         年份之后各列均可留空；梗数填 <b class="mono">SS</b>／<b class="mono">单梗</b> 或 <b class="mono">DS</b>／<b class="mono">双梗</b>，花径与株高以厘米计。
         <b>编号＋杯径＋起始周</b>相同的批次会被覆盖，其余新增；两张照片请在上方逐个上传。</p>
       <textarea id="csv" rows="4" placeholder="TPL-411, Ivory, 象牙白, 2.5&quot;, 5000, 10, 16, 2026, , 60, DS, 11.5, 62
@@ -285,7 +302,7 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
         '<td>' + (esc(it.cup) || '—') +
           (it.stem ? ' <span class="stemtag' + (it.stem === 'DS' ? ' ds' : '') + '">' + (it.stem === 'DS' ? '双梗' : '单梗') + '</span>' : '') +
           (meas.length ? '<br><span class="spec">' + meas.join(' · ') + ' cm</span>' : '') + '</td>' +
-        '<td class="num"><b>' + n(it.qty) + '</b>' + (it.tray > 1 ? '<br><span style="color:var(--faint);font-size:11px;">每盘 ' + n(it.tray) + '</span>' : '') + '</td>' +
+        '<td class="num"><b>' + n(it.qty) + '</b>' + (it.tray > 1 ? '<br><span style="color:var(--faint);font-size:11px;">每内箱 ' + n(it.tray) + '</span>' : '') + '</td>' +
         '<td>第 ' + it.from + '–' + it.to + ' 周<br><span style="color:var(--faint);font-size:11.5px;">' + it.year + '</span></td>';
       var td = document.createElement('td');
       td.style.whiteSpace = 'nowrap';
@@ -308,9 +325,10 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
     $('f-code').value = it.code; $('f-nameEn').value = it.nameEn; $('f-nameZh').value = it.nameZh || '';
     $('f-cup').value = it.cup || ''; $('f-qty').value = it.qty; $('f-tray').value = it.tray || '';
     $('f-stem').value = it.stem || ''; $('f-ns').value = it.ns || ''; $('f-ht').value = it.ht || '';
+    $('f-colour').value = it.colour || ''; $('f-pattern').value = it.pattern || '';
     $('f-from').value = it.from; $('f-to').value = it.to; $('f-year').value = it.year;
     $('f-note').value = it.note || '';
-    shotPlant.reset(); shotFlower.reset();
+    shotPlant.reset(); shotFlower.reset(); syncBox();
     if (it.img) shotPlant.show(photo(it, 'plant'));
     if (it.img2) shotFlower.show(photo(it, 'flower'));
     $('reset').hidden = false;
@@ -321,9 +339,9 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
     $('formTitle').textContent = '添加批次';
     ['f-code','f-nameEn','f-nameZh','f-cup','f-qty','f-tray','f-ns','f-ht','f-from','f-to','f-note']
       .forEach(function (k) { $(k).value = ''; });
-    $('f-stem').value = '';
+    $('f-stem').value = ''; $('f-colour').value = ''; $('f-pattern').value = '';
     $('f-year').value = new Date().getUTCFullYear();
-    shotPlant.reset(); shotFlower.reset();
+    shotPlant.reset(); shotFlower.reset(); syncBox();
     $('reset').hidden = true; st('saveStatus', '');
   }
   $('reset').addEventListener('click', resetForm);
@@ -367,7 +385,7 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
      undefined = leave the stored photo alone, '' = remove it, a data URL =
      replace it. Two slots, so an edit that touches only the bloom leaves the
      plant shot exactly where it was. */
-  function photoField(fileId, prevId, noneId, clearId, max, keepAlpha) {
+  function photoField(fileId, prevId, noneId, clearId, max, keepAlpha, onLoad) {
     var f = { pending: undefined };
     function paint(src) {
       $(prevId).hidden = !src; $(noneId).hidden = !!src; $(clearId).hidden = !src;
@@ -378,6 +396,7 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
       st('saveStatus', '处理图片中…');
       shrink(file, max, keepAlpha).then(function (url) {
         f.pending = url; paint(url); st('saveStatus', '');
+        if (onLoad) onLoad(url);
       }).catch(function () { st('saveStatus', '这张图片读不出来，请换一张', true); });
     });
     $(clearId).addEventListener('click', function () { f.pending = ''; paint(''); $(fileId).value = ''; });
@@ -385,8 +404,71 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
     f.reset = function () { f.pending = undefined; paint(''); $(fileId).value = ''; };
     return f;
   }
+  /* Plants per inner box follows the cup size — 3.8in is 16 to a box, 3.5in is
+     20, 2.8in and 3.0in are 24 — so staff never type it for a flowering size.
+     The server applies the same table, so a blank field is not a missing value;
+     this only shows the grower what is about to be saved. Anything typed here
+     wins, for a grower shipping an odd pack. */
+  var BOX_BY_CUP = { '3.8': 16, '3.5': 20, '3.0': 24, '2.8': 24 };
+  function boxForCup(cup) {
+    var m = /(\d+(?:\.\d+)?)/.exec(String(cup || ''));
+    return m ? (BOX_BY_CUP[Number(m[1]).toFixed(1)] || 0) : 0;
+  }
+  function syncBox() {
+    var d = boxForCup($('f-cup').value);
+    $('f-tray').placeholder = d ? String(d) : '按杯径自动';
+    $('boxHint').textContent = d ? '3.8″=16 · 3.5″=20 · 2.8″/3.0″=24 — 此杯径每内箱 ' + d + ' 株，留空即按此计' : '';
+  }
+  $('f-cup').addEventListener('input', syncBox);
+  $('f-cup').addEventListener('change', syncBox);
+
+  /* Read the dominant hue out of the bloom that was just uploaded and offer it
+     as the colour, so nobody has to classify a photograph they are looking at.
+     Only ever a suggestion, and only into an empty field — the grower's own
+     answer is never overwritten, because they can see the plant and we are
+     looking at 28x28 pixels of it. */
+  function suggestColour(dataUrl) {
+    if ($('f-colour').value) return;
+    var img = new Image();
+    img.onload = function () {
+      try {
+        var n = 28, c = document.createElement('canvas'); c.width = c.height = n;
+        var g = c.getContext('2d', { willReadFrequently: true });
+        g.drawImage(img, 0, 0, n, n);
+        var d = g.getImageData(0, 0, n, n).data, sx = 0, sy = 0, sats = [], hits = 0;
+        for (var i = 0; i < d.length; i += 4) {
+          if (d[i + 3] < 128) continue;
+          var R = d[i], G = d[i + 1], B = d[i + 2];
+          var mx = Math.max(R, G, B), mn = Math.min(R, G, B), ch = mx - mn;
+          var l = (mx + mn) / 510, sat = ch === 0 ? 0 : ch / (255 - Math.abs(mx + mn - 255));
+          if (sat < 0.2 || l < 0.18 || l > 0.92) continue;
+          var h6 = mx === R ? ((G - B) / ch + 6) % 6 : mx === G ? (B - R) / ch + 2 : (R - G) / ch + 4;
+          var a = h6 / 6 * 2 * Math.PI;
+          sx += Math.cos(a); sy += Math.sin(a); sats.push(sat); hits++;
+        }
+        // the same test the customer page uses to tell a real colour from the
+        // warm shadows of a white bloom
+        sats.sort(function (a, b) { return a - b; });
+        var mean = hits ? sats.reduce(function (t, v) { return t + v; }, 0) / hits : 0;
+        var p90 = hits ? sats[Math.floor(hits * 0.9)] : 0;
+        if (hits < 8 || mean < 0.40 || p90 < 0.62) { pick('white'); return; }
+        var deg = (Math.atan2(sy, sx) / (2 * Math.PI) * 360 + 360) % 360;
+        pick(deg < 10 || deg >= 350 ? 'red'
+           : deg < 45 ? 'peach' : deg < 75 ? 'yellow'
+           : deg < 255 ? '' : deg < 295 ? 'purple'
+           : deg < 325 ? 'magenta' : 'pink');
+      } catch (e) {}
+    };
+    img.src = dataUrl;
+    function pick(v) {
+      if (!v || $('f-colour').value) return;
+      $('f-colour').value = v;
+      st('saveStatus', '花色已按图片推断为「' + $('f-colour').selectedOptions[0].textContent.trim() + '」，可手动更改');
+    }
+  }
+
   var shotPlant = photoField('f-img', 'imgPrev', 'imgNone', 'imgClear', 760, false);
-  var shotFlower = photoField('f-img2', 'imgPrev2', 'imgNone2', 'imgClear2', 620, true);
+  var shotFlower = photoField('f-img2', 'imgPrev2', 'imgNone2', 'imgClear2', 620, true, suggestColour);
 
   $('save').addEventListener('click', function () {
     var body = {
@@ -394,6 +476,7 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
       code: $('f-code').value.trim(), nameEn: $('f-nameEn').value.trim(), nameZh: $('f-nameZh').value.trim(),
       cup: $('f-cup').value.trim(), qty: $('f-qty').value, tray: $('f-tray').value || 0,
       stem: $('f-stem').value, ns: $('f-ns').value || 0, ht: $('f-ht').value || 0,
+      colour: $('f-colour').value, pattern: $('f-pattern').value,
       from: $('f-from').value, to: $('f-to').value,
       year: $('f-year').value || new Date().getUTCFullYear(), note: $('f-note').value.trim(),
     };
@@ -455,6 +538,7 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
         tray: Number(g(9)) || 0,
         // the server takes SS / DS / 单梗 / 双梗 / 1 / 2, so a grower's own sheet imports as written
         stem: g(10), ns: Number(g(11)) || 0, ht: Number(g(12)) || 0,
+        colour: g(13), pattern: g(14),
         img: hit ? '__keep__' : undefined, img2: hit ? '__keep__' : undefined,
       });
     });
@@ -489,10 +573,11 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
   });
   $('csvOut').addEventListener('click', function () {
     var q = function (v) { v = String(v == null ? '' : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
-    var csv = '编号,英文名,中文名,杯径,数量,起始周,结束周,年份,备注,每盘株数,梗数,花径,株高\n' +
+    var csv = '编号,英文名,中文名,杯径,数量,起始周,结束周,年份,备注,每内箱株数,梗数,花径,株高,花色,花纹\n' +
       items.map(function (i) {
         return [i.code, i.nameEn, i.nameZh, i.cup, i.qty, i.from, i.to, i.year, i.note,
-                i.tray || '', i.stem || '', i.ns || '', i.ht || ''].map(q).join(',');
+                i.tray || '', i.stem || '', i.ns || '', i.ht || '',
+                i.colour || '', i.pattern || ''].map(q).join(',');
       }).join('\n');
     var a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }));  // BOM so Excel reads the Chinese

@@ -38,6 +38,28 @@
     var leap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
     return (jan1 === 4 || (leap && jan1 === 3)) ? 53 : 52;
   }
+  /* Which calendar month a week sits in. A week that straddles the turn of a
+     month belongs to both — 28 Sep to 4 Oct is neither September nor October —
+     so it is named with both rather than quietly assigned to one. */
+  function monthsOfWeek(year, week) {
+    var s = mondayOfWeek(year, week);
+    var e = new Date(s); e.setUTCDate(s.getUTCDate() + 6);
+    return s.getUTCMonth() === e.getUTCMonth() ? [s.getUTCMonth()] : [s.getUTCMonth(), e.getUTCMonth()];
+  }
+  /* Which week of its month this is — "the second week of September" is how a
+     buyer says it out loud. Counted by Mondays, the same way the calendar's
+     month band groups its columns, so the two always agree. */
+  function weekOfMonth(year, week) {
+    var s = mondayOfWeek(year, week), m = s.getUTCMonth(), n = 0;
+    for (var w = 1; w <= weeksInYear(year); w++) {
+      var d = mondayOfWeek(year, w);
+      if (d.getUTCMonth() !== m) continue;
+      n++;
+      if (w === week) return n;
+    }
+    return 1;
+  }
+
   /* Every ISO week that touches a calendar month. A week straddling the turn
      of a month belongs to both, which is what a grower means by "early April"
      — so it is listed under both rather than assigned to one. */
@@ -52,6 +74,20 @@
     }
     return out;
   }
+
+  /* ---------------- flower colour ----------------
+     The families a buyer filters by, grouped from the vocabulary the main
+     site's variety wall already uses — its eighteen descriptors are shades and
+     markings of these eight. The hex beside each is the swatch on the filter
+     chip, not the chart's tint: the chart still samples the real photograph.
+
+     Colour and marking are separate because a phalaenopsis is both at once.
+     A bloom is pink AND spotted, and one dropdown cannot say that. */
+  var COLOURS = [
+    ['white',   '#F4F1EA'], ['cream',   '#EFE0BC'], ['yellow', '#E6C43F'], ['peach',  '#E6A068'],
+    ['pink',    '#E88CC0'], ['magenta', '#C4459B'], ['red',    '#A33148'], ['purple', '#8C6AC2'],
+  ];
+  var PATTERNS = ['solid', 'bicolour', 'spotted', 'edged'];
 
   /* ---------------- copy ---------------- */
   var DICT = {
@@ -82,10 +118,10 @@
       'f.avail': 'In stock only',
       'wkOf': 'Week beginning',
       'avail': 'available',
-      'trayOf': 'tray of %s',
+      'trayOf': 'inner box of %s',
       'pop.add': 'Add',
       'pop.update': 'Update',
-      'pop.trays': '%n trays of %s', 'pop.trays.1': '%n tray of %s',
+      'pop.trays': '%n inner boxes of %s', 'pop.trays.1': '%n inner box of %s',
       'pop.over': 'more than we hold',
       'pad.h': 'Your request',
       'pad.total': 'Total',
@@ -117,9 +153,16 @@
       'shot.plant': 'Whole plant', 'shot.flower': 'Flower',
       'shot.swap': 'Show this one large',
       'cup': 'Cup',
+      'f.filters': 'Filters', 'f.cup': 'Cup size', 'f.colour': 'Flower colour',
+      'f.pattern': 'Marking', 'f.stem': 'Stem',
+      'f.ns': 'Flower width (N.S.)', 'f.ht': 'Plant height',
+      'f.min': 'Min', 'f.max': 'Max', 'f.clear': 'Clear all', 'f.showing': '%n of %t',
+      'c.white': 'White', 'c.cream': 'Cream', 'c.yellow': 'Yellow', 'c.peach': 'Peach',
+      'c.pink': 'Pink', 'c.magenta': 'Magenta', 'c.red': 'Red', 'c.purple': 'Purple',
+      'm.solid': 'Solid', 'm.bicolour': 'Two-tone', 'm.spotted': 'Spotted', 'm.edged': 'Edged',
       'gate.eyebrow': 'KMTY Orchid · Production calendar',
       'gate.cap': 'Yunnan · \u22481,900 m elevation',
-      'trays': 'trays', 'trays.1': 'tray', 'lines': 'lines', 'lines.1': 'line',
+      'trays': 'inner boxes', 'trays.1': 'inner box', 'lines': 'lines', 'lines.1': 'line',
       'pad.copy': 'Copy as text', 'pad.copied': 'Copied',
       'today': 'This week',
       'done.sum': '%p across %l, %w.',
@@ -132,7 +175,9 @@
       'f.country.ph': 'Country or city',
       'f.note.ph': 'Airport, packing, phytosanitary — anything that affects this shipment',
       'f.reassure': 'Nothing is reserved until our sales desk replies. You will get a reference you can track this request with.',
-      'tray': 'Per tray',
+      'tray': 'Per inner box',
+      'wk.of': '%m W%n', 'wk.span': '%a\u2013%b',
+      'wkmode.num': 'Week', 'wkmode.month': 'Month',
     'months': ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
       'mshort': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
     },
@@ -163,10 +208,10 @@
       'f.avail': '仅看有货',
       'wkOf': '周起始',
       'avail': '株可供',
-      'trayOf': '每盘 %s 株',
+      'trayOf': '每内箱 %s 株',
       'pop.add': '加入',
       'pop.update': '更新',
-      'pop.trays': '%n 盘 × %s 株', 'pop.trays.1': '%n 盘 × %s 株',
+      'pop.trays': '%n 内箱 × %s 株', 'pop.trays.1': '%n 内箱 × %s 株',
       'pop.over': '超出现有库存',
       'pad.h': '需求清单',
       'pad.total': '合计',
@@ -198,9 +243,16 @@
       'shot.plant': '整株', 'shot.flower': '花朵特写',
       'shot.swap': '放大这张',
       'cup': '杯径',
+      'f.filters': '筛选', 'f.cup': '杯径', 'f.colour': '花色',
+      'f.pattern': '花纹', 'f.stem': '梗数',
+      'f.ns': '花径（单朵宽度）', 'f.ht': '株高',
+      'f.min': '最小', 'f.max': '最大', 'f.clear': '清除全部', 'f.showing': '%n / %t',
+      'c.white': '白', 'c.cream': '象牙', 'c.yellow': '金黄', 'c.peach': '蜜桃',
+      'c.pink': '粉', 'c.magenta': '洋红', 'c.red': '酒红', 'c.purple': '淡紫',
+      'm.solid': '纯色', 'm.bicolour': '双色', 'm.spotted': '星点', 'm.edged': '镶边',
       'gate.eyebrow': 'KMTY 兰花 · 排产日历',
       'gate.cap': '云南 · 海拔约 1,900 米',
-      'trays': '盘', 'trays.1': '盘', 'lines': '项', 'lines.1': '项',
+      'trays': '内箱', 'trays.1': '内箱', 'lines': '项', 'lines.1': '项',
       'pad.copy': '复制为文本', 'pad.copied': '已复制',
       'today': '本周',
       'done.sum': '共 %p，%l，%w。',
@@ -213,7 +265,9 @@
       'f.country.ph': '国家或城市',
       'f.note.ph': '机场、包装、检疫证书——任何影响本次发运的事项',
       'f.reassure': '在销售部回复之前不会预留任何库存。提交后您会收到一个可用于查询进度的单号。',
-      'tray': '每盘',
+      'tray': '每内箱',
+      'wk.of': '%m第%n周', 'wk.span': '%a\u2013%b',
+      'wkmode.num': '周', 'wkmode.month': '月',
     'months': ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
       'mshort': ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
     },
@@ -244,11 +298,11 @@
       'f.avail': 'Только в наличии',
       'wkOf': 'Начало недели',
       'avail': 'в наличии',
-      'trayOf': 'лоток по %s',
+      'trayOf': 'внутренняя коробка по %s',
       'pop.add': 'Добавить',
       'pop.update': 'Обновить',
-      'pop.trays': '%n лотков по %s', 'pop.trays.1': '%n лоток по %s',
-      'pop.trays.2': '%n лотка по %s', 'pop.trays.5': '%n лотков по %s',
+      'pop.trays': '%n коробок по %s', 'pop.trays.1': '%n коробка по %s',
+      'pop.trays.2': '%n коробки по %s', 'pop.trays.5': '%n коробок по %s',
       'pop.over': 'больше, чем есть',
       'pad.h': 'Ваш запрос',
       'pad.total': 'Итого',
@@ -280,9 +334,16 @@
       'shot.plant': 'Всё растение', 'shot.flower': 'Цветок',
       'shot.swap': 'Показать крупно',
       'cup': 'Горшок',
+      'f.filters': 'Фильтры', 'f.cup': 'Диаметр горшка', 'f.colour': 'Цвет цветка',
+      'f.pattern': 'Рисунок', 'f.stem': 'Цветонос',
+      'f.ns': 'Ширина цветка', 'f.ht': 'Высота растения',
+      'f.min': 'От', 'f.max': 'До', 'f.clear': 'Сбросить всё', 'f.showing': '%n из %t',
+      'c.white': 'Белый', 'c.cream': 'Кремовый', 'c.yellow': 'Жёлтый', 'c.peach': 'Персиковый',
+      'c.pink': 'Розовый', 'c.magenta': 'Пурпурный', 'c.red': 'Красный', 'c.purple': 'Фиолетовый',
+      'm.solid': 'Однотонный', 'm.bicolour': 'Двухцветный', 'm.spotted': 'Крапчатый', 'm.edged': 'С каймой',
       'gate.eyebrow': 'KMTY Orchid · Производственный календарь',
       'gate.cap': 'Юньнань · \u2248 1 900 м над уровнем моря',
-      'trays': 'лотков', 'trays.1': 'лоток', 'trays.2': 'лотка', 'trays.5': 'лотков',
+      'trays': 'коробок', 'trays.1': 'коробка', 'trays.2': 'коробки', 'trays.5': 'коробок',
       'lines': 'позиций', 'lines.1': 'позиция', 'lines.2': 'позиции', 'lines.5': 'позиций',
       'pad.copy': 'Скопировать текстом', 'pad.copied': 'Скопировано',
       'today': 'Эта неделя',
@@ -296,7 +357,9 @@
       'f.country.ph': 'Страна или город',
       'f.note.ph': 'Аэропорт, упаковка, фитосанитария — всё, что влияет на эту отгрузку',
       'f.reassure': 'До ответа отдела продаж ничего не бронируется. Вы получите номер, по которому можно отследить запрос.',
-      'tray': 'В лотке',
+      'tray': 'Во внутренней коробке',
+      'wk.of': '%m W%n', 'wk.span': '%a\u2013%b',
+      'wkmode.num': 'Нед.', 'wkmode.month': 'Мес.',
     'months': ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'],
       'mshort': ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'],
     },
@@ -327,10 +390,10 @@
       'f.avail': 'Chỉ hàng có sẵn',
       'wkOf': 'Tuần bắt đầu',
       'avail': 'có sẵn',
-      'trayOf': 'khay %s cây',
+      'trayOf': 'hộp trong %s cây',
       'pop.add': 'Thêm',
       'pop.update': 'Cập nhật',
-      'pop.trays': '%n khay × %s', 'pop.trays.1': '%n khay × %s',
+      'pop.trays': '%n hộp trong × %s', 'pop.trays.1': '%n hộp trong × %s',
       'pop.over': 'vượt tồn kho',
       'pad.h': 'Yêu cầu của bạn',
       'pad.total': 'Tổng',
@@ -362,9 +425,16 @@
       'shot.plant': 'Cả cây', 'shot.flower': 'Hoa',
       'shot.swap': 'Xem ảnh này lớn',
       'cup': 'Chậu',
+      'f.filters': 'Bộ lọc', 'f.cup': 'Cỡ chậu', 'f.colour': 'Màu hoa',
+      'f.pattern': 'Hoa văn', 'f.stem': 'Cành hoa',
+      'f.ns': 'Độ rộng hoa', 'f.ht': 'Chiều cao cây',
+      'f.min': 'Tối thiểu', 'f.max': 'Tối đa', 'f.clear': 'Xoá tất cả', 'f.showing': '%n / %t',
+      'c.white': 'Trắng', 'c.cream': 'Kem', 'c.yellow': 'Vàng', 'c.peach': 'Đào',
+      'c.pink': 'Hồng', 'c.magenta': 'Đỏ tím', 'c.red': 'Đỏ', 'c.purple': 'Tím',
+      'm.solid': 'Trơn', 'm.bicolour': 'Hai màu', 'm.spotted': 'Đốm', 'm.edged': 'Viền',
       'gate.eyebrow': 'KMTY Orchid · Lịch sản xuất',
       'gate.cap': 'Vân Nam · độ cao \u2248 1.900 m',
-      'trays': 'khay', 'trays.1': 'khay', 'lines': 'dòng', 'lines.1': 'dòng',
+      'trays': 'hộp trong', 'trays.1': 'hộp trong', 'lines': 'dòng', 'lines.1': 'dòng',
       'pad.copy': 'Sao chép dạng văn bản', 'pad.copied': 'Đã sao chép',
       'today': 'Tuần này',
       'done.sum': '%p, %l, %w.',
@@ -377,7 +447,9 @@
       'f.country.ph': 'Quốc gia hoặc thành phố',
       'f.note.ph': 'Sân bay, đóng gói, kiểm dịch — bất cứ điều gì ảnh hưởng tới lô hàng này',
       'f.reassure': 'Chưa có gì được giữ cho tới khi bộ phận kinh doanh phản hồi. Bạn sẽ nhận được mã để tra cứu yêu cầu.',
-      'tray': 'Mỗi khay',
+      'tray': 'Mỗi hộp trong',
+      'wk.of': '%m W%n', 'wk.span': '%a\u2013%b',
+      'wkmode.num': 'Tuần', 'wkmode.month': 'Tháng',
     'months': ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
       'mshort': ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12'],
     },
@@ -386,12 +458,12 @@
   var LANG = 'en';
   try { var saved = localStorage.getItem('kmty-lang'); if (DICT[saved]) LANG = saved; } catch (e) {}
 
-  /* Measurements are taken in centimetres — that is what the ruler in the
-     greenhouse says — but a buyer in Miami or Manchester reads a phalaenopsis
-     spec in inches and should not have to do the arithmetic on a spec sheet.
-     The stored value never changes; only the way it is written down does. */
-  var UNIT = 'cm';
-  try { if (localStorage.getItem('kmty-inv-unit') === 'in') UNIT = 'in'; } catch (e) {}
+  /* Week numbers are the trade's unit and the axis this whole book is built
+     on, but not every buyer reads in them — "week 37" means nothing until you
+     know it is the second week of September. The labels can be switched; the
+     underlying ISO week never changes. */
+  var WKMODE = 'num';
+  try { if (localStorage.getItem('kmty-inv-wk') === 'month') WKMODE = 'month'; } catch (e) {}
 
   var T = {
     lang: function () { return LANG; },
@@ -434,15 +506,28 @@
       if (LANG === 'en') return count === 1 ? pick(base + '.1') : pick(base);
       return d[base] || base;                       // zh and vi do not inflect
     },
-    unit: function () { return UNIT; },
-    setUnit: function (u) {
-      UNIT = u === 'in' ? 'in' : 'cm';
-      try { localStorage.setItem('kmty-inv-unit', UNIT); } catch (e) {}
+    weekMode: function () { return WKMODE; },
+    setWeekMode: function (m) {
+      WKMODE = m === 'month' ? 'month' : 'num';
+      try { localStorage.setItem('kmty-inv-wk', WKMODE); } catch (e) {}
     },
-    /* a length held in cm, written the way the reader measures */
-    len: function (cm) {
-      if (!cm) return '';
-      return UNIT === 'in' ? (Math.round(cm / 2.54 * 10) / 10) + '\u2033' : cm + ' cm';
+    len: function (cm) { return cm ? cm + ' cm' : ''; },
+
+    /* A week, named the way the reader asked for it. Short form for a chip or
+       a column head, long form where there is room for the word. */
+    week: function (year, w, long) {
+      if (WKMODE !== 'month') return long ? T.s('wk') + ' ' + w : String(w);
+      var ms = monthsOfWeek(year, w), sh = T.s('mshort');
+      if (ms.length > 1) return T.s('wk.span').replace('%a', sh[ms[0]]).replace('%b', sh[ms[1]]);
+      return T.s('wk.of').replace('%m', sh[ms[0]]).replace('%n', weekOfMonth(year, w));
+    },
+    /* A run of weeks: "Week 31–42", or the months it actually covers. */
+    weekSpan: function (year, from, to) {
+      if (WKMODE !== 'month') return T.s('wk') + ' ' + from + '\u2013' + to;
+      var sh = T.s('mshort');
+      var a = monthsOfWeek(year, from)[0];
+      var end = monthsOfWeek(year, to); var b = end[end.length - 1];
+      return a === b ? sh[a] : T.s('wk.span').replace('%a', sh[a]).replace('%b', sh[b]);
     },
     /* The measurements as a buyer writes them down. Anything not recorded is
        left out rather than shown as a zero or a dash — a blank in a spec line
@@ -521,6 +606,8 @@
 
   window.KMTY_INV = {
     t: T, api: api, photo: photo, hasShot: hasShot,
-    weeks: { mondayOfWeek: mondayOfWeek, weeksInYear: weeksInYear, weeksOfMonth: weeksOfMonth, isoWeekNow: isoWeekNow },
+    colours: COLOURS, patterns: PATTERNS,
+    weeks: { mondayOfWeek: mondayOfWeek, weeksInYear: weeksInYear, weeksOfMonth: weeksOfMonth,
+             isoWeekNow: isoWeekNow, monthsOfWeek: monthsOfWeek, weekOfMonth: weekOfMonth },
   };
 })();

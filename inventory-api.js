@@ -25,7 +25,9 @@
 // variety in a list; the flower shot is the one that sells it.
 //
 // The specs beside them are the three figures a buyer quotes back at you:
+//   tray  plants per inner box — defaulted from the cup size (see BOX_BY_CUP)
 //   stem  SS (single stem, 单梗) or DS (dual stem, 双梗)
+//   colour/pattern  the flower's family and marking, for the buyer's filter
 //   ns    natural spread — the width of one open flower, in cm
 //   ht    plant height, in cm
 // They sit on the batch rather than on the variety because the same variety is
@@ -60,6 +62,37 @@ function dec1(v, lo, hi) {
   if (!isFinite(n)) return 0;
   return Math.min(hi, Math.max(lo, n));
 }
+/* How many plants go in one inner box, by cup size. This is a property of the
+   packing, not of the batch, so a grower should not have to type it on every
+   row — a 3.5in flowering pot is twenty to a box whoever is selling it. Only
+   the flowering sizes have a fixed count here; plugs and young plants are
+   packed to order, so those still take whatever the grower enters.
+
+   An explicit figure on the batch always wins, because a grower shipping an
+   odd pack has the last word about their own boxes. */
+const BOX_BY_CUP = { '3.8': 16, '3.5': 20, '3.0': 24, '2.8': 24 };
+export function boxForCup(cup) {
+  const m = /(\d+(?:\.\d+)?)/.exec(String(cup == null ? '' : cup));
+  if (!m) return 0;
+  return BOX_BY_CUP[Number(m[1]).toFixed(1)] || 0;
+}
+
+/* Colour and pattern, taken from the vocabulary the main site's variety wall
+   already uses, grouped into families a buyer would actually filter by. They
+   are two fields because a phalaenopsis is both at once — a bloom is pink AND
+   spotted, and one dropdown cannot say that.
+
+   The colour is declared rather than derived. The chart still tints itself
+   from the photograph, which is the true bloom; this is what the grower says
+   it is, and a filter has to be right every time or a buyer silently misses
+   stock they would have bought. */
+const COLOURS = ['white', 'cream', 'yellow', 'peach', 'pink', 'magenta', 'red', 'purple'];
+const PATTERNS = ['solid', 'bicolour', 'spotted', 'edged'];
+function oneOf(v, allowed) {
+  const s = String(v == null ? '' : v).trim().toLowerCase();
+  return allowed.indexOf(s) >= 0 ? s : '';
+}
+
 function stemOf(v) {
   const s = String(v == null ? '' : v).trim().toUpperCase();
   if (s === 'SS' || s === '单梗' || s === '單梗' || s === '1') return 'SS';
@@ -121,8 +154,17 @@ function cleanItem(b, prev) {
     nameZh: str(b.nameZh, 60),
     cup: str(b.cup, 24),
     qty: int(b.qty, 0, 9999999, 0),
-    tray: int(b.tray, 0, 10000, 0),        // units per tray; 0 = no multiple enforced
+    /* What the grower last published for this batch. Confirming an inquiry
+       lowers `qty` and never touches this, so `qty / qty0` is honestly "how
+       much of what we offered is still here". Saving the batch again resets
+       it, because a grower re-entering the figure is declaring a new pool —
+       which also means a corrected typo does not leave the bar reading 60%
+       for ever. */
+    qty0: int(b.qty, 0, 9999999, 0),
+    tray: int(b.tray, 0, 10000, 0) || boxForCup(b.cup),   // plants per inner box
     stem: stemOf(b.stem),                  // 'SS' | 'DS' | ''
+    colour: oneOf(b.colour, COLOURS),      // '' when the grower has not said
+    pattern: oneOf(b.pattern, PATTERNS),
     ns: dec1(b.ns, 0, 60),                 // natural spread, cm; 0 = not recorded
     ht: dec1(b.ht, 0, 300),                // plant height, cm; 0 = not recorded
     from: weeks[0],
@@ -228,6 +270,7 @@ async function submitInquiry(request, env, sendMail) {
       id: item.id, code: item.code, nameEn: item.nameEn, nameZh: item.nameZh,
       cup: item.cup, week, qty, year: item.year, tray: item.tray,
       stem: item.stem, ns: item.ns, ht: item.ht,               // the grade that was on offer
+      colour: item.colour, pattern: item.pattern,
       stockAtRequest: item.qty,                                // what staff should sanity-check against
     });
   }
