@@ -252,25 +252,36 @@
       radial-gradient(circle at 50% 75%,rgba(156,34,51,1) var(--dotr),transparent calc(var(--dotr) + .5px));}
   body.compact .cx-C .avb{--doty:8.5px;--dotr:1.5px;}
 
-  /* X — a mix: rainbow diagonals. Six hard-edged bands at 45°, one cycle per
-     --xs * 6 along the gradient axis, with --xs set per bar so a whole number
-     of cycles lands across it. */
+  /* X — a mix: rainbow diagonals. Eight hard-edged bands at 45°, one cycle per
+     --xs * 8 along the gradient axis, with --xs set per bar so a whole number
+     of cycles lands across it. No blue — a phalaenopsis is never blue, and the
+     mixed crates are ivory, greens, yellows, reds, pinks and lavender. The run
+     goes round the wheel so every neighbour is a step, ivory included: it
+     opens the cycle and lavender closes it, which makes the wrap a step too.
+
+     Ivory carries a much higher alpha than the rest. It is drawn over the
+     white cell, so at .46 it would not be a band at all — the same reason W
+     is drawn as white with an edge rather than at 30% like every other tint. */
   .cx-X .avb{border-color:rgba(26,30,23,.22);
     background-color:transparent;
     background-image:repeating-linear-gradient(135deg,
-      rgba(156,34,51,.46) 0,rgba(156,34,51,.46) var(--xs,3.65px),
-      rgba(210,118,47,.46) var(--xs,3.65px),rgba(210,118,47,.46) calc(var(--xs,3.65px) * 2),
-      rgba(224,185,58,.46) calc(var(--xs,3.65px) * 2),rgba(224,185,58,.46) calc(var(--xs,3.65px) * 3),
-      rgba(91,143,98,.46) calc(var(--xs,3.65px) * 3),rgba(91,143,98,.46) calc(var(--xs,3.65px) * 4),
-      rgba(74,127,168,.46) calc(var(--xs,3.65px) * 4),rgba(74,127,168,.46) calc(var(--xs,3.65px) * 5),
-      rgba(140,106,194,.46) calc(var(--xs,3.65px) * 5),rgba(140,106,194,.46) calc(var(--xs,3.65px) * 6));}
+      rgba(240,235,224,.92) 0,rgba(240,235,224,.92) var(--xs,2.74px),
+      rgba(168,201,138,.46) var(--xs,2.74px),rgba(168,201,138,.46) calc(var(--xs,2.74px) * 2),
+      rgba(91,143,98,.46) calc(var(--xs,2.74px) * 2),rgba(91,143,98,.46) calc(var(--xs,2.74px) * 3),
+      rgba(224,185,58,.46) calc(var(--xs,2.74px) * 3),rgba(224,185,58,.46) calc(var(--xs,2.74px) * 4),
+      rgba(210,118,47,.46) calc(var(--xs,2.74px) * 4),rgba(210,118,47,.46) calc(var(--xs,2.74px) * 5),
+      rgba(156,34,51,.46) calc(var(--xs,2.74px) * 5),rgba(156,34,51,.46) calc(var(--xs,2.74px) * 6),
+      rgba(222,111,172,.46) calc(var(--xs,2.74px) * 6),rgba(222,111,172,.46) calc(var(--xs,2.74px) * 7),
+      rgba(140,106,194,.46) calc(var(--xs,2.74px) * 7),rgba(140,106,194,.46) calc(var(--xs,2.74px) * 8));}
   .cx-X .avb:hover{background-image:repeating-linear-gradient(135deg,
-      rgba(156,34,51,.78) 0,rgba(156,34,51,.78) var(--xs,3.65px),
-      rgba(210,118,47,.78) var(--xs,3.65px),rgba(210,118,47,.78) calc(var(--xs,3.65px) * 2),
-      rgba(224,185,58,.78) calc(var(--xs,3.65px) * 2),rgba(224,185,58,.78) calc(var(--xs,3.65px) * 3),
-      rgba(91,143,98,.78) calc(var(--xs,3.65px) * 3),rgba(91,143,98,.78) calc(var(--xs,3.65px) * 4),
-      rgba(74,127,168,.78) calc(var(--xs,3.65px) * 4),rgba(74,127,168,.78) calc(var(--xs,3.65px) * 5),
-      rgba(140,106,194,.78) calc(var(--xs,3.65px) * 5),rgba(140,106,194,.78) calc(var(--xs,3.65px) * 6));}
+      rgba(240,235,224,1) 0,rgba(240,235,224,1) var(--xs,2.74px),
+      rgba(168,201,138,.78) var(--xs,2.74px),rgba(168,201,138,.78) calc(var(--xs,2.74px) * 2),
+      rgba(91,143,98,.78) calc(var(--xs,2.74px) * 2),rgba(91,143,98,.78) calc(var(--xs,2.74px) * 3),
+      rgba(224,185,58,.78) calc(var(--xs,2.74px) * 3),rgba(224,185,58,.78) calc(var(--xs,2.74px) * 4),
+      rgba(210,118,47,.78) calc(var(--xs,2.74px) * 4),rgba(210,118,47,.78) calc(var(--xs,2.74px) * 5),
+      rgba(156,34,51,.78) calc(var(--xs,2.74px) * 5),rgba(156,34,51,.78) calc(var(--xs,2.74px) * 6),
+      rgba(222,111,172,.78) calc(var(--xs,2.74px) * 6),rgba(222,111,172,.78) calc(var(--xs,2.74px) * 7),
+      rgba(140,106,194,.78) calc(var(--xs,2.74px) * 7),rgba(140,106,194,.78) calc(var(--xs,2.74px) * 8));}
   /* the picked state stays the deep green everywhere, so selection never has
      to compete with hue for the reader's attention */
   .cx-W .avb.picked,.cx-C .avb.picked,.cx-X .avb.picked{background:var(--deep);border-color:var(--deep);}
@@ -283,22 +294,22 @@
   .cx-C .vc::before{background:repeating-linear-gradient(to bottom,
     #FCFAF6 0,#FCFAF6 2.5px,#9C2233 2.5px,#9C2233 5.5px);
     box-shadow:inset 0 0 0 1px rgba(26,30,23,.2);}
-  .cx-X .vc::before{background:linear-gradient(to bottom,#9C2233,#D2762F 20%,#E0B93A 40%,
-    #5B8F62 60%,#4A7FA8 80%,#8C6AC2);}
-  .cx-X .vmeter .track i{background:linear-gradient(90deg,#9C2233,#D2762F 20%,#E0B93A 40%,
-    #5B8F62 60%,#4A7FA8 80%,#8C6AC2);}
+  .cx-X .vc::before{background:linear-gradient(to bottom,#F0EBE0,#A8C98A 14%,#5B8F62 29%,
+    #E0B93A 43%,#D2762F 57%,#9C2233 71%,#DE6FAC 86%,#8C6AC2);}
+  .cx-X .vmeter .track i{background:linear-gradient(90deg,#F0EBE0,#A8C98A 14%,#5B8F62 29%,
+    #E0B93A 43%,#D2762F 57%,#9C2233 71%,#DE6FAC 86%,#8C6AC2);}
   .cx-C .vmeter .track i{background:repeating-linear-gradient(90deg,
     #F0EBE0 0,#F0EBE0 2px,#9C2233 2px,#9C2233 4.5px);}
   .gcard.cx-W .gbody{border-top-color:#E4DED2;}
   .gcard.cx-C .gbody{border-image:repeating-linear-gradient(90deg,
     #F0EBE0 0,#F0EBE0 3px,#9C2233 3px,#9C2233 6.5px) 1;}
-  .gcard.cx-X .gbody{border-image:linear-gradient(90deg,#9C2233,#D2762F 20%,#E0B93A 40%,
-    #5B8F62 60%,#4A7FA8 80%,#8C6AC2) 1;}
+  .gcard.cx-X .gbody{border-image:linear-gradient(90deg,#F0EBE0,#A8C98A 14%,#5B8F62 29%,
+    #E0B93A 43%,#D2762F 57%,#9C2233 71%,#DE6FAC 86%,#8C6AC2) 1;}
   .pline.cx-W::before{background:#EFEAE0;box-shadow:inset 0 0 0 1px rgba(26,30,23,.22);}
   .pline.cx-C::before{background:repeating-linear-gradient(to bottom,
     #F3EFE6 0,#F3EFE6 2.5px,#9C2233 2.5px,#9C2233 5.5px);}
-  .pline.cx-X::before{background:linear-gradient(to bottom,#9C2233,#D2762F 20%,#E0B93A 40%,
-    #5B8F62 60%,#4A7FA8 80%,#8C6AC2);}
+  .pline.cx-X::before{background:linear-gradient(to bottom,#F0EBE0,#A8C98A 14%,#5B8F62 29%,
+    #E0B93A 43%,#D2762F 57%,#9C2233 71%,#DE6FAC 86%,#8C6AC2);}
   .cx-W .vmeter .track i,.cx-C .vmeter .track i{box-shadow:inset 0 0 0 1px rgba(26,30,23,.24);}
   /* the filter chip is the legend for the bar, so it carries the same two
      patterns — at 13px, three dots and three bands is all that fits, and all
@@ -307,8 +318,9 @@
     background-image:radial-gradient(circle at 50% 50%,#9C2233 1.5px,transparent 1.7px) !important;
     background-size:6.5px 6.5px !important;background-position:1px 1px !important;}
   .fopt .sw.sw-X{background:repeating-linear-gradient(135deg,
-    #9C2233 0,#9C2233 2.2px,#D2762F 2.2px,#D2762F 4.4px,#E0B93A 4.4px,#E0B93A 6.6px,
-    #5B8F62 6.6px,#5B8F62 8.8px,#4A7FA8 8.8px,#4A7FA8 11px,#8C6AC2 11px,#8C6AC2 13.2px) !important;}
+    #F0EBE0 0,#F0EBE0 1.7px,#A8C98A 1.7px,#A8C98A 3.4px,#5B8F62 3.4px,#5B8F62 5.1px,
+    #E0B93A 5.1px,#E0B93A 6.8px,#D2762F 6.8px,#D2762F 8.5px,#9C2233 8.5px,#9C2233 10.2px,
+    #DE6FAC 10.2px,#DE6FAC 11.9px,#8C6AC2 11.9px,#8C6AC2 13.6px) !important;}
 
   /* ---------- the availability bar ----------
      The bar is tinted with the variety's own bloom colour, read off the second
@@ -1393,11 +1405,11 @@
     for (i = 0; i < bars.length; i++) {
       if (!(w[i] > 1)) continue;                            // display:none, or not laid out yet
       var s = bars[i].style;
-      // ~10.5px of dot pitch and ~31px of rainbow cycle, rounded to fit whole
+      // ~10.5px of dot pitch and ~36px of rainbow cycle, rounded to fit whole
       s.setProperty('--dotx', (w[i] / Math.max(4, Math.round(w[i] / 10.5))).toFixed(3) + 'px');
-      // six bands to a cycle, measured along the 45° axis — hence the cos
+      // eight bands to a cycle, measured along the 45° axis — hence the cos
       s.setProperty('--xs',
-        (w[i] / Math.max(1, Math.round(w[i] / 31)) * 0.70710678 / 6).toFixed(3) + 'px');
+        (w[i] / Math.max(1, Math.round(w[i] / 36)) * 0.70710678 / 8).toFixed(3) + 'px');
     }
   }
   /* A resize changes the column width without changing what is on the chart,
