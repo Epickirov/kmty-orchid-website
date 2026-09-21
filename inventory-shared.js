@@ -106,6 +106,17 @@
       'st.msg.confirmed': 'Confirmed and set aside. Our sales desk will be in touch about shipping.',
       'st.msg.declined': 'We could not fill this one. Nothing was deducted — please talk to your KMTY contact.',
       'st.set': 'Set aside:',
+      'ns': 'N.S.',
+      'ns.full': 'Natural spread — the width of one open flower',
+      'ht': 'Height',
+      'ht.full': 'Plant height',
+      'stem.SS': 'Single stem', 'stem.DS': 'Dual stem',
+      'stem.SS.s': 'SS', 'stem.DS.s': 'DS',
+      'stem.full': 'Stem',
+      'shot.plant': 'Whole plant', 'shot.flower': 'Flower',
+      'shot.swap': 'Show this one large',
+      'cup': 'Cup',
+      'tray': 'Per tray',
     'months': ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
       'mshort': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
     },
@@ -160,6 +171,17 @@
       'st.msg.confirmed': '已确认并预留，销售部将就发运事宜与您联系。',
       'st.msg.declined': '本次未能满足，库存未作任何扣减，请与您的 KMTY 对接人联系。',
       'st.set': '已预留：',
+      'ns': '花径',
+      'ns.full': '花径 — 单朵花完全展开的宽度',
+      'ht': '株高',
+      'ht.full': '株高',
+      'stem.SS': '单梗', 'stem.DS': '双梗',
+      'stem.SS.s': '单梗', 'stem.DS.s': '双梗',
+      'stem.full': '梗数',
+      'shot.plant': '整株', 'shot.flower': '花朵特写',
+      'shot.swap': '放大这张',
+      'cup': '杯径',
+      'tray': '每盘',
     'months': ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
       'mshort': ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
     },
@@ -214,6 +236,17 @@
       'st.msg.confirmed': 'Подтверждён и отложен. Отдел продаж свяжется с вами по отгрузке.',
       'st.msg.declined': 'Выполнить не удалось. Ничего не списано — свяжитесь с вашим менеджером KMTY.',
       'st.set': 'Отложено:',
+      'ns': 'Ø цветка',
+      'ns.full': 'Натуральный размах — ширина раскрытого цветка',
+      'ht': 'Высота',
+      'ht.full': 'Высота растения',
+      'stem.SS': 'Один цветонос', 'stem.DS': 'Два цветоноса',
+      'stem.SS.s': 'SS', 'stem.DS.s': 'DS',
+      'stem.full': 'Цветонос',
+      'shot.plant': 'Всё растение', 'shot.flower': 'Цветок',
+      'shot.swap': 'Показать крупно',
+      'cup': 'Горшок',
+      'tray': 'В лотке',
     'months': ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'],
       'mshort': ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'],
     },
@@ -268,6 +301,17 @@
       'st.msg.confirmed': 'Đã xác nhận và giữ hàng. Bộ phận kinh doanh sẽ liên hệ về việc giao hàng.',
       'st.msg.declined': 'Lần này chúng tôi chưa đáp ứng được. Không trừ tồn kho — vui lòng liên hệ người phụ trách KMTY.',
       'st.set': 'Đã giữ:',
+      'ns': 'Ø hoa',
+      'ns.full': 'Độ rộng của một bông hoa đã nở',
+      'ht': 'Chiều cao',
+      'ht.full': 'Chiều cao cây',
+      'stem.SS': 'Một cành', 'stem.DS': 'Hai cành',
+      'stem.SS.s': 'SS', 'stem.DS.s': 'DS',
+      'stem.full': 'Cành hoa',
+      'shot.plant': 'Cả cây', 'shot.flower': 'Hoa',
+      'shot.swap': 'Xem ảnh này lớn',
+      'cup': 'Chậu',
+      'tray': 'Mỗi khay',
     'months': ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
       'mshort': ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12'],
     },
@@ -298,6 +342,34 @@
         ? a.getUTCDate() + '–' + b.getUTCDate() + ' ' + ms[b.getUTCMonth()]
         : one(a) + ' – ' + one(b);
     },
+    /* SS / DS. `full` gives the sentence a buyer can read; the short form is
+       the trade abbreviation everywhere except Chinese, where 单梗 / 双梗 *is*
+       the abbreviation and SS would read as an import. */
+    stem: function (c, full) { return c ? T.s('stem.' + c + (full ? '' : '.s')) : ''; },
+    /* The measurements as a buyer writes them down. Anything not recorded is
+       left out rather than shown as a zero or a dash — a blank in a spec line
+       is noise, and a zero is a lie. */
+    specs: function (it, skipStem) {
+      var out = [];
+      if (it.cup) out.push(it.cup);
+      if (it.stem && !skipStem) out.push(T.stem(it.stem));
+      if (it.ns) out.push(T.s('ns') + ' ' + it.ns + ' cm');
+      if (it.ht) out.push(T.s('ht') + ' ' + it.ht + ' cm');
+      return out;
+    },
+    /* skipStem is for the places that already show the SS/DS badge: saying it
+       twice on one line is noise, and the line is fighting for width. */
+    specLine: function (it, skipStem) { return T.specs(it, skipStem).join(' · ') || '—'; },
+    /* Cup and stem alone: what identifies the grade in a list that already has
+       the variety name above it. The measurements go in full where there is
+       room to read them. */
+    specShort: function (it) {
+      var o = [];
+      if (it.cup) o.push(it.cup);
+      if (it.stem) o.push(T.stem(it.stem));
+      return o.join(' · ') || '—';
+    },
+
     apply: function (root) {
       document.documentElement.lang = LANG;
       root.querySelectorAll('[data-t]').forEach(function (el) {
@@ -339,8 +411,18 @@
     setSettings: function (pass, s) { return post('/api/inv/admin/settings', s, { 'x-admin-pass': pass }); },
   };
 
+  /* One place that knows how a photo is addressed, so the two pages and the
+     admin cannot drift apart. `shot` is 'plant' (the default, and what the
+     older single-photo links said) or 'flower'. updatedAt busts the cache,
+     which is why the image route may cache hard. */
+  function photo(it, shot) {
+    return '/api/inv/img?id=' + encodeURIComponent(it.id) +
+      (shot === 'flower' ? '&shot=flower' : '') + '&t=' + (it.updatedAt || 0);
+  }
+  function hasShot(it, shot) { return shot === 'flower' ? !!it.img2 : !!it.img; }
+
   window.KMTY_INV = {
-    t: T, api: api,
+    t: T, api: api, photo: photo, hasShot: hasShot,
     weeks: { mondayOfWeek: mondayOfWeek, weeksInYear: weeksInYear, weeksOfMonth: weeksOfMonth, isoWeekNow: isoWeekNow },
   };
 })();

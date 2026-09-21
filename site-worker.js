@@ -209,6 +209,23 @@ function groupByWeek(lines) {
   for (const l of lines) { if (!weeks.has(l.week)) weeks.set(l.week, []); weeks.get(l.week).push(l); }
   return [...weeks.entries()].sort((a, b) => a[0] - b[0]);
 }
+/* The grade the buyer was looking at when they asked. Production checks the
+   order against this, not against the variety name, so it travels with every
+   line: cup, single or dual stem, and the two measurements. Bilingual on the
+   stem because the sales desk reads English and the greenhouse reads 单梗. */
+const STEM_LABEL = { SS: 'SS 单梗', DS: 'DS 双梗' };
+function specHtml(l) {
+  const top = [esc(l.cup) || '—', l.stem ? STEM_LABEL[l.stem] : ''].filter(Boolean).join(' · ');
+  const meas = [l.ns ? 'N.S. ' + l.ns : '', l.ht ? 'H ' + l.ht : ''].filter(Boolean).join(' · ');
+  return top + (meas ? `<br><span style="color:#7A7264;font-size:11px;">${meas} cm</span>` : '');
+}
+function specText(l) {
+  const bits = [l.cup || '—'];
+  if (l.stem) bits.push(l.stem);
+  if (l.ns) bits.push('NS' + l.ns);
+  if (l.ht) bits.push('H' + l.ht);
+  return bits.join('/');
+}
 
 function inquiryHtml(rec) {
   const G = groupByWeek(rec.lines);
@@ -226,7 +243,7 @@ function inquiryHtml(rec) {
       rows += `<tr>
         <td style="${cell}font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:600;">${esc(l.code)}</td>
         <td style="${cell}">${esc(l.nameEn)}${l.nameZh ? `<br><span style="color:#7A7264;">${esc(l.nameZh)}</span>` : ''}</td>
-        <td style="${cell}white-space:nowrap;">${esc(l.cup) || '—'}</td>
+        <td style="${cell}white-space:nowrap;">${specHtml(l)}</td>
         <td style="${cell}text-align:right;font-weight:700;font-size:15px;">${l.qty.toLocaleString('en-US')}</td>
         <td style="${cell}text-align:right;color:${over ? '#B0552F' : '#7A7264'};white-space:nowrap;">
           ${l.stockAtRequest.toLocaleString('en-US')}${over ? '<br><b>short ' + (l.qty - l.stockAtRequest).toLocaleString('en-US') + '</b>' : ''}</td>
@@ -244,7 +261,7 @@ function inquiryHtml(rec) {
     ${short.length ? `<div style="background:#FBEEE7;color:#8E3F1F;padding:11px 24px;font-size:13px;">
       <b>${short.length} line${short.length > 1 ? 's' : ''} ${short.length > 1 ? 'exceed' : 'exceeds'} the stock we were showing.</b> Check with production before confirming.</div>` : ''}
     <table style="width:100%;border-collapse:collapse;">
-      <tr><th style="${head}">Code</th><th style="${head}">Variety</th><th style="${head}">Cup</th>
+      <tr><th style="${head}">Code</th><th style="${head}">Variety</th><th style="${head}">Spec · 规格</th>
           <th style="${head}text-align:right;">Wanted</th><th style="${head}text-align:right;">In stock</th></tr>
       ${rows}
       <tr><td colspan="3" style="${cell}border-bottom:none;padding-top:14px;font-weight:700;">Total</td>
@@ -274,7 +291,7 @@ function inquiryText(rec) {
   for (const [week, ls] of groupByWeek(rec.lines)) {
     t += 'WEEK ' + week + '\n';
     for (const l of ls) {
-      t += '  ' + l.code.padEnd(10) + (l.cup || '—').padEnd(10) +
+      t += '  ' + l.code.padEnd(10) + specText(l).padEnd(22) +
         String(l.qty).padStart(7) + '   (in stock ' + l.stockAtRequest + ')' +
         (l.qty > l.stockAtRequest ? '  ** SHORT ' + (l.qty - l.stockAtRequest) + ' **' : '') + '\n';
     }

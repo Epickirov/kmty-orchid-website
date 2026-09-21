@@ -289,6 +289,18 @@ cup size, one quantity, ready across a window of weeks — "5,000 of TPL-411 in
 why the customer page shows the whole window beside every week it appears in.
 Quantity is the pool, not a per-week figure.
 
+**Every batch carries two photographs and three measurements**, because that is
+what a buyer judges a phalaenopsis on and no single picture or number carries
+it. The *whole plant* shot (`invimg:<id>`) shows the habit — how it sits on a
+bench, how the spike arches — and identifies the variety in a list. The *flower*
+shot (`invimg2:<id>`) is a close-up or cut-out of one current bloom, for the
+colour break and the lip. The measurements are `stem` (`SS` single / `DS` dual,
+entered as SS/DS or 单梗/双梗), `ns` (natural spread, the width of one open
+flower, cm) and `ht` (plant height, cm). All five are optional: what the grower
+has not measured is left out rather than shown as a dash, because a spec sheet
+full of blanks says only that nobody measured. The specs sit on the batch, not
+the variety, since the same variety is graded and sold several ways.
+
 Weeks are ISO-8601 (week 1 contains 4 January, weeks start Monday), computed
 independently in the browser and in the worker — the server never trusts a week
 number that arrives from a client, and drops any line outside its batch's
@@ -298,7 +310,8 @@ window.
 |---|---|
 | `/inventory` | Buyers. Public landing page; the numbers need the access code. |
 | `/inventory-admin` | Staff. Gated by `ADMIN_PASS`. |
-| KV keys | `invcfg` (access code) · `inv:<id>` · `invimg:<id>` · `inq:<ts>-<rand>` |
+| KV keys | `invcfg` (access code) · `inv:<id>` · `invimg:<id>` (plant) · `invimg2:<id>` (flower) · `inq:<ts>-<rand>` |
+| Photo URLs | `/api/inv/img?id=<id>` is the plant; `&shot=flower` is the bloom |
 
 **Two levels of access, both deliberately simple.** Staff send `x-admin-pass`;
 buyers send `x-inv-code`, one shared code rotated from the admin page — buyers
@@ -335,7 +348,9 @@ from. The reference alone is short and dated, so it is guessable; the pair is
 not, and it is exactly what the buyer has to hand.
 
 Stock can be typed in one batch at a time or pasted/imported as CSV
-(`code, nameEn, nameZh, cup, qty, from, to, year, note, tray`); a row matching an
+(`code, nameEn, nameZh, cup, qty, from, to, year, note, tray, stem, ns, ht`);
+everything from `year` on may be left blank, and photos are uploaded per batch
+rather than through the sheet. A row matching an
 existing **code + cup + start week** updates it instead of duplicating, so a
 corrected sheet can be re-imported. Export writes a BOM so Excel reads the
 Chinese.

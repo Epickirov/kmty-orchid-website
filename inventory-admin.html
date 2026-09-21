@@ -13,6 +13,9 @@
         --sans:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;
         --serif:'Fraunces','Noto Serif SC',serif;}
   body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.55;}
+  /* an author rule that sets `display` beats the UA sheet's [hidden] — without
+     this the pending-inquiry badge sits there reading "0" forever */
+  [hidden]{display:none !important;}
   .wrap{max-width:1180px;margin:0 auto;padding:0 clamp(14px,3vw,30px);}
   h1{font-family:var(--serif);font-weight:600;font-size:23px;margin:0;}
   h2{font-family:var(--serif);font-weight:600;font-size:17px;margin:0 0 4px;}
@@ -53,6 +56,30 @@
   .thumb{width:44px;height:44px;border-radius:9px;object-fit:contain;background:var(--paper);}
   .nothumb{width:44px;height:44px;border-radius:9px;background:var(--paper);display:flex;align-items:center;
       justify-content:center;color:rgba(26,30,23,.2);font-family:var(--serif);}
+  /* plant + bloom in one 44px footprint, the same pairing the customer sees */
+  .duo{position:relative;width:44px;height:44px;}
+  .duo .flo{position:absolute;right:-5px;bottom:-5px;width:21px;height:21px;border-radius:50%;
+      object-fit:cover;background:#fff;box-shadow:0 0 0 2px #fff,0 1px 3px rgba(26,30,23,.25);}
+  .spec{font-size:11.5px;color:var(--muted);}
+  .stemtag{display:inline-block;padding:0 6px;border-radius:5px;font-size:10px;font-weight:700;line-height:16px;
+      background:rgba(76,140,87,.12);color:#2F5D3A;border:1px solid rgba(76,140,87,.24);}
+  .stemtag.ds{background:rgba(198,149,47,.16);color:#8A6412;border-color:rgba(198,149,47,.36);}
+
+  /* the two uploads, side by side and named, so nobody has to remember which
+     slot the cut-out goes in */
+  .shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-bottom:12px;}
+  .shot{border:1px solid var(--line);border-radius:12px;padding:12px 13px;background:var(--paper);
+      display:flex;gap:12px;align-items:flex-start;}
+  .shotbody{flex:1 1 auto;min-width:0;}
+  .shot h3{margin:0 0 2px;font-size:13px;font-weight:600;}
+  .shot p{margin:0 0 9px;font-size:11.5px;color:var(--faint);line-height:1.45;}
+  .shotbox{flex:0 0 auto;width:86px;height:86px;border-radius:10px;background:#fff;border:1px dashed var(--line);
+      display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  .shotbox img{width:100%;height:100%;object-fit:contain;}
+  .shotbox em{font-size:11px;color:rgba(26,30,23,.3);font-style:normal;}
+  .shot input[type=file]{font-size:12px;padding:6px 8px;background:#fff;}
+  .shot .btn{margin-top:7px;}
+  @media(max-width:520px){ .shot{flex-direction:column;} }
   .num{text-align:right;font-variant-numeric:tabular-nums;}
   .pill{display:inline-block;font-size:11px;padding:2px 9px;border-radius:999px;background:var(--paper);border:1px solid var(--line);}
   .pill.pending{background:#FFF6E6;border-color:#E8C88A;color:#8A5E10;}
@@ -113,12 +140,35 @@
         <label class="fld">年份 Year<input id="f-year" type="number" min="2024" max="2100"></label>
       </div>
       <div class="row">
+        <label class="fld">梗数 Stem<select id="f-stem">
+          <option value="">未标注 —</option>
+          <option value="SS">单梗 SS</option>
+          <option value="DS">双梗 DS</option>
+        </select></label>
+        <label class="fld">花径 N.S.（厘米）<input id="f-ns" type="number" min="0" max="60" step="0.1" placeholder="11.5"></label>
+        <label class="fld">株高 Height（厘米）<input id="f-ht" type="number" min="0" max="300" step="0.5" placeholder="62"></label>
         <label class="fld">备注 Note（客户可见，选填）<input id="f-note" maxlength="140" placeholder="大花型 / large flower"></label>
-        <label class="fld">照片 Photo（自动缩小）<input id="f-img" type="file" accept="image/*"></label>
       </div>
-      <div id="imgWrap" style="display:none;margin-bottom:10px;">
-        <img id="imgPrev" class="thumb" style="width:74px;height:74px;" alt="">
-        <button class="btn ghost sm" type="button" id="imgClear">移除照片</button>
+
+      <div class="shots">
+        <div class="shot">
+          <div class="shotbox"><img id="imgPrev" alt="" hidden><em id="imgNone">未上传</em></div>
+          <div class="shotbody">
+            <h3>主图 · 整株 Whole plant</h3>
+            <p>客户在列表和图库中首先看到这张。请拍完整植株，含盆。</p>
+            <input id="f-img" type="file" accept="image/*">
+            <button class="btn ghost sm" type="button" id="imgClear" hidden>移除</button>
+          </div>
+        </div>
+        <div class="shot">
+          <div class="shotbox"><img id="imgPrev2" alt="" hidden><em id="imgNone2">未上传</em></div>
+          <div class="shotbody">
+            <h3>副图 · 花朵特写 Flower</h3>
+            <p>当季单朵花的特写或去背图，用于展示花色与唇瓣。</p>
+            <input id="f-img2" type="file" accept="image/*">
+            <button class="btn ghost sm" type="button" id="imgClear2" hidden>移除</button>
+          </div>
+        </div>
       </div>
       <p style="display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:0;">
         <button class="btn" id="save">保存批次</button>
@@ -130,9 +180,10 @@
     <div class="card">
       <h2>批量导入 Bulk import</h2>
       <p class="lead">从 Excel 直接复制粘贴，或选择 CSV 文件。每行一个批次，列顺序：
-        <b class="mono">编号, 英文名, 中文名, 杯径, 数量, 起始周, 结束周, 年份, 备注, 每盘株数</b>。
-        年份与备注可留空。<b>编号＋杯径＋起始周</b>相同的批次会被覆盖，其余新增；照片请在上方逐个上传。</p>
-      <textarea id="csv" rows="4" placeholder="TPL-411, Ivory, 象牙白, 2.5&quot;, 5000, 10, 16, 2026,
+        <b class="mono">编号, 英文名, 中文名, 杯径, 数量, 起始周, 结束周, 年份, 备注, 每盘株数, 梗数, 花径, 株高</b>。
+        年份之后各列均可留空；梗数填 <b class="mono">SS</b>／<b class="mono">单梗</b> 或 <b class="mono">DS</b>／<b class="mono">双梗</b>，花径与株高以厘米计。
+        <b>编号＋杯径＋起始周</b>相同的批次会被覆盖，其余新增；两张照片请在上方逐个上传。</p>
+      <textarea id="csv" rows="4" placeholder="TPL-411, Ivory, 象牙白, 2.5&quot;, 5000, 10, 16, 2026, , 60, DS, 11.5, 62
 TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
       <p style="display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:10px 0 0;">
         <input type="file" id="csvFile" accept=".csv,text/csv,text/plain" style="width:auto;">
@@ -145,7 +196,7 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
     <div class="card">
       <h2>现有批次 <span class="pill" id="stockCount"></span></h2>
       <div style="overflow-x:auto;"><table id="stockTable">
-        <thead><tr><th></th><th>编号</th><th>品种</th><th>杯径</th><th class="num">数量</th><th>可供周</th><th></th></tr></thead>
+        <thead><tr><th></th><th>编号</th><th>品种</th><th>规格</th><th class="num">数量</th><th>可供周</th><th></th></tr></thead>
         <tbody></tbody>
       </table></div>
     </div>
@@ -171,13 +222,13 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
   </div>
 </div>
 
-<script src="inventory-shared.js?v=2"></script>
+<script src="inventory-shared.js?v=3"></script>
 <script>
 (function () {
   'use strict';
-  var api = window.KMTY_INV.api, W = window.KMTY_INV.weeks;
+  var api = window.KMTY_INV.api, W = window.KMTY_INV.weeks, photo = window.KMTY_INV.photo;
   var $ = function (id) { return document.getElementById(id); };
-  var pass = '', items = [], inquiries = [], editing = null, newImg;
+  var pass = '', items = [], inquiries = [], editing = null;
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
   function st(el, msg, bad) { var e = $(el); e.textContent = msg; e.className = 'status' + (bad ? ' bad' : ''); }
@@ -219,11 +270,21 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
     $('stockCount').textContent = items.length + ' 批 · ' + n(items.reduce(function (s, i) { return s + i.qty; }, 0)) + ' 株';
     items.forEach(function (it) {
       var tr = document.createElement('tr');
+      // the plant leads; the bloom rides its corner, exactly as on the customer page
+      var shot = it.img || it.img2
+        ? '<div class="duo"><img class="thumb" src="' + photo(it, it.img ? 'plant' : 'flower') + '" alt="">' +
+          (it.img && it.img2 ? '<img class="flo" src="' + photo(it, 'flower') + '" alt="" title="花朵特写">' : '') + '</div>'
+        : '<span class="nothumb">✽</span>';
+      var meas = [];
+      if (it.ns) meas.push('花径 ' + it.ns);
+      if (it.ht) meas.push('株高 ' + it.ht);
       tr.innerHTML =
-        '<td>' + (it.img ? '<img class="thumb" src="/api/inv/img?id=' + it.id + '&t=' + it.updatedAt + '" alt="">' : '<span class="nothumb">✽</span>') + '</td>' +
+        '<td>' + shot + '</td>' +
         '<td class="mono" style="font-size:12px;">' + esc(it.code) + '</td>' +
         '<td>' + esc(it.nameEn) + (it.nameZh ? '<br><span style="color:var(--faint);font-size:12px;">' + esc(it.nameZh) + '</span>' : '') + '</td>' +
-        '<td>' + (esc(it.cup) || '—') + '</td>' +
+        '<td>' + (esc(it.cup) || '—') +
+          (it.stem ? ' <span class="stemtag' + (it.stem === 'DS' ? ' ds' : '') + '">' + (it.stem === 'DS' ? '双梗' : '单梗') + '</span>' : '') +
+          (meas.length ? '<br><span class="spec">' + meas.join(' · ') + ' cm</span>' : '') + '</td>' +
         '<td class="num"><b>' + n(it.qty) + '</b>' + (it.tray > 1 ? '<br><span style="color:var(--faint);font-size:11px;">每盘 ' + n(it.tray) + '</span>' : '') + '</td>' +
         '<td>第 ' + it.from + '–' + it.to + ' 周<br><span style="color:var(--faint);font-size:11.5px;">' + it.year + '</span></td>';
       var td = document.createElement('td');
@@ -242,66 +303,104 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
   }
 
   function edit(it) {
-    editing = it.id; newImg = undefined;
+    editing = it.id;
     $('formTitle').textContent = '编辑批次 · ' + it.code;
     $('f-code').value = it.code; $('f-nameEn').value = it.nameEn; $('f-nameZh').value = it.nameZh || '';
     $('f-cup').value = it.cup || ''; $('f-qty').value = it.qty; $('f-tray').value = it.tray || '';
+    $('f-stem').value = it.stem || ''; $('f-ns').value = it.ns || ''; $('f-ht').value = it.ht || '';
     $('f-from').value = it.from; $('f-to').value = it.to; $('f-year').value = it.year;
     $('f-note').value = it.note || '';
-    $('f-img').value = '';
-    if (it.img) { $('imgPrev').src = '/api/inv/img?id=' + it.id + '&t=' + it.updatedAt; $('imgWrap').style.display = 'block'; }
-    else $('imgWrap').style.display = 'none';
+    shotPlant.reset(); shotFlower.reset();
+    if (it.img) shotPlant.show(photo(it, 'plant'));
+    if (it.img2) shotFlower.show(photo(it, 'flower'));
     $('reset').hidden = false;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   function resetForm() {
-    editing = null; newImg = undefined;
+    editing = null;
     $('formTitle').textContent = '添加批次';
-    ['f-code','f-nameEn','f-nameZh','f-cup','f-qty','f-tray','f-from','f-to','f-note','f-img'].forEach(function (k) { $(k).value = ''; });
+    ['f-code','f-nameEn','f-nameZh','f-cup','f-qty','f-tray','f-ns','f-ht','f-from','f-to','f-note']
+      .forEach(function (k) { $(k).value = ''; });
+    $('f-stem').value = '';
     $('f-year').value = new Date().getUTCFullYear();
-    $('imgWrap').style.display = 'none'; $('reset').hidden = true; st('saveStatus', '');
+    shotPlant.reset(); shotFlower.reset();
+    $('reset').hidden = true; st('saveStatus', '');
   }
   $('reset').addEventListener('click', resetForm);
 
-  // resize in the browser: a 4000px phone photo has no business in KV, and the
-  // customer page never shows it bigger than ~320 CSS px
-  $('f-img').addEventListener('change', function () {
-    var f = this.files && this.files[0]; if (!f) return;
-    var fr = new FileReader();
-    fr.onload = function () {
-      var img = new Image();
-      img.onload = function () {
-        var max = 760, w = img.width, h = img.height;
-        if (w > max || h > max) { var k = max / Math.max(w, h); w = Math.round(w * k); h = Math.round(h * k); }
-        var c = document.createElement('canvas'); c.width = w; c.height = h;
-        var g = c.getContext('2d');
-        // cut-out photos of blooms usually arrive as PNG or WebP with a
-        // transparent background, and JPEG has no alpha — without this the
-        // background lands as black and every card looks like a night shot
-        g.fillStyle = '#FFFFFF'; g.fillRect(0, 0, w, h);
-        g.drawImage(img, 0, 0, w, h);
-        newImg = c.toDataURL('image/jpeg', 0.84);
-        $('imgPrev').src = newImg; $('imgWrap').style.display = 'block';
+  /* Resize in the browser: a 4000px phone photo has no business in KV, and no
+     page shows one bigger than ~320 CSS px.
+
+     Cut-outs of a single bloom arrive as PNG or WebP with a transparent
+     background, and JPEG has no alpha — encode one as JPEG and the background
+     lands as black. So a cut-out is kept as PNG while that stays small; past
+     that it is flattened onto white, which is what every card behind it is
+     anyway. Plant shots go straight to JPEG: they fill the frame. */
+  function shrink(file, max, keepAlpha) {
+    return new Promise(function (done, fail) {
+      var fr = new FileReader();
+      fr.onerror = fail;
+      fr.onload = function () {
+        var img = new Image();
+        img.onerror = fail;
+        img.onload = function () {
+          var w = img.width, h = img.height;
+          if (w > max || h > max) { var k = max / Math.max(w, h); w = Math.round(w * k); h = Math.round(h * k); }
+          var c = document.createElement('canvas'); c.width = w; c.height = h;
+          var g = c.getContext('2d');
+          if (keepAlpha && /png|webp/i.test(file.type || '')) {
+            g.drawImage(img, 0, 0, w, h);
+            var png = c.toDataURL('image/png');
+            if (png.length < 700000) { done(png); return; }   // transparency is worth 500KB, not 3MB
+          }
+          g.fillStyle = '#FFFFFF'; g.fillRect(0, 0, w, h);     // opaque ground, then the photo over it
+          g.drawImage(img, 0, 0, w, h);
+          done(c.toDataURL('image/jpeg', 0.84));
+        };
+        img.src = fr.result;
       };
-      img.src = fr.result;
-    };
-    fr.readAsDataURL(f);
-  });
-  $('imgClear').addEventListener('click', function () {
-    newImg = ''; $('imgWrap').style.display = 'none'; $('f-img').value = '';
-  });
+      fr.readAsDataURL(file);
+    });
+  }
+
+  /* One upload slot. `pending` carries the three-way the API expects:
+     undefined = leave the stored photo alone, '' = remove it, a data URL =
+     replace it. Two slots, so an edit that touches only the bloom leaves the
+     plant shot exactly where it was. */
+  function photoField(fileId, prevId, noneId, clearId, max, keepAlpha) {
+    var f = { pending: undefined };
+    function paint(src) {
+      $(prevId).hidden = !src; $(noneId).hidden = !!src; $(clearId).hidden = !src;
+      if (src) $(prevId).src = src;
+    }
+    $(fileId).addEventListener('change', function () {
+      var file = this.files && this.files[0]; if (!file) return;
+      st('saveStatus', '处理图片中…');
+      shrink(file, max, keepAlpha).then(function (url) {
+        f.pending = url; paint(url); st('saveStatus', '');
+      }).catch(function () { st('saveStatus', '这张图片读不出来，请换一张', true); });
+    });
+    $(clearId).addEventListener('click', function () { f.pending = ''; paint(''); $(fileId).value = ''; });
+    f.show = paint;
+    f.reset = function () { f.pending = undefined; paint(''); $(fileId).value = ''; };
+    return f;
+  }
+  var shotPlant = photoField('f-img', 'imgPrev', 'imgNone', 'imgClear', 760, false);
+  var shotFlower = photoField('f-img2', 'imgPrev2', 'imgNone2', 'imgClear2', 620, true);
 
   $('save').addEventListener('click', function () {
     var body = {
       id: editing || undefined,
       code: $('f-code').value.trim(), nameEn: $('f-nameEn').value.trim(), nameZh: $('f-nameZh').value.trim(),
       cup: $('f-cup').value.trim(), qty: $('f-qty').value, tray: $('f-tray').value || 0,
+      stem: $('f-stem').value, ns: $('f-ns').value || 0, ht: $('f-ht').value || 0,
       from: $('f-from').value, to: $('f-to').value,
       year: $('f-year').value || new Date().getUTCFullYear(), note: $('f-note').value.trim(),
     };
     if (!body.code || !body.nameEn) { st('saveStatus', '编号与英文名为必填', true); return; }
     if (!body.from || !body.to) { st('saveStatus', '请填写可供周段', true); return; }
-    if (newImg !== undefined) body.img = newImg; else if (editing) body.img = '__keep__';
+    if (shotPlant.pending !== undefined) body.img = shotPlant.pending;
+    if (shotFlower.pending !== undefined) body.img2 = shotFlower.pending;
     $('save').disabled = true; st('saveStatus', '保存中…');
     api.saveItem(pass, body).then(function (r) {
       $('save').disabled = false;
@@ -354,7 +453,9 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
         id: hit ? hit.id : undefined, code: code, nameEn: en, nameZh: g(2), cup: cup,
         qty: qty, from: from, to: to, year: Number(g(7)) || new Date().getUTCFullYear(), note: g(8),
         tray: Number(g(9)) || 0,
-        img: hit ? '__keep__' : undefined,
+        // the server takes SS / DS / 单梗 / 双梗 / 1 / 2, so a grower's own sheet imports as written
+        stem: g(10), ns: Number(g(11)) || 0, ht: Number(g(12)) || 0,
+        img: hit ? '__keep__' : undefined, img2: hit ? '__keep__' : undefined,
       });
     });
     if (!jobs.length) { st('csvStatus', '每行至少需要 编号 / 英文名 / 数量 / 起止周', true); return; }
@@ -388,8 +489,11 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
   });
   $('csvOut').addEventListener('click', function () {
     var q = function (v) { v = String(v == null ? '' : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
-    var csv = '编号,英文名,中文名,杯径,数量,起始周,结束周,年份,备注,每盘株数\n' +
-      items.map(function (i) { return [i.code, i.nameEn, i.nameZh, i.cup, i.qty, i.from, i.to, i.year, i.note, i.tray || ''].map(q).join(','); }).join('\n');
+    var csv = '编号,英文名,中文名,杯径,数量,起始周,结束周,年份,备注,每盘株数,梗数,花径,株高\n' +
+      items.map(function (i) {
+        return [i.code, i.nameEn, i.nameZh, i.cup, i.qty, i.from, i.to, i.year, i.note,
+                i.tray || '', i.stem || '', i.ns || '', i.ht || ''].map(q).join(',');
+      }).join('\n');
     var a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }));  // BOM so Excel reads the Chinese
     a.download = 'kmty-inventory-' + new Date().toISOString().slice(0, 10) + '.csv';
@@ -437,7 +541,10 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
           rows += '<tr>' +
             '<td class="mono" style="font-size:12px;">' + esc(l.code) + '</td>' +
             '<td>' + esc(l.nameEn) + (l.nameZh ? ' · ' + esc(l.nameZh) : '') + '</td>' +
-            '<td>' + (esc(l.cup) || '—') + '</td>' +
+            '<td>' + (esc(l.cup) || '—') +
+              (l.stem ? ' <span class="stemtag' + (l.stem === 'DS' ? ' ds' : '') + '">' + (l.stem === 'DS' ? '双梗' : '单梗') + '</span>' : '') +
+              (l.ns || l.ht ? '<br><span class="spec">' +
+                [l.ns ? '花径 ' + l.ns : '', l.ht ? '株高 ' + l.ht : ''].filter(Boolean).join(' · ') + ' cm</span>' : '') + '</td>' +
             '<td class="num"><b>' + n(l.qty) + '</b></td>' +
             '<td class="num' + (over ? ' short' : '') + '">' + (now === null ? '已删除' : n(now) + ' 现存' + (over ? '（差 ' + n(l.qty - now) + '）' : '')) + '</td>' +
           '</tr>';
@@ -450,7 +557,7 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
         }).join('，') + '</p>';
       }
       body.innerHTML =
-        '<div style="overflow-x:auto;"><table><thead><tr><th>编号</th><th>品种</th><th>杯径</th><th class="num">需求</th><th class="num">库存</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+        '<div style="overflow-x:auto;"><table><thead><tr><th>编号</th><th>品种</th><th>规格</th><th class="num">需求</th><th class="num">库存</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
         '<p class="lead" style="margin-top:12px;"><b>' + esc(q.buyer.name || '—') + '</b>' + (q.buyer.country ? ' · ' + esc(q.buyer.country) : '') +
           ' · <a href="mailto:' + esc(q.buyer.email) + '">' + esc(q.buyer.email) + '</a>' + (q.buyer.tel ? ' · ' + esc(q.buyer.tel) : '') + '</p>' +
         (q.buyer.note ? '<p class="lead" style="background:var(--paper);padding:10px 12px;border-radius:9px;white-space:pre-wrap;">' + esc(q.buyer.note) + '</p>' : '') +

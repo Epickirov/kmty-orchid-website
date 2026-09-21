@@ -16,8 +16,8 @@
     --serif:'Fraunces','Playfair Display','Noto Serif SC',serif;
     --sans:'Hanken Grotesk','Noto Sans','Noto Sans SC',sans-serif;
     --wcol:62px;           /* one week column */
-    --namecol:268px;       /* the sticky variety column */
-    --row:62px;
+    --namecol:330px;       /* the sticky variety column */
+    --row:64px;
   }
   html{-webkit-text-size-adjust:100%;}
   body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--sans);font-size:14.5px;line-height:1.5;}
@@ -27,6 +27,11 @@
   .tnum{font-variant-numeric:tabular-nums;}
   button,input,select,textarea{font-family:var(--sans);font-size:14px;}
   .sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
+  /* The page hides things with the `hidden` attribute, but any author rule
+     that sets `display` beats the UA sheet's [hidden] — which is why the
+     Calendar/Gallery and Cosy/Compact toggles were showing on the access-code
+     screen, before there was anything to toggle. */
+  [hidden]{display:none !important;}
 
   /* ---------- chrome ---------- */
   header{position:sticky;top:0;z-index:80;background:rgba(243,238,228,.95);
@@ -77,15 +82,32 @@
 
   /* variety cell */
   .vc{display:flex;gap:10px;align-items:center;padding:8px 12px;height:var(--row);}
-  .vthumb{width:44px;height:44px;border-radius:9px;flex:0 0 auto;object-fit:contain;
+  /* Two photos, one footprint: the plant carries the row, the bloom rides its
+     corner. Doubling the thumbnail would cost the sticky column 50px it does
+     not have, and the flower is a detail — it earns a detail's size. */
+  .vshots{position:relative;flex:0 0 auto;width:46px;height:46px;}
+  .vthumb{width:46px;height:46px;border-radius:9px;display:block;object-fit:contain;
     background:var(--paper) radial-gradient(circle at 50% 38%,#fff,rgba(0,0,0,.05));}
+  div.vthumb{display:flex;align-items:center;justify-content:center;}
+  div.vthumb::after{content:'\2733';font-family:var(--serif);font-size:18px;color:rgba(26,30,23,.15);}
+  .vflo{position:absolute;right:-5px;bottom:-5px;width:23px;height:23px;border-radius:50%;
+    object-fit:cover;background:#fff;box-shadow:0 0 0 2px #fff,0 1px 4px rgba(26,30,23,.22);}
+  .cal tbody tr:hover .vflo{box-shadow:0 0 0 2px #FCFAF6,0 1px 4px rgba(26,30,23,.22);}
   .vmeta{min-width:0;flex:1 1 auto;}
-  .vcode{font-size:9.5px;letter-spacing:.13em;color:var(--gold);font-weight:700;}
+  .vcode{font-size:9.5px;letter-spacing:.13em;color:var(--gold);font-weight:700;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .vname{font-family:var(--serif);font-weight:600;font-size:14.5px;line-height:1.15;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .vsub{font-size:11px;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .vqty{text-align:right;flex:0 0 auto;}
   .vqty b{font-size:14px;} .vqty span{display:block;font-size:10px;color:var(--faint);}
+
+  /* stem grade: one plant, one spike (SS) or two (DS). DS is the better grade,
+     so it takes the gold the site already spends on its premium marks. */
+  .sb{display:inline-block;margin-left:7px;padding:0 6px;border-radius:5px;vertical-align:1px;
+    font-size:9px;letter-spacing:.09em;font-weight:700;line-height:15px;
+    background:rgba(47,93,58,.1);color:var(--deep);border:1px solid rgba(47,93,58,.22);}
+  .sb.ds{background:rgba(198,149,47,.15);color:#8A6412;border-color:rgba(198,149,47,.34);}
 
   /* the availability bar */
   td.wk{position:relative;height:var(--row);}
@@ -103,21 +125,42 @@
   td.wk.out{background:repeating-linear-gradient(135deg,transparent,transparent 5px,rgba(26,30,23,.028) 5px,rgba(26,30,23,.028) 10px);}
 
   /* compact density */
-  body.compact{--row:36px;}
+  body.compact{--row:36px;--namecol:286px;}
   body.compact .vc{padding:4px 12px;gap:8px;}
+  body.compact .vshots{width:24px;height:24px;}
   body.compact .vthumb{width:24px;height:24px;border-radius:6px;}
+  body.compact .vflo{display:none;}              /* unreadable at 11px; the popover has it */
   body.compact .vcode{display:inline;margin-right:7px;}
   body.compact .vname{display:inline;font-size:13px;}
-  body.compact .vsub{display:none;}              /* cup + tray live in the popover */
+  body.compact .vsub{display:none;}              /* the measurements live in the popover */
+  body.compact .sb{margin-left:5px;line-height:13px;font-size:8.5px;}
   body.compact .vqty span{display:none;}
   body.compact .vqty b{font-size:12.5px;}
   body.compact .avb{height:17px;}
 
   /* ---------- quantity popover ---------- */
   .pop{position:fixed;z-index:95;background:#fff;border:1px solid var(--line);border-radius:14px;
-    box-shadow:0 14px 44px rgba(26,30,23,.2);padding:14px;width:250px;}
+    box-shadow:0 14px 44px rgba(26,30,23,.2);padding:14px;width:296px;max-width:calc(100vw - 24px);}
   .pop h4{margin:0 0 2px;font-family:var(--serif);font-size:15px;font-weight:600;}
   .pop .pmeta{font-size:11.5px;color:var(--faint);margin-bottom:10px;}
+  /* both shots, side by side and labelled — this is the one place a buyer can
+     see the habit and the bloom together before committing a number */
+  .pshots{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px;margin-bottom:11px;}
+  .pshot{min-width:0;}
+  .pshot img{width:100%;aspect-ratio:1/1;object-fit:contain;border-radius:10px;display:block;
+    background:var(--paper) radial-gradient(circle at 50% 38%,#fff,rgba(0,0,0,.05));}
+  .pshot span{display:block;margin-top:4px;font-size:9.5px;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--faint);text-align:center;}
+  /* the spec sheet: label over figure, so the numbers line up and read as a set */
+  .pspec{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line2);
+    border:1px solid var(--line2);border-radius:10px;overflow:hidden;margin:10px 0 2px;}
+  .pspec div{background:#fff;padding:6px 9px;min-width:0;}
+  /* an odd number of figures otherwise leaves a white half-cell that reads as
+     an empty field rather than as the end of the sheet */
+  .pspec div:last-child:nth-child(odd){grid-column:1/-1;}
+  .pspec dt{font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);margin:0;}
+  .pspec dd{margin:1px 0 0;font-size:12.5px;font-weight:600;font-variant-numeric:tabular-nums;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .stepper{display:flex;gap:6px;align-items:center;}
   .stepper button{width:34px;height:38px;border:1px solid var(--line);background:var(--paper);border-radius:9px;
     font-size:17px;cursor:pointer;color:var(--ink);line-height:1;}
@@ -141,9 +184,32 @@
   .gcard{background:#fff;border:1px solid var(--line);border-radius:17px;overflow:hidden;display:flex;flex-direction:column;
     transition:box-shadow .2s ease,transform .2s ease;}
   .gcard:hover{box-shadow:0 8px 26px rgba(26,30,23,.09);transform:translateY(-2px);}
-  .gshot{aspect-ratio:1/1;background:var(--paper) radial-gradient(circle at 50% 38%,#fff,rgba(0,0,0,.04));}
-  .gshot img{width:100%;height:100%;object-fit:contain;padding:8%;}
+  .gshot{aspect-ratio:1/1;background:var(--paper) radial-gradient(circle at 50% 38%,#fff,rgba(0,0,0,.04));
+    position:relative;}
+  /* a variety with no photograph yet gets the house mark rather than a blank
+     white square, which reads as a failed load */
+  .gshot.empty::before{content:'✽';position:absolute;inset:0;display:flex;align-items:center;
+    justify-content:center;font-family:var(--serif);font-size:34px;color:rgba(26,30,23,.13);}
+  .gshot img.gmain{width:100%;height:100%;object-fit:contain;padding:8%;}
+  /* the other shot as a swatch on the corner. Tapping it swaps the two, which
+     is the whole interaction — no lightbox, no carousel dots to hunt for. */
+  .ginset{position:absolute;right:9px;bottom:9px;width:31%;aspect-ratio:1/1;border-radius:50%;
+    padding:0;border:0;overflow:hidden;cursor:pointer;background:#fff;
+    box-shadow:0 0 0 2px #fff,0 2px 9px rgba(26,30,23,.22);transition:transform .16s ease;}
+  .ginset img{width:100%;height:100%;object-fit:cover;display:block;}
+  .ginset:hover,.ginset:focus-visible{transform:scale(1.07);}
+  .gtag{position:absolute;left:9px;top:9px;font-size:9px;letter-spacing:.09em;text-transform:uppercase;
+    background:rgba(255,255,255,.88);color:var(--muted);padding:2px 7px;border-radius:999px;
+    backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
   .gbody{padding:11px 13px 13px;flex:1 1 auto;display:flex;flex-direction:column;}
+  /* spec sheet: two columns of label → figure, hairline-ruled like a datasheet */
+  .gspec{display:grid;grid-template-columns:1fr 1fr;gap:3px 11px;margin-top:9px;}
+  .gspec div{display:flex;justify-content:space-between;align-items:baseline;gap:6px;
+    font-size:11px;padding-bottom:3px;border-bottom:1px solid var(--line2);min-width:0;}
+  .gspec div:last-child:nth-child(odd){grid-column:1/-1;}
+  .gspec dt{color:var(--faint);margin:0;white-space:nowrap;}
+  .gspec dd{margin:0;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .gwks{display:flex;gap:3px;flex-wrap:wrap;margin-top:8px;}
   .gwk{font-size:10.5px;padding:3px 7px;border-radius:7px;background:rgba(76,140,87,.12);color:var(--deep);
     border:1px solid rgba(76,140,87,.22);cursor:pointer;font-weight:600;}
@@ -168,6 +234,8 @@
   .pweek{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--deep);font-weight:700;
     padding:15px 0 5px;border-bottom:1px solid var(--line);}
   .pline{display:flex;gap:9px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line2);}
+  .pline .pthumb{width:32px;height:32px;border-radius:7px;flex:0 0 auto;object-fit:contain;
+    background:#fff radial-gradient(circle at 50% 38%,#fff,rgba(0,0,0,.05));}
   .pline .pm{flex:1 1 auto;min-width:0;}
   .pline .pn{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .pline .pc{font-size:10.5px;color:var(--faint);}
@@ -205,10 +273,22 @@
   .empty{text-align:center;color:var(--faint);padding:56px 0;}
   footer{padding:26px 0 90px;color:var(--faint);font-size:12px;}
 
+  /* The control strip does not fit one 390px row — it was running 760px wide
+     and taking the whole page sideways with it. Let it wrap; the spacer that
+     pushes the right-hand group away on a desktop is exactly what stops it. */
+  @media(max-width:760px){
+    .bar{height:auto;flex-wrap:wrap;padding:8px 0;gap:7px 9px;}
+    .bar .sp{display:none;}
+    .seg button{padding:5px 10px;font-size:11.5px;}
+    .back{font-size:11.5px;}
+  }
   @media(max-width:860px){
-    :root{--namecol:176px;--wcol:56px;--row:50px;}
+    :root{--namecol:196px;--wcol:56px;--row:52px;}
+    body.compact{--namecol:196px;}
     .scroller{max-height:none;}
-    .vthumb{width:30px;height:30px;}
+    .vshots{width:32px;height:32px;}
+    .vthumb{width:32px;height:32px;}
+    .vflo{width:16px;height:16px;right:-4px;bottom:-4px;}
     .vsub{display:none;}
     .vqty span{display:none;}
     .vqty b{font-size:12.5px;}
@@ -321,15 +401,58 @@
   </div>
 </aside>
 
-<script src="inventory-shared.js?v=2"></script>
+<script src="inventory-shared.js?v=3"></script>
 <script>
 (function () {
   'use strict';
   var T = window.KMTY_INV.t, W = window.KMTY_INV.weeks, api = window.KMTY_INV.api;
+  var photo = window.KMTY_INV.photo, hasShot = window.KMTY_INV.hasShot;
   var $ = function (id) { return document.getElementById(id); };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
     return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   var n = function (v) { return Number(v).toLocaleString('en-US'); };
+
+  /* Which shots this batch actually has, in the order they should be shown:
+     the plant first because it is what identifies the variety, the flower
+     second. A batch with only a bloom shot still leads with the bloom rather
+     than with an empty frame. */
+  function shots(it) {
+    var out = [];
+    if (hasShot(it, 'plant')) out.push('plant');
+    if (hasShot(it, 'flower')) out.push('flower');
+    return out;
+  }
+  function stemBadge(it) {
+    return it.stem ? '<span class="sb' + (it.stem === 'DS' ? ' ds' : '') + '" title="' +
+      esc(T.s('stem.' + it.stem)) + '">' + esc(T.stem(it.stem)) + '</span>' : '';
+  }
+
+  /* The measured figures as label → value pairs. Only what was actually
+     recorded: a spec sheet full of dashes tells a buyer nothing except that
+     nobody measured, and it costs the same vertical space as one that does. */
+  function specPairs(it) {
+    var p = [];
+    if (it.cup) p.push([T.s('cup'), it.cup]);
+    if (it.stem) p.push([T.s('stem.full'), T.s('stem.' + it.stem)]);
+    if (it.ns) p.push([T.s('ns'), it.ns + ' cm']);
+    if (it.ht) p.push([T.s('ht'), it.ht + ' cm']);
+    if (it.tray > 1) p.push([T.s('tray'), n(it.tray)]);
+    return p;
+  }
+  function specGrid(it) {
+    var p = specPairs(it);
+    if (!p.length) return '';
+    return '<dl class="gspec">' + p.map(function (x) {
+      return '<div><dt>' + esc(x[0]) + '</dt><dd>' + esc(x[1]) + '</dd></div>';
+    }).join('') + '</dl>';
+  }
+  function specSheet(it) {
+    var p = specPairs(it);
+    if (!p.length) return '';
+    return '<dl class="pspec">' + p.map(function (x) {
+      return '<div><dt>' + esc(x[0]) + '</dt><dd>' + esc(x[1]) + '</dd></div>';
+    }).join('') + '</dl>';
+  }
 
   var S = {
     code: '', items: [], year: new Date().getUTCFullYear(), cart: [],
@@ -498,14 +621,19 @@
     rows.forEach(function (it) {
       var tr = document.createElement('tr');
       var td = document.createElement('td'); td.className = 'name';
+      var sh = shots(it);
       td.innerHTML =
         '<div class="vc">' +
-          (it.img ? '<img class="vthumb" src="/api/inv/img?id=' + it.id + '&t=' + it.updatedAt + '" alt="" loading="lazy">'
-                  : '<div class="vthumb"></div>') +
+          '<div class="vshots">' +
+            (sh.length ? '<img class="vthumb" src="' + photo(it, sh[0]) + '" alt="" loading="lazy">'
+                       : '<div class="vthumb"></div>') +
+            (sh.length > 1 ? '<img class="vflo" src="' + photo(it, sh[1]) + '" alt="" loading="lazy" title="' +
+                             esc(T.s('shot.flower')) + '">' : '') +
+          '</div>' +
           '<div class="vmeta">' +
-            '<div class="vcode mono">' + esc(it.code) + '</div>' +
+            '<div class="vcode mono">' + esc(it.code) + stemBadge(it) + '</div>' +
             '<div class="vname">' + esc(nm(it)) + '</div>' +
-            '<div class="vsub">' + esc(it.cup || '—') + (it.tray > 1 ? ' · ' + T.s('trayOf').replace('%s', n(it.tray)) : '') + '</div>' +
+            '<div class="vsub">' + esc(T.specLine(it, true)) + '</div>' +
           '</div>' +
           '<div class="vqty tnum"><b>' + n(it.qty) + '</b><span>' + esc(T.s('avail')) + '</span></div>' +
         '</div>';
@@ -540,16 +668,38 @@
     if (!rows.length) { host.innerHTML = '<div class="empty">' + esc(T.s('none')) + '</div>'; return; }
     rows.forEach(function (it) {
       var d = document.createElement('div'); d.className = 'gcard';
+      var sh = shots(it);
       d.innerHTML =
-        '<div class="gshot">' + (it.img ? '<img src="/api/inv/img?id=' + it.id + '&t=' + it.updatedAt + '" alt="" loading="lazy">' : '') + '</div>' +
+        '<div class="gshot' + (sh.length ? '' : ' empty') + '">' +
+          (sh.length ? '<img class="gmain" src="' + photo(it, sh[0]) + '" alt="' + esc(nm(it)) + '" loading="lazy">' +
+                       '<span class="gtag">' + esc(T.s('shot.' + sh[0])) + '</span>' : '') +
+          (sh.length > 1 ? '<button class="ginset" type="button" title="' + esc(T.s('shot.swap')) + '">' +
+                           '<img src="' + photo(it, sh[1]) + '" alt="' + esc(T.s('shot.' + sh[1])) + '" loading="lazy"></button>' : '') +
+        '</div>' +
         '<div class="gbody">' +
-          '<div class="vcode mono">' + esc(it.code) + '</div>' +
+          '<div class="vcode mono">' + esc(it.code) + stemBadge(it) + '</div>' +
           '<div class="vname" style="font-size:16px;">' + esc(nm(it)) + '</div>' +
-          '<div class="vsub">' + esc(it.cup || '—') + (it.tray > 1 ? ' · ' + T.s('trayOf').replace('%s', n(it.tray)) : '') + '</div>' +
-          '<div style="margin-top:8px;font-size:12px;color:var(--muted);"><b class="tnum" style="font-size:15px;color:var(--ink);">' +
+          specGrid(it) +
+          '<div style="margin-top:9px;font-size:12px;color:var(--muted);"><b class="tnum" style="font-size:15px;color:var(--ink);">' +
             n(it.qty) + '</b> ' + esc(T.s('avail')) + '</div>' +
           (it.note ? '<div class="vsub" style="font-style:italic;margin-top:5px;">' + esc(it.note) + '</div>' : '') +
         '</div>';
+
+      /* swap the two shots in place — the big frame and the corner swatch trade
+         sources, so the card never reflows and never loses its week chips */
+      var inset = d.querySelector('.ginset');
+      if (inset) {
+        var order = sh.slice();
+        inset.addEventListener('click', function (e) {
+          e.stopPropagation();
+          order.reverse();
+          d.querySelector('.gmain').src = photo(it, order[0]);
+          d.querySelector('.gmain').alt = nm(it) + ' — ' + T.s('shot.' + order[0]);
+          d.querySelector('.gtag').textContent = T.s('shot.' + order[0]);
+          inset.querySelector('img').src = photo(it, order[1]);
+          inset.querySelector('img').alt = T.s('shot.' + order[1]);
+        });
+      }
       var wk = document.createElement('div'); wk.className = 'gwks';
       for (var w = it.from; w <= it.to; w++) {
         (function (w) {
@@ -580,11 +730,17 @@
     var cur = qtyOf(it.id, week);
     pop = document.createElement('div'); pop.className = 'pop';
     pop.addEventListener('click', function (e) { e.stopPropagation(); });
+    var sh = shots(it);
     pop.innerHTML =
+      (sh.length ? '<div class="pshots">' + sh.map(function (k) {
+        return '<div class="pshot"><img src="' + photo(it, k) + '" alt="' + esc(nm(it) + ' — ' + T.s('shot.' + k)) +
+          '"><span>' + esc(T.s('shot.' + k)) + '</span></div>';
+      }).join('') + '</div>' : '') +
       '<h4>' + esc(nm(it)) + '</h4>' +
-      '<div class="pmeta"><span class="mono">' + esc(it.code) + '</span> · ' + esc(it.cup || '—') +
-        ' · ' + esc(T.s('wk')) + ' ' + week + ' · ' + n(it.qty) + ' ' + esc(T.s('avail')) + '</div>' +
-      '<div class="stepper">' +
+      '<div class="pmeta"><span class="mono">' + esc(it.code) + '</span> · ' +
+        esc(T.s('wk')) + ' ' + week + ' · ' + n(it.qty) + ' ' + esc(T.s('avail')) + '</div>' +
+      specSheet(it) +
+      '<div class="stepper" style="margin-top:11px;">' +
         '<button type="button" data-d="-1" aria-label="−">−</button>' +
         '<input type="number" min="0" step="' + step + '" value="' + (cur || '') + '" inputmode="numeric">' +
         '<button type="button" data-d="1" aria-label="+">+</button>' +
@@ -655,10 +811,12 @@
       byWeek[wk].forEach(function (l) {
         var it = itemById(l.id); if (!it) return;
         var row = document.createElement('div');
+        var psh = shots(it);
         row.className = 'pline' + (l.qty > it.qty ? ' over' : '');
         row.innerHTML =
+          (psh.length ? '<img class="pthumb" src="' + photo(it, psh[0]) + '" alt="" loading="lazy">' : '') +
           '<div class="pm"><div class="pn">' + esc(nm(it)) + '</div>' +
-            '<div class="pc"><span class="mono">' + esc(it.code) + '</span> · ' + esc(it.cup || '—') +
+            '<div class="pc"><span class="mono">' + esc(it.code) + '</span> · ' + esc(T.specShort(it)) +
             (l.qty > it.qty ? ' · <span style="color:var(--rust);">' + esc(T.s('over')) + '</span>' : '') + '</div></div>' +
           '<div class="pq tnum">' + n(l.qty) + '</div>';
         var edit = document.createElement('button');
@@ -703,7 +861,7 @@
       if (!r.ok) { $('stErr').textContent = T.s('st.none'); return; }
       var lines = r.lines.map(function (l) {
         return '<div class="pline"><div class="pm"><div class="pn">' + esc(T.lang() === 'zh' && l.nameZh ? l.nameZh : l.nameEn) +
-          '</div><div class="pc"><span class="mono">' + esc(l.code) + '</span> · ' + esc(l.cup || '—') +
+          '</div><div class="pc"><span class="mono">' + esc(l.code) + '</span> · ' + esc(T.specShort(l)) +
           ' · ' + esc(T.s('wk')) + ' ' + l.week + '</div></div><div class="pq tnum">' + n(l.qty) + '</div></div>';
       }).join('');
       var applied = r.applied && r.applied.length

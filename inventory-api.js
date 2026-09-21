@@ -7,8 +7,9 @@
 // Storage is the Pages project's KV namespace, keyed by prefix so it can share
 // the namespace the leads ledger already uses:
 //   invcfg            → { code, updatedAt }        the buyers' access code
-//   inv:<id>          → a batch (see below); no image, so lists stay small
-//   invimg:<id>       → that batch's photo, as a data URL
+//   inv:<id>          → a batch (see below); no images, so lists stay small
+//   invimg:<id>       → the whole-plant photo, as a data URL
+//   invimg2:<id>      → the single-flower cut-out, as a data URL
 //   inq:<ts>-<rand>   → an inquiry and its status
 //
 // A batch is what a grower actually has: a quantity of one variety in one cup
@@ -16,6 +17,19 @@
 // 12 to 20". A buyer asking for week 15 draws from that batch. Quantity is the
 // pool, not a per-week figure, which is why the customer page shows the whole
 // window next to every week it appears in.
+//
+// Two photos, because buyers judge a phalaenopsis by two different things and
+// one picture cannot carry both: the habit of the whole plant (how it will
+// look on a bench, how the spike arches) and the face of a single bloom (the
+// colour break, the lip). The plant shot is the one that identifies the
+// variety in a list; the flower shot is the one that sells it.
+//
+// The specs beside them are the three figures a buyer quotes back at you:
+//   stem  SS (single stem, 单梗) or DS (dual stem, 双梗)
+//   ns    natural spread — the width of one open flower, in cm
+//   ht    plant height, in cm
+// They sit on the batch rather than on the variety because the same variety is
+// grown and graded to different specs, and it is the grade that is for sale.
 //
 // Two levels of access, both deliberately simple:
 //   x-admin-pass  === env.ADMIN_PASS   staff: everything
@@ -37,6 +51,20 @@ function int(v, lo, hi, dflt) {
   const n = Math.round(Number(v));
   if (!isFinite(n)) return dflt;
   return Math.min(hi, Math.max(lo, n));
+}
+/* Measurements come off a ruler, so they are decimal — 11.5 cm is a real
+   natural spread and rounding it to 12 loses the grade. One decimal is as fine
+   as anyone measures; 0 means "not recorded" and the pages simply omit it. */
+function dec1(v, lo, hi) {
+  const n = Math.round(Number(v) * 10) / 10;
+  if (!isFinite(n)) return 0;
+  return Math.min(hi, Math.max(lo, n));
+}
+function stemOf(v) {
+  const s = String(v == null ? '' : v).trim().toUpperCase();
+  if (s === 'SS' || s === '单梗' || s === '單梗' || s === '1') return 'SS';
+  if (s === 'DS' || s === '双梗' || s === '雙梗' || s === '2') return 'DS';
+  return '';                                  // unspecified, and shown as such
 }
 function id6() {
   return Array.from(crypto.getRandomValues(new Uint8Array(6))).map(x => x.toString(16).padStart(2, '0')).join('');
@@ -94,11 +122,15 @@ function cleanItem(b, prev) {
     cup: str(b.cup, 24),
     qty: int(b.qty, 0, 9999999, 0),
     tray: int(b.tray, 0, 10000, 0),        // units per tray; 0 = no multiple enforced
+    stem: stemOf(b.stem),                  // 'SS' | 'DS' | ''
+    ns: dec1(b.ns, 0, 60),                 // natural spread, cm; 0 = not recorded
+    ht: dec1(b.ht, 0, 300),                // plant height, cm; 0 = not recorded
     from: weeks[0],
     to: weeks[1],
     year: int(b.year, 2000, 2100, new Date().getUTCFullYear()),
     note: str(b.note, 140),
-    img: prev ? !!prev.img : false,
+    img: prev ? !!prev.img : false,        // whole plant
+    img2: prev ? !!prev.img2 : false,      // single-flower cut-out
     updatedAt: Date.now(),
   };
 }
@@ -125,7 +157,7 @@ async function saveItem(request, env) {
   if (b.delete) {
     const del = str(b.id, 16);
     if (!del) return json({ error: 'id' }, 400);
-    await K.delete('inv:' + del); await K.delete('invimg:' + del);
+    await K.delete('inv:' + del); await K.delete('invimg:' + del); await K.delete('invimg2:' + del);
     return json({ ok: true, deleted: del });
   }
 
@@ -135,12 +167,16 @@ async function saveItem(request, env) {
   if (!item.code || !item.nameEn) return json({ error: 'code and English name are required' }, 400);
 
   // '__keep__' leaves the stored photo alone, '' removes it, anything else is a
-  // new data URL — the same three-way the reseller logos use
-  if (typeof b.img === 'string' && b.img !== '__keep__') {
-    if (b.img === '') { await K.delete('invimg:' + item.id); item.img = false; }
-    else if (/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(b.img) && b.img.length < 3_000_000) {
-      await K.put('invimg:' + item.id, b.img); item.img = true;
-    } else return json({ error: 'image must be a png/jpeg/webp data URL under 3MB' }, 400);
+  // new data URL — the same three-way the reseller logos use. Both shots take
+  // it, so an edit that touches only the flower leaves the plant untouched.
+  for (const [field, prefix] of [['img', 'invimg:'], ['img2', 'invimg2:']]) {
+    const val = b[field];
+    if (typeof val !== 'string' || val === '__keep__') continue;
+    if (val === '') { await K.delete(prefix + item.id); item[field] = false; continue; }
+    if (!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(val) || val.length >= 3_000_000) {
+      return json({ error: 'photos must be png/jpeg/webp data URLs under 3MB' }, 400);
+    }
+    await K.put(prefix + item.id, val); item[field] = true;
   }
 
   await K.put('inv:' + item.id, JSON.stringify(item));
@@ -149,7 +185,10 @@ async function saveItem(request, env) {
 
 async function serveImage(url, env) {
   const K = kv(env); if (!K) return new Response('', { status: 404 });
-  const raw = await K.get('invimg:' + str(url.searchParams.get('id'), 16));
+  // ?shot=flower asks for the cut-out; anything else (including no shot at all,
+  // which is what older links say) means the whole plant
+  const prefix = url.searchParams.get('shot') === 'flower' ? 'invimg2:' : 'invimg:';
+  const raw = await K.get(prefix + str(url.searchParams.get('id'), 16));
   if (!raw) return new Response('', { status: 404 });
   const m = /^data:(image\/[a-z]+);base64,(.*)$/.exec(raw);
   if (!m) return new Response('', { status: 404 });
@@ -188,6 +227,7 @@ async function submitInquiry(request, env, sendMail) {
     lines.push({
       id: item.id, code: item.code, nameEn: item.nameEn, nameZh: item.nameZh,
       cup: item.cup, week, qty, year: item.year, tray: item.tray,
+      stem: item.stem, ns: item.ns, ht: item.ht,               // the grade that was on offer
       stockAtRequest: item.qty,                                // what staff should sanity-check against
     });
   }
@@ -295,7 +335,8 @@ export async function handleInventory(request, env, url, sendMail) {
     return json({
       ok: true,
       ref: hit.ref, status: hit.status, ts: hit.ts, decidedAt: hit.decidedAt || null,
-      lines: hit.lines.map(l => ({ code: l.code, nameEn: l.nameEn, nameZh: l.nameZh, cup: l.cup, week: l.week, qty: l.qty })),
+      lines: hit.lines.map(l => ({ code: l.code, nameEn: l.nameEn, nameZh: l.nameZh, cup: l.cup,
+                                   stem: l.stem || '', ns: l.ns || 0, ht: l.ht || 0, week: l.week, qty: l.qty })),
       // what was actually set aside, once staff have decided
       applied: hit.status === 'confirmed' ? (hit.applied || []).map(a => ({ code: a.code, taken: a.taken, short: a.short })) : null,
     });
