@@ -48,6 +48,11 @@
      Calendar/Gallery and Cosy/Compact toggles were showing on the access-code
      screen, before there was anything to toggle. */
   [hidden]{display:none !important;}
+  /* One focus ring for the whole page, shaped to whatever it lands on, so a
+     buyer working through the chart by keyboard can always see where they are. */
+  :focus-visible{outline:2px solid var(--deep);outline-offset:2px;}
+  .btn:focus-visible,.fchip:focus-visible,.seg button:focus-visible,.pcopy:focus-visible{outline-offset:3px;}
+  input:focus-visible,textarea:focus-visible{outline:none;}   /* these carry their own ring */
 
   /* ---------- chrome ---------- */
   header{position:sticky;top:0;z-index:80;background:rgba(243,238,228,.95);
@@ -73,7 +78,8 @@
     font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;}
   .fchip.on{background:var(--deep);border-color:var(--deep);color:#fff;}
   .fchip:hover{border-color:var(--green);}
-  .tcount{font-size:12.5px;color:var(--faint);margin-left:2px;}
+  .tcount{font-size:12.5px;color:var(--faint);margin-left:auto;white-space:nowrap;}
+  .filters{display:flex;gap:6px;align-items:center;flex-wrap:wrap;min-width:0;}
   /* the greenhouse measures in centimetres; Miami and Manchester read inches */
   .seg.units{padding:2px;}
   .seg.units button{padding:5px 11px;font-size:11.5px;}
@@ -283,7 +289,11 @@
   .padhead{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid var(--line);}
   .padhead h3{margin:0;font-family:var(--serif);font-size:18px;font-weight:600;}
   .padclose{margin-left:auto;border:0;background:transparent;font-size:23px;line-height:1;cursor:pointer;color:var(--muted);padding:0 4px;}
-  .padbody{flex:1 1 auto;overflow-y:auto;padding:4px 18px 10px;}
+  /* the list scrolls under the total, so it fades out rather than being sliced
+     through the middle of a row */
+  .padbody{flex:1 1 auto;overflow-y:auto;padding:4px 18px 14px;
+    -webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 26px),transparent);
+    mask-image:linear-gradient(to bottom,#000 calc(100% - 26px),transparent);}
   /* A week is the unit production plans in and the unit a pallet ships in, so
      the pad groups by it and totals it — a buyer filling a truck needs to see
      the shape of each week, not one undifferentiated list. */
@@ -305,7 +315,8 @@
   .pline .px{border:0;background:transparent;color:var(--faint);cursor:pointer;font-size:17px;padding:0 2px;line-height:1;}
   .pline .px:hover{color:var(--rust);}
   .pline.over .pq{color:var(--rust);}
-  .padfoot{border-top:1px solid var(--line);padding:14px 18px 18px;background:var(--paper);}
+  .padfoot{border-top:1px solid var(--line);padding:14px 18px 18px;background:var(--paper);
+    box-shadow:0 -10px 22px rgba(26,30,23,.07);position:relative;z-index:1;}
   /* the running total, as three figures a buyer checks before sending:
      what it comes to, how many trays that is, how many lines */
   .ptot{display:flex;align-items:flex-end;gap:14px;margin-bottom:13px;}
@@ -344,13 +355,14 @@
      anywhere else, and what they are being asked for is a password. The least
      we can do is open on the thing they came for. Two columns: the sentence on
      the left, one bloom on the right, nothing else competing. */
-  .hero{display:grid;grid-template-columns:1.02fr .98fr;gap:clamp(24px,4.5vw,68px);align-items:center;
+  .hero{display:grid;grid-template-columns:1.02fr .98fr;gap:clamp(24px,4.5vw,68px);align-items:stretch;
     padding:clamp(20px,3.5vh,46px) 0 clamp(28px,5vh,60px);
     /* nothing follows the gate, so it should settle into the screen rather
        than sit as a band across the top of it */
-    min-height:min(680px,calc(100svh - 150px));}
+    min-height:min(820px,calc(100svh - 150px));}
   .hero h1{font-size:clamp(36px,5.7vw,74px);margin:17px 0 0;}
-  .hero .lede{color:var(--muted);margin:18px 0 0;max-width:46ch;font-size:clamp(14.5px,1.15vw,16.5px);line-height:1.62;}
+  .hero .lede{color:var(--muted);margin:18px 0 0;max-width:46ch;font-size:clamp(14.5px,1.15vw,16.5px);
+    line-height:1.62;text-wrap:pretty;}
   .keyline{display:flex;gap:9px;margin-top:30px;max-width:440px;}
   .keyline input{flex:1 1 auto;min-width:0;padding:15px 18px;border:1px solid var(--line);border-radius:13px;
     background:#fff;outline:none;letter-spacing:.14em;font-size:15px;
@@ -361,8 +373,8 @@
   .ask{margin-top:16px;font-size:13px;color:var(--faint);}
   /* the aubergine the variety wall on the main site already uses, so the two
      pages read as one property */
-  .heroart{position:relative;aspect-ratio:1/1;max-height:clamp(340px,54vh,540px);
-    border-radius:26px;overflow:hidden;
+  .hero > div{align-self:center;}
+  .heroart{position:relative;border-radius:26px;overflow:hidden;min-height:340px;
     background:radial-gradient(120% 90% at 50% 18%,#2A2233 0%,#141018 74%);
     box-shadow:0 26px 70px rgba(26,30,23,.22);}
   .heroart img{position:absolute;inset:8%;width:84%;height:84%;object-fit:contain;
@@ -374,15 +386,17 @@
   @keyframes heroIn{from{opacity:0;transform:scale(.965) translateY(10px);}to{opacity:1;transform:none;}}
   @media(prefers-reduced-motion:reduce){ .heroart img{animation:none;} }
   @media(max-width:820px){
-    .hero{grid-template-columns:1fr;gap:26px;padding-top:20px;}
-    .heroart{order:-1;aspect-ratio:16/10;}
+    .hero{grid-template-columns:1fr;gap:26px;padding-top:20px;min-height:0;}
+    .heroart{order:-1;aspect-ratio:16/10;min-height:0;}
     .heroart img{inset:6%;width:88%;height:88%;}
   }
 
   /* ---------- done / status ---------- */
   .mid{max-width:560px;margin:clamp(36px,8vh,84px) auto;text-align:center;}
-  .mid h1{font-size:clamp(30px,4.6vw,48px);margin:0 0 14px;}
-  .mid p{color:var(--muted);margin:0 auto 22px;max-width:46ch;}
+  .mid h1{font-family:var(--serif);font-variation-settings:'opsz' 144,'wght' 400;
+    font-size:clamp(30px,4.6vw,48px);line-height:1.04;letter-spacing:-.015em;
+    text-wrap:balance;margin:0 0 14px;}
+  .mid p{color:var(--muted);margin:0 auto 22px;max-width:46ch;text-wrap:pretty;}
   .mid input{padding:12px 14px;border:1px solid var(--line);border-radius:11px;background:#fff;outline:none;min-width:200px;}
   .mid input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(76,140,87,.14);}
   .row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
@@ -410,18 +424,31 @@
     background:var(--paper);border:1px solid var(--line);font-size:11px;font-weight:700;
     display:flex;align-items:center;justify-content:center;color:var(--muted);margin-top:1px;}
   .steps b{font-weight:500;font-size:14px;line-height:1.45;}
-  .stat{text-align:left;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-top:18px;}
-  .badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
-    padding:4px 11px;border-radius:999px;}
+  .stat{text-align:left;background:#fff;border:1px solid var(--line);border-radius:16px;
+    padding:20px 22px;margin:22px auto 0;max-width:480px;box-shadow:0 2px 14px rgba(26,30,23,.05);}
+  .badge{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+    padding:5px 12px;border-radius:999px;}
   .badge.pending{background:#FFF6E6;color:#8A5E10;} .badge.confirmed{background:#E9F3EB;color:var(--deep);}
   .badge.declined{background:#F1EEE9;color:var(--faint);}
-  .empty{text-align:center;color:var(--faint);padding:56px 0;}
+  .empty{text-align:center;color:var(--muted);padding:60px 20px 66px;}
+  .empty .emptymark{font-family:var(--serif);font-size:36px;color:rgba(26,30,23,.14);margin-bottom:10px;}
+  .empty p{margin:0 0 16px;font-size:14.5px;}
   footer{padding:26px 0 90px;color:var(--faint);font-size:12px;}
 
   /* The control strip does not fit one 390px row — it was running 760px wide
      and taking the whole page sideways with it. Let it wrap; the spacer that
      pushes the right-hand group away on a desktop is exactly what stops it. */
   @media(max-width:760px){
+    /* 229px of chrome before a single plant appeared. The filters become one
+       row the thumb can sweep, which is how a phone shows a chip set anyway. */
+    .tools{padding:9px 0 8px;gap:7px;}
+    .search{flex:1 0 100%;max-width:none;}
+    .tools .sp{display:none;}
+    .filters{flex:1 1 auto;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;
+      -webkit-overflow-scrolling:touch;padding-bottom:1px;}
+    .filters::-webkit-scrollbar{display:none;}
+    .filters > *{flex:0 0 auto;}
+    .tcount{flex:0 0 auto;margin-left:0;font-size:11.5px;}
     .bar{height:auto;flex-wrap:wrap;padding:8px 0;gap:7px 9px;}
     .bar .sp{display:none;}
     .seg button{padding:5px 10px;font-size:11.5px;}
@@ -489,11 +516,12 @@
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.6"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
         <input id="q" type="search" data-t-ph="f.search" placeholder="Search code or variety">
       </div>
-      <div id="cupChips" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
-      <button class="fchip" id="availOnly" data-t="f.avail">In stock only</button>
-      <span class="sp"></span>
-      <div class="seg units" id="unitSeg" aria-label="Units">
-        <button data-unit="cm">cm</button><button data-unit="in">inch</button>
+      <div class="filters">
+        <div id="cupChips" style="display:flex;gap:6px;"></div>
+        <button class="fchip" id="availOnly" data-t="f.avail">In stock only</button>
+        <div class="seg units" id="unitSeg" aria-label="Units">
+          <button data-unit="cm">cm</button><button data-unit="in">inch</button>
+        </div>
       </div>
       <span class="tcount" id="count"></span>
     </div>
@@ -858,11 +886,31 @@
       n(v.reduce(function (s, i) { return s + i.qty; }, 0)) + ' ' + T.s('plants');
   }
 
+  /* Nothing matched. The old copy sent the reader off to pick another month,
+     which stopped being possible when the month picker became a calendar —
+     and the filters that caused it are the thing to offer. */
+  function emptyState(host) {
+    host.innerHTML =
+      '<div class="empty">' +
+        '<div class="emptymark">✽</div>' +
+        '<p>' + esc(T.s('none')) + '</p>' +
+        '<button class="btn ghost sm" type="button" data-clear>' + esc(T.s('none.clear')) + '</button>' +
+      '</div>';
+    host.querySelector('[data-clear]').addEventListener('click', function () {
+      S.q = ''; S.cups = {}; S.availOnly = false; $('q').value = '';
+      render();
+    });
+  }
+
   function renderCal() {
-    var rows = visible(), t = $('cal');
+    var rows = visible();
+    /* The empty state replaces the whole scroller, table and all. Rebuild the
+       table before touching it, or the next render after a search that found
+       nothing throws on a null and the calendar never comes back. */
+    if (!rows.length) { emptyState($('calWrap')); return; }
+    var t = $('cal');
+    if (!t) { $('calWrap').innerHTML = '<table class="cal" id="cal"></table>'; t = $('cal'); }
     t.innerHTML = '';
-    if (!rows.length) { $('calWrap').innerHTML = '<div class="empty">' + esc(T.s('none')) + '</div>'; return; }
-    if (!$('cal')) { $('calWrap').innerHTML = '<table class="cal" id="cal"></table>'; t = $('cal'); }
 
     var weeks = [];
     for (var w = S.from; w <= S.to; w++) weeks.push({ w: w, d: W.mondayOfWeek(S.year, w) });
@@ -939,9 +987,15 @@
         bar.setAttribute('role', 'button'); bar.tabIndex = 0;
         bar.setAttribute('aria-label', it.code + ' ' + T.s('wk') + ' ' + x.w);
         if (q) bar.innerHTML = '<span class="bq">' + n(q) + '</span>';
-        var open = function (e) { e.stopPropagation(); popover(bar, it, x.w); };
+        var open = function (e, seed) { e.stopPropagation(); popover(bar, it, x.w, seed); };
         bar.addEventListener('click', open);
-        bar.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(e); } });
+        /* Tab across the chart and type. A buyer entering forty lines should
+           not have to reach for the mouse between each one: Enter opens the
+           stepper, and a digit opens it already carrying that digit. */
+        bar.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(e); return; }
+          if (/^[0-9]$/.test(e.key)) { e.preventDefault(); open(e, e.key); }
+        });
         cell.appendChild(bar);
         tr.appendChild(cell);
       });
@@ -949,12 +1003,25 @@
     });
     t.appendChild(tb);
     rows.forEach(applyTint);
+
+    /* Put this week in view rather than leaving the reader at whatever week
+       the earliest batch happens to start in. Once only — re-centring on
+       every keystroke would fight whoever is scrolling. */
+    if (!S.centred) {
+      S.centred = true;
+      var col = t.querySelector('thead th.wk.now');
+      if (col) {
+        var sc = $('calWrap');
+        sc.scrollLeft = Math.max(0, col.offsetLeft - parseFloat(getComputedStyle(document.documentElement)
+          .getPropertyValue('--namecol')) - 40);
+      }
+    }
   }
 
   function renderGal() {
     var host = $('galWrap'); host.innerHTML = '';
     var rows = visible();
-    if (!rows.length) { host.innerHTML = '<div class="empty">' + esc(T.s('none')) + '</div>'; return; }
+    if (!rows.length) { emptyState(host); return; }
     rows.forEach(function (it) {
       var d = document.createElement('div'); d.className = 'gcard';
       d.dataset.vid = it.id;
@@ -1037,7 +1104,7 @@
   document.addEventListener('click', closePop);
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closePop(); closePad(); } });
 
-  function popover(anchor, it, week) {
+  function popover(anchor, it, week, seed) {
     closePop();
     var step = it.tray > 1 ? it.tray : 1;
     var cur = qtyOf(it.id, week);
@@ -1059,7 +1126,7 @@
          replaces it in one keystroke. */
       '<div class="stepper" style="margin-top:12px;">' +
         '<button type="button" data-d="-1" aria-label="−">−</button>' +
-        '<input type="number" min="0" step="' + step + '" value="' + (cur || step) + '" inputmode="numeric">' +
+        '<input type="number" min="0" step="' + step + '" value="' + (seed || cur || step) + '" inputmode="numeric">' +
         '<button type="button" data-d="1" aria-label="+">+</button>' +
       '</div>' +
       '<p class="phint"></p>' +
@@ -1099,7 +1166,12 @@
     input.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); commit(); } });
     var rm = pop.querySelector('[data-rm]');
     if (rm) rm.addEventListener('click', function () { setQty(it, week, 0); closePop(); });
-    feedback(); input.focus(); input.select();
+    feedback(); input.focus();
+    /* A number input will not take setSelectionRange, and Chromium parks the
+       caret at the start — so typing 7 then 20 produced 207. Re-assigning the
+       value after focus is what actually moves the caret to the end. */
+    if (seed) { var v = input.value; input.value = ''; input.value = v; }
+    else input.select();
   }
 
   /* ---------------- order pad ---------------- */
