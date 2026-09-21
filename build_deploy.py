@@ -35,7 +35,10 @@ LIVE = 'https://www.kmtyorchid.com'
 FILES = ['i18n.js', 'support.js', 'image-slot.js', 'terroir-geo.json', '_headers',
          # the inventory inquiry pages; the API behind them is imported by the
          # worker, so inventory-api.js has to travel with it
-         'inventory.html', 'inventory-admin.html', 'inventory-shared.js', 'inventory-api.js']
+         'inventory.html', 'inventory-admin.html', 'inventory-shared.js', 'inventory-api.js',
+         # the staff page reads .xlsx in the browser with this and nothing else;
+         # leaving it out publishes an import button that throws on every file
+         'xlsx-lite.js']
 TREES = ['fonts', 'vendor']
 WORKER = ('site-worker.js', '_worker.js')
 

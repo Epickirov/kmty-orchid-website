@@ -33,6 +33,29 @@
   .ckey i{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-shadow:inset 0 0 0 1px rgba(26,30,23,.2);}
   .ckey.none{color:var(--rust);}
 
+  /* ---------- Excel import ---------- */
+  .maph{font-family:var(--serif);font-size:15px;margin:18px 0 2px;}
+  .sumline{cursor:pointer;font-size:13px;color:var(--muted);padding:4px 0;}
+  .sumline:hover{color:var(--ink);}
+  #mapTable td,#mapTable th{vertical-align:middle;}
+  #mapTable select{width:auto;min-width:150px;padding:5px 8px;font-size:12.5px;}
+  .colref{font-family:var(--mono);font-size:11.5px;color:var(--muted);}
+  .sample{font-size:11.5px;color:var(--muted);max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  /* a column already spoken for elsewhere — two columns cannot both be 数量 */
+  #mapTable tr.dup select{border-color:var(--rust);background:#FDF3EF;}
+  #previewTable{font-size:12px;}
+  #previewTable td{white-space:nowrap;}
+  #previewTable tr.bad{background:#FDF3EF;}
+  #previewTable tr.bad td:first-child{color:var(--rust);font-weight:700;}
+  #previewTable .newvar{color:var(--green);font-weight:700;}
+  .why{font-size:11px;color:var(--rust);}
+  /* the cell as it was written, beside what the importer made of it — a bound
+     that fires is only actionable next to the value that tripped it */
+  .rawv{font-family:var(--mono);font-size:10.5px;color:var(--muted);}
+  .rawv::before{content:'原文 ';}
+  .ackline{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--rust);cursor:pointer;}
+  .ackline input{width:auto;margin:0;}
+
   .tabs{display:flex;gap:6px;padding:16px 0 0;flex-wrap:wrap;}
   .tab{border:1px solid var(--line);background:#fff;border-radius:11px;padding:8px 16px;font-family:var(--sans);
        font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer;}
@@ -121,6 +144,7 @@
 <div id="app" hidden>
   <div class="wrap tabs">
     <button class="tab on" data-tab="stock">库存 Stock</button>
+    <button class="tab" data-tab="lib">品种库 Varieties <span class="badge" id="libBadge" hidden>0</span></button>
     <button class="tab" data-tab="inq">询价 Inquiries <span class="badge" id="pendBadge" hidden>0</span></button>
     <button class="tab" data-tab="set">访问码 Access</button>
   </div>
@@ -198,24 +222,128 @@
 
     <div class="card">
       <h2>批量导入 Bulk import</h2>
-      <p class="lead">从 Excel 直接复制粘贴，或选择 CSV 文件。每行一个批次，列顺序：
-        <b class="mono">编号, 英文名, 中文名, 杯径, 数量, 起始周, 结束周, 年份, 备注, 每内箱株数, 梗数, 花径, 株高, 花纹</b>。
-        年份之后各列均可留空；梗数填 <b class="mono">SS</b>／<b class="mono">单梗</b> 或 <b class="mono">DS</b>／<b class="mono">双梗</b>，花径与株高以厘米计。
-        <b>编号＋杯径＋起始周</b>相同的批次会被覆盖，其余新增；两张照片请在上方逐个上传。</p>
-      <textarea id="csv" rows="4" placeholder="TPL-411, Ivory, 象牙白, 2.5&quot;, 5000, 10, 16, 2026, , 60, DS, 11.5, 62
-TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
-      <p style="display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:10px 0 0;">
-        <input type="file" id="csvFile" accept=".csv,text/csv,text/plain" style="width:auto;">
-        <button class="btn" id="csvGo">导入</button>
+      <p class="lead">直接上传你们平时用的 <b>Excel（.xlsx）</b>或 CSV，<b>列的顺序不限</b>——读入后逐列指定含义即可，
+        系统会记住这份对应关系，下次同样格式的表一键导入。也可以从 Excel 复制粘贴到下面的文本框。
+        每行一个批次，至少需要 <b class="mono">编号 + 数量 + 起止周</b>；名称、杯径、花径、株高等若已录入
+        <b>品种库</b>，表里可以完全不填。<b>编号＋杯径＋起始周</b>相同的批次会被覆盖，其余新增。</p>
+
+      <p style="display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:0 0 10px;">
+        <input type="file" id="xlFile" accept=".xlsx,.csv,text/csv,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="width:auto;">
         <button class="btn ghost" id="csvOut">导出当前库存 CSV</button>
         <span class="status" id="csvStatus"></span>
       </p>
+
+      <!-- step 2: which sheet, which row is the header -->
+      <div id="mapStep" hidden>
+        <div class="row" style="align-items:flex-end;">
+          <label class="fld" id="sheetWrap">工作表 Sheet<select id="xlSheet"></select></label>
+          <label class="fld">表头在第几行 Header row<input id="xlHeader" type="number" min="1" max="50" value="1"></label>
+          <label class="fld" style="flex:0 0 auto;justify-content:flex-end;">
+            <button class="btn ghost sm" type="button" id="xlAuto">重新自动识别</button>
+          </label>
+        </div>
+
+        <h3 class="maph">列对应 Column mapping</h3>
+        <p class="lead" style="margin:0 0 8px;">左边是你表里的列，右边选它代表什么。选「忽略」的列不会被导入。</p>
+        <div style="overflow-x:auto;"><table id="mapTable">
+          <thead><tr><th>列</th><th>表头</th><th>示例</th><th>导入为</th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+
+        <h3 class="maph">预览 Preview <span class="pill" id="previewCount"></span></h3>
+        <div style="overflow-x:auto;"><table id="previewTable">
+          <thead><tr></tr></thead><tbody></tbody>
+        </table></div>
+        <p class="lead" id="mapWarn" style="margin:8px 0 0;"></p>
+
+        <p id="ackWrap" hidden style="margin:10px 0 0;">
+          <label class="ackline"><input type="checkbox" id="skipAck"><span></span></label>
+        </p>
+        <p style="display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:12px 0 0;">
+          <button class="btn" id="xlGo">导入</button>
+          <button class="btn ghost" id="xlCancel">取消</button>
+          <span class="status" id="xlStatus"></span>
+        </p>
+      </div>
+
+      <details id="pasteWrap">
+        <summary class="sumline">或者从 Excel 复制粘贴 Paste instead</summary>
+        <textarea id="csv" rows="4" placeholder="编号	品种	杯径	数量	起始周	结束周
+TPL-411	Ivory	2.5&quot;	5000	10	16"></textarea>
+        <p style="display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:10px 0 0;">
+          <button class="btn" id="csvGo">读入并对应列</button>
+        </p>
+      </details>
     </div>
 
     <div class="card">
       <h2>现有批次 <span class="pill" id="stockCount"></span></h2>
       <div style="overflow-x:auto;"><table id="stockTable">
         <thead><tr><th></th><th>编号</th><th>品种</th><th>规格</th><th class="num">数量</th><th>可供周</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- ---------- variety library ---------- -->
+  <div class="wrap panel" id="p-lib" hidden>
+    <div class="card">
+      <h2 id="libTitle">添加品种</h2>
+      <p class="lead">品种库记录一个编号<b>永远不变</b>的部分：名称、常用规格、两张照片。录入一次之后，批次只需填
+        <b class="mono">编号 + 数量 + 起止周</b>，其余自动带出；批次上单独填写的字段仍以批次为准。
+        在这里改正一个名字，所有未单独填写的批次同步更新。</p>
+      <div class="row">
+        <label class="fld">花卉编号 Code *<input id="v-code" placeholder="TPL-411" maxlength="24">
+          <span class="ckey" id="vCodeKey"></span></label>
+        <label class="fld">英文名 Name (EN) *<input id="v-nameEn" placeholder="Ivory" maxlength="60"></label>
+        <label class="fld">中文名 Name (中文)<input id="v-nameZh" placeholder="象牙白" maxlength="60"></label>
+        <label class="fld">常用杯径 Cup size<input id="v-cup" list="cups" placeholder="2.5&quot;" maxlength="24"></label>
+      </div>
+      <div class="row">
+        <label class="fld">梗数 Stem<select id="v-stem">
+          <option value="">未标注 —</option>
+          <option value="SS">单梗 SS</option>
+          <option value="DS">双梗 DS</option>
+        </select></label>
+        <label class="fld">花径 N.S.（厘米）<input id="v-ns" type="number" min="0" max="60" step="0.1" placeholder="11.5"></label>
+        <label class="fld">株高 Height（厘米）<input id="v-ht" type="number" min="0" max="300" step="0.5" placeholder="62"></label>
+        <label class="fld">花纹 Marking<select id="v-pattern">
+          <option value="">未标注 —</option>
+          <option value="solid">纯色 Solid</option><option value="bicolour">双色 Two-tone</option>
+          <option value="spotted">星点 Spotted</option><option value="edged">镶边 Edged</option>
+        </select></label>
+      </div>
+      <div class="shots">
+        <div class="shot">
+          <div class="shotbox"><img id="vImgPrev" alt="" hidden><em id="vImgNone">未上传</em></div>
+          <div class="shotbody">
+            <h3>主图 · 整株 Whole plant</h3>
+            <p>这张照片会出现在该编号的每一个批次上。</p>
+            <input id="v-img" type="file" accept="image/*">
+            <button class="btn ghost sm" type="button" id="vImgClear" hidden>移除</button>
+          </div>
+        </div>
+        <div class="shot">
+          <div class="shotbox"><img id="vImgPrev2" alt="" hidden><em id="vImgNone2">未上传</em></div>
+          <div class="shotbody">
+            <h3>副图 · 花朵特写 Flower</h3>
+            <p>单朵花特写或去背图，用于展示花色与唇瓣。</p>
+            <input id="v-img2" type="file" accept="image/*">
+            <button class="btn ghost sm" type="button" id="vImgClear2" hidden>移除</button>
+          </div>
+        </div>
+      </div>
+      <p style="display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:0;">
+        <button class="btn" id="vSave">保存品种</button>
+        <button class="btn ghost" id="vReset" hidden>取消编辑</button>
+        <span class="status" id="vStatus"></span>
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>品种库 <span class="pill" id="libCount"></span></h2>
+      <div style="overflow-x:auto;"><table id="libTable">
+        <thead><tr><th></th><th>编号</th><th>名称</th><th>常用规格</th><th class="num">在用批次</th><th></th></tr></thead>
         <tbody></tbody>
       </table></div>
     </div>
@@ -242,12 +370,17 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
 </div>
 
 <script src="inventory-shared.js?v=4"></script>
+<script src="xlsx-lite.js?v=1"></script>
 <script>
 (function () {
   'use strict';
   var api = window.KMTY_INV.api, W = window.KMTY_INV.weeks, photo = window.KMTY_INV.photo;
   var $ = function (id) { return document.getElementById(id); };
   var pass = '', items = [], inquiries = [], editing = null;
+  /* The library, by code. The importer reads it to decide whether a row can
+     stand on a bare code, and the preview reads it to show the name a row
+     will end up with even though the sheet never mentions one. */
+  var VARS = {}, varList = [], editingVar = null;
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
   function st(el, msg, bad) { var e = $(el); e.textContent = msg; e.className = 'status' + (bad ? ' bad' : ''); }
@@ -264,7 +397,7 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
       try { sessionStorage.setItem('kmty-adm', pass); } catch (e) {}
       $('login').hidden = true; $('app').hidden = false;
       items = r.items; paintStock();
-      refreshInquiries(); loadSettings();
+      refreshInquiries(); loadSettings(); loadVarieties();
     }).catch(function () { $('go').disabled = false; st('loginErr', '无法连接服务器', true); });
   }
   $('go').addEventListener('click', login);
@@ -275,7 +408,7 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
     t.addEventListener('click', function () {
       document.querySelectorAll('.tab').forEach(function (x) { x.classList.remove('on'); });
       t.classList.add('on');
-      ['stock', 'inq', 'set'].forEach(function (k) { $('p-' + k).hidden = k !== t.dataset.tab; });
+      ['stock', 'lib', 'inq', 'set'].forEach(function (k) { $('p-' + k).hidden = k !== t.dataset.tab; });
     });
   });
 
@@ -387,18 +520,19 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
      undefined = leave the stored photo alone, '' = remove it, a data URL =
      replace it. Two slots, so an edit that touches only the bloom leaves the
      plant shot exactly where it was. */
-  function photoField(fileId, prevId, noneId, clearId, max, keepAlpha) {
+  function photoField(fileId, prevId, noneId, clearId, max, keepAlpha, statusId) {
     var f = { pending: undefined };
+    var sid = statusId || 'saveStatus';
     function paint(src) {
       $(prevId).hidden = !src; $(noneId).hidden = !!src; $(clearId).hidden = !src;
       if (src) $(prevId).src = src;
     }
     $(fileId).addEventListener('change', function () {
       var file = this.files && this.files[0]; if (!file) return;
-      st('saveStatus', '处理图片中…');
+      st(sid, '处理图片中…');
       shrink(file, max, keepAlpha).then(function (url) {
-        f.pending = url; paint(url); st('saveStatus', '');
-      }).catch(function () { st('saveStatus', '这张图片读不出来，请换一张', true); });
+        f.pending = url; paint(url); st(sid, '');
+      }).catch(function () { st(sid, '这张图片读不出来，请换一张', true); });
     });
     $(clearId).addEventListener('click', function () { f.pending = ''; paint(''); $(fileId).value = ''; });
     f.show = paint;
@@ -432,18 +566,19 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
     Y: ['黄 Yellow', '#E0B93A'], C: ['白花红唇 White, red lip', '#F6F3EC'],
     X: ['混色 Mixed', 'linear-gradient(135deg,#E0B93A,#DE6FAC 38%,#8C6AC2 70%,#9C2233)'],
   };
-  function syncCodeKey() {
-    var m = /^[A-Z]([A-Z])[A-Z]?-/.exec($('f-code').value.trim().toUpperCase());
+  function paintCodeKey(value, el) {
+    var v = String(value || '').trim();
+    var m = /^[A-Z]([A-Z])[A-Z]?-/.exec(v.toUpperCase());
     var hit = m && CODE_COLOURS[m[1]];
-    var el = $('codeKey');
     if (!hit) {
-      el.className = 'ckey' + ($('f-code').value.trim() ? ' none' : '');
-      el.textContent = $('f-code').value.trim() ? '编号第二个字母无法识别花色' : '';
+      el.className = 'ckey' + (v ? ' none' : '');
+      el.textContent = v ? '编号第二个字母无法识别花色' : '';
       return;
     }
     el.className = 'ckey';
     el.innerHTML = '<i style="background:' + hit[1] + '"></i>花色 ' + hit[0] + '（按编号）';
   }
+  function syncCodeKey() { paintCodeKey($('f-code').value, $('codeKey')); }
   $('f-code').addEventListener('input', syncCodeKey);
 
   var shotPlant = photoField('f-img', 'imgPrev', 'imgNone', 'imgClear', 760, false);
@@ -467,8 +602,9 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
     api.saveItem(pass, body).then(function (r) {
       $('save').disabled = false;
       if (!r.ok) { st('saveStatus', r.error || '保存失败', true); return; }
-      st('saveStatus', '已保存');
+      // resetForm() blanks the status line, so the confirmation goes after it
       resetForm(); reload();
+      st('saveStatus', '已保存');
     }).catch(function () { $('save').disabled = false; st('saveStatus', '无法连接服务器', true); });
   });
 
@@ -497,59 +633,517 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
     return rows.filter(function (r) { return r.some(function (x) { return String(x).trim() !== ''; }); });
   }
 
-  function runImport(text) {
-    var rows = parseCsv(text);
-    if (!rows.length) { st('csvStatus', '没有可导入的内容', true); return; }
-    // tolerate a header line
-    var first = rows[0].join(' ').toLowerCase();
-    if (/code|编号/.test(first) && !/^\s*[A-Z]{2,4}-?\d/i.test(rows[0][0] || '')) rows.shift();
+  /* ---------------- the column map ----------------
+     Every grower's sheet has the same facts in a different order under a
+     different heading, and half of them are in Chinese. Demanding one fixed
+     column order is how an import feature goes unused: the sheet already
+     exists, it is the one the sales desk works in, and re-arranging it by hand
+     every week costs more than typing the batches did.
 
-    var jobs = [], bad = 0;
-    rows.forEach(function (r) {
-      var g = function (i) { return String(r[i] == null ? '' : r[i]).trim(); };
-      var code = g(0).toUpperCase(), en = g(1), qty = Number(g(4)), from = Number(g(5)), to = Number(g(6));
-      if (!code || !en || !isFinite(qty) || !from || !to) { bad++; return; }
-      var cup = g(3);
-      var hit = items.filter(function (x) { return x.code === code && x.cup === cup && x.from === from; })[0];
-      jobs.push({
-        id: hit ? hit.id : undefined, code: code, nameEn: en, nameZh: g(2), cup: cup,
-        qty: qty, from: from, to: to, year: Number(g(7)) || new Date().getUTCFullYear(), note: g(8),
-        tray: Number(g(9)) || 0,
-        // the server takes SS / DS / 单梗 / 双梗 / 1 / 2, so a grower's own sheet imports as written
-        stem: g(10), ns: Number(g(11)) || 0, ht: Number(g(12)) || 0,
-        pattern: g(13),
-        img: hit ? '__keep__' : undefined, img2: hit ? '__keep__' : undefined,
-      });
+     So the file decides nothing. The operator says what each column means,
+     once, and the answer is remembered against the shape of the header row —
+     next month's sheet in the same format needs no mapping at all.
+
+     `syn` is only for guessing the first time. A guess that is wrong is
+     visible and one dropdown away from right, which is why it can afford to
+     be generous. */
+  var FIELDS = [
+    { k: 'code',    label: '花卉编号 Code',        req: true,
+      syn: ['编号', '花卉编号', '品种编号', '货号', 'code', 'sku', 'item', 'item no', 'item code'] },
+    { k: 'nameEn',  label: '英文名 Name (EN)',
+      syn: ['英文名', '英文', 'name', 'name en', 'variety', 'english', 'cultivar'] },
+    { k: 'nameZh',  label: '中文名 Name (中文)',
+      syn: ['中文名', '中文', '品种', '品名', '名称', 'name zh', 'chinese'] },
+    { k: 'cup',     label: '杯径 Cup size',
+      syn: ['杯径', '杯口', '规格', '盆径', 'cup', 'pot', 'size', 'pot size', 'cup size'] },
+    { k: 'qty',     label: '数量 Quantity',        req: true,
+      syn: ['数量', '株数', '苗数', '可供量', '库存', 'qty', 'quantity', 'stock', 'available', 'pcs', 'plants'] },
+    { k: 'from',    label: '起始周 From week',     req: true,
+      syn: ['起始周', '开始周', '起始', '开始', '起', 'from', 'from week', 'start', 'start week', 'week from'] },
+    { k: 'to',      label: '结束周 To week',       req: true,
+      syn: ['结束周', '截止周', '结束', '截止', '止', 'to', 'to week', 'end', 'end week', 'week to'] },
+    { k: 'week',    label: '单周 Single week',
+      syn: ['周', '周次', '供货周', 'week', 'wk', 'week no'] },
+    { k: 'year',    label: '年份 Year',
+      syn: ['年份', '年', 'year', 'yr'] },
+    { k: 'stem',    label: '梗数 Stem',
+      syn: ['梗数', '梗', '花梗', 'stem', 'stems', 'spike', 'spikes'] },
+    { k: 'ns',      label: '花径 N.S. (cm)',
+      syn: ['花径', '花朵直径', 'ns', 'n.s.', 'natural spread', 'flower size', 'flower width'] },
+    { k: 'ht',      label: '株高 Height (cm)',
+      syn: ['株高', '高度', '苗高', 'height', 'ht', 'plant height'] },
+    { k: 'tray',    label: '每内箱株数 Inner box',
+      syn: ['每内箱株数', '内箱', '内箱株数', '装箱', 'inner box', 'box', 'per box', 'tray'] },
+    { k: 'pattern', label: '花纹 Marking',
+      syn: ['花纹', '斑纹', '花型', 'pattern', 'marking', 'markings'] },
+    { k: 'note',    label: '备注 Note',
+      syn: ['备注', '说明', '注', 'note', 'notes', 'remark', 'remarks', 'comment'] },
+  ];
+  var FIELD_BY_KEY = {}; FIELDS.forEach(function (f) { FIELD_BY_KEY[f.k] = f; });
+
+  function norm(s) {
+    return String(s == null ? '' : s).toLowerCase()
+      .replace(/[\s_\-—–()（）:：.。、/]/g, '')       // punctuation a header might carry
+      .replace(/[（）]/g, '').trim();
+  }
+  function guessField(header, taken) {
+    var h = norm(header);
+    if (!h) return '';
+    for (var pass = 0; pass < 2; pass++) {
+      for (var i = 0; i < FIELDS.length; i++) {
+        var f = FIELDS[i];
+        if (taken[f.k]) continue;
+        for (var j = 0; j < f.syn.length; j++) {
+          var s = norm(f.syn[j]);
+          if (!s) continue;
+          // exact first, then contains — so "周" cannot steal "起始周"
+          if (pass === 0 ? h === s : (h.indexOf(s) >= 0 || s.indexOf(h) >= 0)) return f.k;
+        }
+      }
+    }
+    return '';
+  }
+
+  /* The remembered map is keyed by the header row itself, so it applies to the
+     next sheet of the same shape and to no other. Kept per browser: it is a
+     convenience, not data, and a wrong one is corrected by changing a
+     dropdown. */
+  function mapKey(headers) {
+    return 'kmty-colmap:' + headers.map(norm).join('|').slice(0, 300);
+  }
+  function rememberMap(headers, map) {
+    try { localStorage.setItem(mapKey(headers), JSON.stringify(map)); } catch (e) {}
+  }
+  function recallMap(headers) {
+    try { return JSON.parse(localStorage.getItem(mapKey(headers)) || 'null'); } catch (e) { return null; }
+  }
+
+  /* ---------------- the import sheet in hand ---------------- */
+  var SHEET = null;            // { sheets:[{name,rows}], si, headerRow, map:[fieldKey|''] }
+  var LAST = { good: [], bad: [], skipped: 0 };   // what the preview last decided
+
+  function openSheet(sheets, label) {
+    SHEET = { sheets: sheets, si: 0, headerRow: 1, map: [] };
+    var sel = $('xlSheet'); sel.innerHTML = '';
+    sheets.forEach(function (s, i) {
+      var o = document.createElement('option');
+      o.value = i; o.textContent = s.name + '（' + s.rows.length + ' 行）';
+      sel.appendChild(o);
     });
-    if (!jobs.length) { st('csvStatus', '每行至少需要 编号 / 英文名 / 数量 / 起止周', true); return; }
+    $('sheetWrap').hidden = sheets.length < 2;
+    /* Land on the sheet that looks like data rather than always the first —
+       a workbook often opens on a cover sheet or last year's tab. */
+    var best = 0, bestScore = -1;
+    sheets.forEach(function (s, i) {
+      var score = scoreSheet(s);
+      if (score > bestScore) { bestScore = score; best = i; }
+    });
+    SHEET.si = best; sel.value = String(best);
+    $('mapStep').hidden = false;
+    $('pasteWrap').open = false;
+    st('csvStatus', '已读入 ' + label);
+    autoHeaderRow(); autoMap(); renderMap();
+  }
 
-    $('csvGo').disabled = true;
-    st('csvStatus', '导入中… 0/' + jobs.length);
-    var done = 0, failed = 0;
-    // one at a time: KV writes are cheap but a burst of them from one browser is
-    // the kind of thing that trips rate limits, and the count is small
+  function scoreSheet(s) {
+    var best = 0;
+    for (var r = 0; r < Math.min(s.rows.length, 12); r++) {
+      var taken = {}, hits = 0;
+      s.rows[r].forEach(function (h) {
+        var k = guessField(h, taken);
+        if (k) { taken[k] = true; hits++; }
+      });
+      if (hits > best) best = hits;
+    }
+    return best;
+  }
+
+  /* The header is whichever of the first rows names the most fields. Sheets
+     routinely open with a title and a blank line above the real header. */
+  function autoHeaderRow() {
+    var rows = SHEET.sheets[SHEET.si].rows;
+    var best = 1, bestHits = 0;
+    for (var r = 0; r < Math.min(rows.length, 12); r++) {
+      var taken = {}, hits = 0;
+      rows[r].forEach(function (h) { var k = guessField(h, taken); if (k) { taken[k] = true; hits++; } });
+      if (hits > bestHits) { bestHits = hits; best = r + 1; }
+    }
+    SHEET.headerRow = best;
+    $('xlHeader').value = String(best);
+  }
+
+  function headers() {
+    var rows = SHEET.sheets[SHEET.si].rows;
+    return rows[SHEET.headerRow - 1] || [];
+  }
+  /* Everything below the header, blanks included — buildJobs() is the one
+     place that decides a row is empty, so the "skipped N blank rows" it
+     reports is the real count rather than one taken before the filter. */
+  function bodyRows() {
+    return SHEET.sheets[SHEET.si].rows.slice(SHEET.headerRow);
+  }
+
+  function autoMap() {
+    var hs = headers();
+    var saved = recallMap(hs);
+    if (saved && saved.length === hs.length) { SHEET.map = saved.slice(); return; }
+    var taken = {};
+    SHEET.map = hs.map(function (h) {
+      var k = guessField(h, taken);
+      if (k) taken[k] = true;
+      return k;
+    });
+  }
+
+  function colName(n) {
+    var s = '';
+    n += 1;
+    while (n) { var r = (n - 1) % 26; s = String.fromCharCode(65 + r) + s; n = Math.floor((n - 1) / 26); }
+    return s;
+  }
+
+  function renderMap() {
+    var hs = headers(), body = bodyRows();
+    var tb = $('mapTable').querySelector('tbody'); tb.innerHTML = '';
+    var used = {};
+    SHEET.map.forEach(function (k) { if (k) used[k] = (used[k] || 0) + 1; });
+
+    hs.forEach(function (h, i) {
+      var tr = document.createElement('tr');
+      if (SHEET.map[i] && used[SHEET.map[i]] > 1) tr.className = 'dup';
+      var samples = body.slice(0, 3).map(function (r) { return r[i]; })
+        .filter(function (v) { return String(v).trim() !== ''; }).join(' · ');
+      tr.innerHTML = '<td class="colref">' + colName(i) + '</td>' +
+        '<td>' + esc(h || '（空）') + '</td>' +
+        '<td class="sample">' + esc(samples) + '</td><td></td>';
+      var sel = document.createElement('select');
+      sel.innerHTML = '<option value="">— 忽略 Ignore —</option>' +
+        FIELDS.map(function (f) {
+          return '<option value="' + f.k + '">' + esc(f.label) + (f.req ? ' *' : '') + '</option>';
+        }).join('');
+      sel.value = SHEET.map[i] || '';
+      sel.addEventListener('change', function () {
+        SHEET.map[i] = this.value;
+        renderMap();
+      });
+      tr.children[3].appendChild(sel);
+      tb.appendChild(tr);
+    });
+    renderPreview();
+  }
+
+  /* ---------------- reading a row through the map ---------------- */
+  function pick(row, key) {
+    var i = SHEET.map.indexOf(key);
+    return i < 0 ? '' : String(row[i] == null ? '' : row[i]).trim();
+  }
+
+  /* A week can be written as a week number or as a date — growers do both, and
+     a date is what Excel produces when someone types 7/27. Either is accepted
+     and a date is converted to the ISO week it falls in. */
+  function weekOf(v, year) {
+    var s = String(v == null ? '' : v).trim();
+    if (!s) return 0;
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+    if (m) return isoWeekOfDate(new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])));
+    var n = parseInt(s.replace(/[^\d]/g, ''), 10);
+    return isFinite(n) && n >= 1 && n <= 53 ? n : 0;
+  }
+  function isoWeekOfDate(d) {
+    var t = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+    var day = (t.getUTCDay() + 6) % 7;             // Monday = 0
+    t.setUTCDate(t.getUTCDate() - day + 3);        // the Thursday of this week
+    var jan4 = new Date(Date.UTC(t.getUTCFullYear(), 0, 4));
+    var jDay = (jan4.getUTCDay() + 6) % 7;
+    var week1Mon = new Date(jan4.getTime() - jDay * 86400000);
+    return 1 + Math.round((t - week1Mon) / (7 * 86400000));
+  }
+  function yearOf(v) {
+    var m = /^(\d{4})-\d{2}-\d{2}$/.exec(String(v || '').trim());
+    if (m) return +m[1];
+    var n = parseInt(String(v || '').replace(/[^\d]/g, ''), 10);
+    return (n >= 2000 && n <= 2100) ? n : 0;
+  }
+  function numOf(v) {
+    // 1,200 and １２００ and "1 200" are all the same number to a grower
+    var n = parseFloat(String(v == null ? '' : v).replace(/[,，\s]/g, '').replace(/[^\d.\-]/g, ''));
+    return isFinite(n) ? n : NaN;
+  }
+
+  /* Every numeric field carries a plausibility bound, and the bounds are not
+     about data hygiene — they are how a mis-mapped column is caught. A cup-size
+     column dropped onto `ht` parses happily as 3 cm and imports; bounded, it
+     says so on the row it happened, before anything is written. The failure
+     this feature has to prevent is a confident wrong answer, not a crash. */
+  var BOUND = {
+    qty:  { lo: 1,    hi: 9999999, int: true,  label: '数量' },
+    tray: { lo: 1,    hi: 10000,   int: true,  label: '每内箱株数' },
+    ns:   { lo: 1,    hi: 60,      int: false, label: '花径' },
+    ht:   { lo: 1,    hi: 300,     int: false, label: '株高' },
+  };
+  function bounded(key, raw, why) {
+    var b = BOUND[key];
+    var s = String(raw == null ? '' : raw).trim();
+    if (s === '') return 0;                       // not given is not wrong
+    var n = numOf(s);
+    if (!isFinite(n)) { why.push(b.label + '「' + s + '」不是数字'); return 0; }
+    if (b.int && Math.round(n) !== n) { why.push(b.label + '必须是整数（' + s + '）'); return 0; }
+    if (n < b.lo || n > b.hi) {
+      why.push(b.label + ' ' + s + ' 超出常理（' + b.lo + '–' + b.hi + '），是不是选错列了');
+      return 0;
+    }
+    return b.int ? Math.round(n) : n;
+  }
+
+  /* A cup size is 1 to 12 inches. The bound is what catches a cup-size column
+     mapped onto the code column: without it "TPL-411" reads as 411 inches and
+     only surfaces later as an inner box of zero. */
+  function cupOf(raw, why) {
+    var s = String(raw == null ? '' : raw).trim();
+    if (!s) return '';
+    var m = /(\d+(?:\.\d+)?)/.exec(s);
+    if (!m) { why.push('杯径「' + s + '」里没有数字'); return ''; }
+    var n = +m[1];
+    if (n < 1 || n > 12) { why.push('杯径 ' + s + ' 不像杯径（1–12 寸），是不是选错列了'); return ''; }
+    return s;
+  }
+
+  /* Exact code only — never infer a prefix. Typing a batch by hand can accept
+     "411" and fill in the rest, because the operator sees the resolved code
+     before committing. Two hundred imported rows are reviewed by nobody, and a
+     guessed prefix would quietly substitute a different variety. */
+  function codeOf(raw, why) {
+    var s = String(raw == null ? '' : raw).trim().toUpperCase();
+    if (!s) { why.push('缺编号'); return ''; }
+    if (!/[A-Z]/.test(s)) {
+      why.push('编号「' + s + '」只有数字，导入不会替你补前缀（是不是选错列了）');
+      return '';
+    }
+    return s;
+  }
+
+  function buildJobs() {
+    var body = bodyRows(), out = [], bad = [], skipped = 0;
+    var mapped = SHEET.map.map(function (k, i) { return k ? i : -1; })
+                          .filter(function (i) { return i >= 0; });
+
+    body.forEach(function (row, n) {
+      /* A row blank in every mapped column is not an error, it is a spacer.
+         Erroring on those is how a real spreadsheet becomes unimportable. */
+      var anything = mapped.some(function (i) { return String(row[i] || '').trim() !== ''; });
+      if (!anything) { skipped++; return; }
+
+      var why = [];
+      var code = codeOf(pick(row, 'code'), why);
+      var rawQty = pick(row, 'qty');
+      if (rawQty === '') why.push('缺数量');
+      var qty = bounded('qty', rawQty, why);
+
+      var single = pick(row, 'week');
+      var rawFrom = pick(row, 'from') || single, rawTo = pick(row, 'to') || single;
+      var year = yearOf(pick(row, 'year')) || yearOf(rawFrom) || new Date().getUTCFullYear();
+      var from = weekOf(rawFrom, year);
+      var to = weekOf(rawTo, year) || from;
+      if (!from) why.push(rawFrom ? '起始周「' + rawFrom + '」不是 1–53 的周次或日期' : '缺起始周');
+      if (!to) why.push('缺结束周');
+
+      var cup = cupOf(pick(row, 'cup'), why);
+      var known = !!VARS[code];
+      var nameEn = pick(row, 'nameEn');
+      if (code && !nameEn && !known) why.push('品种库里没有 ' + code + '，表里也没有英文名');
+
+      var rec = {
+        _row: SHEET.headerRow + n + 1, _why: why, _new: !!(code && !known),
+        _raw: { qty: rawQty, from: rawFrom, to: rawTo, cup: pick(row, 'cup') },
+        code: code, nameEn: nameEn, nameZh: pick(row, 'nameZh'), cup: cup,
+        qty: qty, from: from, to: to, year: year, note: pick(row, 'note'),
+        tray: bounded('tray', pick(row, 'tray'), why),
+        stem: pick(row, 'stem'),
+        ns: bounded('ns', pick(row, 'ns'), why),
+        ht: bounded('ht', pick(row, 'ht'), why),
+        pattern: pick(row, 'pattern'),
+      };
+      (why.length ? bad : out).push(rec);
+    });
+    return { good: out, bad: bad, skipped: skipped };
+  }
+
+  var MAX_PREVIEW = 30;
+
+  function renderPreview() {
+    var r = buildJobs();
+    LAST = r;
+    var head = $('previewTable').querySelector('thead tr');
+    head.innerHTML = ['行', '编号', '名称', '杯径', '数量', '周', '年'].map(function (c) {
+      return '<th>' + c + '</th>';
+    }).join('');
+    var tb = $('previewTable').querySelector('tbody'); tb.innerHTML = '';
+
+    /* Raw beside parsed wherever the two can differ. A row that says "数量 超出
+       常理" is unactionable on its own; next to the cell it came from it is
+       obvious, and usually it is the mapping that is wrong, not the sheet. */
+    function cell(parsed, raw) {
+      var p = String(parsed == null || parsed === 0 ? '' : parsed);
+      var q = String(raw == null ? '' : raw).trim();
+      if (!q || q === p) return esc(p);
+      return esc(p || '—') + ' <span class="rawv">' + esc(q) + '</span>';
+    }
+
+    var show = r.bad.concat(r.good).slice(0, MAX_PREVIEW);
+    show.forEach(function (j) {
+      var tr = document.createElement('tr');
+      if (j._why.length) tr.className = 'bad';
+      var nm = j.nameEn || (VARS[j.code] && VARS[j.code].nameEn) || '';
+      tr.innerHTML =
+        '<td>' + j._row + '</td>' +
+        '<td class="mono">' + esc(j.code || '—') +
+          (j._new && !j._why.length ? ' <span class="newvar">新</span>' : '') + '</td>' +
+        '<td>' + esc(nm) + '</td>' +
+        '<td>' + cell(j.cup || (VARS[j.code] && VARS[j.code].cup) || '', j._raw.cup) + '</td>' +
+        '<td>' + cell(j.qty, j._raw.qty) + '</td>' +
+        '<td>' + cell(j.from ? j.from + '–' + j.to : '', j._raw.from) + '</td>' +
+        '<td>' + (j.year || '') + '</td>';
+      if (j._why.length) {
+        tr.children[2].innerHTML = '<span class="why">' + esc(j._why.join('；')) + '</span>';
+      }
+      tb.appendChild(tr);
+    });
+    if (show.length < r.good.length + r.bad.length) {
+      var more = document.createElement('tr');
+      more.innerHTML = '<td colspan="7" class="lead" style="padding:8px 5px;">' +
+        '以上只显示前 ' + MAX_PREVIEW + ' 行，其余 ' +
+        (r.good.length + r.bad.length - show.length) + ' 行同样会按上面的对应关系导入。</td>';
+      tb.appendChild(more);
+    }
+
+    $('previewCount').textContent = r.good.length + ' 条可导入' +
+      (r.bad.length ? ' · ' + r.bad.length + ' 行有问题' : '') +
+      (r.skipped ? ' · 跳过 ' + r.skipped + ' 个空行' : '');
+
+    var msgs = [];
+    var missing = FIELDS.filter(function (f) { return f.req && SHEET.map.indexOf(f.k) < 0; });
+    if (SHEET.map.indexOf('week') >= 0) {
+      missing = missing.filter(function (f) { return f.k !== 'from' && f.k !== 'to'; });
+    }
+    if (missing.length) msgs.push('还没有指定：' + missing.map(function (f) { return f.label; }).join('、') + '。');
+    var newOnes = r.good.filter(function (j) { return j._new; }).length;
+    if (newOnes) msgs.push('其中 ' + newOnes + ' 个编号不在品种库里，会按表里的名称建立批次——' +
+                          '建议随后到「品种库」补上照片与规格。');
+    $('mapWarn').textContent = msgs.join(' ');
+
+    /* Partial import is allowed here, unlike a packing list where a missing
+       carton would mis-describe a physical pallet — a batch that fails to
+       import leaves the calendar showing less stock, which is safe. But it is
+       never silent: the rows being dropped are listed above and have to be
+       acknowledged before the button works. */
+    var ack = $('skipAck');
+    $('ackWrap').hidden = !r.bad.length;
+    if (!r.bad.length) ack.checked = false;
+    ack.nextElementSibling.textContent =
+      '我已核对，跳过上面 ' + r.bad.length + ' 行并导入其余 ' + r.good.length + ' 条';
+    $('xlGo').disabled = !r.good.length || (r.bad.length > 0 && !ack.checked);
+    $('xlGo').textContent = r.good.length ? '导入 ' + r.good.length + ' 条' : '导入';
+  }
+
+  function runImport() {
+    var jobs = LAST.good.slice();
+    if (!jobs.length) return;
+    rememberMap(headers(), SHEET.map);
+
+    var total = jobs.length, done = 0, failed = 0;
+    $('xlGo').disabled = true;
+    st('xlStatus', '导入中… 0/' + total);
     (function next() {
       if (!jobs.length) {
-        $('csvGo').disabled = false;
-        st('csvStatus', '完成：' + done + ' 条' + (failed ? '，失败 ' + failed : '') + (bad ? '，跳过 ' + bad + ' 行' : ''), failed > 0);
-        $('csv').value = '';
-        reload();
+        $('xlGo').disabled = false;
+        st('xlStatus', '完成：' + done + ' 条' + (failed ? '，失败 ' + failed : ''), failed > 0);
+        if (!failed) { $('mapStep').hidden = true; SHEET = null; $('csv').value = ''; $('xlFile').value = ''; }
+        reload(); loadVarieties();
         return;
       }
-      api.saveItem(pass, jobs.shift()).then(function (r) {
+      var j = jobs.shift();
+      // same batch identity as before: code + cup + start week
+      var hit = items.filter(function (x) {
+        return x.code === j.code && (x.cup || '') === (j.cup || '') && x.from === j.from;
+      })[0];
+      var body = {
+        id: hit ? hit.id : undefined, code: j.code, nameEn: j.nameEn, nameZh: j.nameZh,
+        cup: j.cup, qty: j.qty, from: j.from, to: j.to, year: j.year, note: j.note,
+        tray: j.tray, stem: j.stem, ns: j.ns, ht: j.ht, pattern: j.pattern,
+        img: hit ? '__keep__' : undefined, img2: hit ? '__keep__' : undefined,
+      };
+      api.saveItem(pass, body).then(function (r) {
         if (r.ok) done++; else failed++;
-        st('csvStatus', '导入中… ' + (done + failed) + '/' + (done + failed + jobs.length));
+        st('xlStatus', '导入中… ' + (done + failed) + '/' + total);
         next();
       }).catch(function () { failed++; next(); });
     })();
   }
-  $('csvGo').addEventListener('click', function () { runImport($('csv').value); });
-  $('csvFile').addEventListener('change', function () {
-    var f = this.files && this.files[0]; if (!f) return;
-    var fr = new FileReader();
-    fr.onload = function () { $('csv').value = fr.result; st('csvStatus', '已读入 ' + f.name + '，点「导入」确认'); };
-    fr.readAsText(f, 'utf-8');
+
+  /* ---------------- getting a file in ---------------- */
+  function readFile(f) {
+    var isXl = /\.xlsx$/i.test(f.name);
+    if (isXl && !window.XLSXLite.supported()) {
+      st('csvStatus', '这个浏览器读不了 .xlsx，请另存为 CSV 再上传', true); return;
+    }
+    if (isXl) {
+      var fr = new FileReader();
+      fr.onload = function () {
+        window.XLSXLite.read(fr.result).then(function (wb) {
+          openSheet(wb.sheets, f.name);
+        }).catch(function (e) {
+          var why = { 'not-zip': '这不是一个 .xlsx 文件', 'not-xlsx': '这个文件不是 Excel 工作簿',
+                      'zip64': '文件太大，请另存为 CSV', 'no-sheets': '工作簿里没有工作表' }[e.message];
+          st('csvStatus', why || ('读取失败：' + e.message), true);
+        });
+      };
+      fr.readAsArrayBuffer(f);
+    } else {
+      var t = new FileReader();
+      t.onload = function () {
+        var rows = parseCsv(String(t.result));
+        if (!rows.length) { st('csvStatus', '文件里没有内容', true); return; }
+        var w = Math.max.apply(null, rows.map(function (r) { return r.length; }));
+        rows = rows.map(function (r) {
+          var o = []; for (var i = 0; i < w; i++) o.push(String(r[i] == null ? '' : r[i]).trim());
+          return o;
+        });
+        openSheet([{ name: f.name, rows: rows }], f.name);
+      };
+      t.readAsText(f, 'utf-8');
+    }
+  }
+
+  $('xlFile').addEventListener('change', function () {
+    var f = this.files && this.files[0]; if (f) readFile(f);
   });
+  $('xlSheet').addEventListener('change', function () {
+    SHEET.si = +this.value; autoHeaderRow(); autoMap(); renderMap();
+  });
+  $('xlHeader').addEventListener('input', function () {
+    var n = Math.max(1, Math.min(50, +this.value || 1));
+    SHEET.headerRow = n; autoMap(); renderMap();
+  });
+  $('xlAuto').addEventListener('click', function () {
+    try { localStorage.removeItem(mapKey(headers())); } catch (e) {}
+    autoHeaderRow(); autoMap(); renderMap();
+  });
+  $('skipAck').addEventListener('change', renderPreview);
+  $('xlGo').addEventListener('click', runImport);
+  $('xlCancel').addEventListener('click', function () {
+    $('mapStep').hidden = true; SHEET = null; $('xlFile').value = ''; st('csvStatus', '');
+  });
+  $('csvGo').addEventListener('click', function () {
+    var rows = parseCsv($('csv').value);
+    if (!rows.length) { st('csvStatus', '没有可导入的内容', true); return; }
+    var w = Math.max.apply(null, rows.map(function (r) { return r.length; }));
+    rows = rows.map(function (r) {
+      var o = []; for (var i = 0; i < w; i++) o.push(String(r[i] == null ? '' : r[i]).trim());
+      return o;
+    });
+    openSheet([{ name: '粘贴的内容', rows: rows }], '粘贴的内容');
+  });
+
   $('csvOut').addEventListener('click', function () {
     var q = function (v) { v = String(v == null ? '' : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
     var csv = '编号,英文名,中文名,杯径,数量,起始周,结束周,年份,备注,每内箱株数,梗数,花径,株高,花纹\n' +
@@ -562,6 +1156,129 @@ TPL-321, Pink, 粉, 3.5&quot;, 800, 12, 20"></textarea>
     a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }));  // BOM so Excel reads the Chinese
     a.download = 'kmty-inventory-' + new Date().toISOString().slice(0, 10) + '.csv';
     a.click(); URL.revokeObjectURL(a.href);
+  });
+
+
+  /* ---------------- the variety library ----------------
+     The half of a batch that never changes, kept once per code. Everything
+     here exists so that the next spreadsheet can be three columns wide. */
+  function loadVarieties() {
+    return api.varieties(pass).then(function (r) {
+      if (!r.ok) return;
+      varList = r.varieties || [];
+      VARS = {};
+      varList.forEach(function (v) { VARS[v.code] = v; });
+      paintVarieties();
+      // the preview names rows from the library, so it moves when the library does
+      if (SHEET) renderPreview();
+    });
+  }
+
+  function paintVarieties() {
+    var tb = $('libTable').querySelector('tbody');
+    tb.innerHTML = '';
+    $('libCount').textContent = varList.length + ' 个品种';
+    var badge = $('libBadge');
+    /* Codes that are in use but not in the library: the thing a grower most
+       wants to be told, because those are the batches with no photograph. */
+    var missing = {};
+    items.forEach(function (i) { if (i.code && !VARS[i.code]) missing[i.code] = true; });
+    var nMissing = Object.keys(missing).length;
+    badge.hidden = !nMissing;
+    badge.textContent = String(nMissing);
+    badge.title = nMissing ? nMissing + ' 个在用编号还没建品种' : '';
+
+    varList.forEach(function (v) {
+      var used = items.filter(function (i) { return i.code === v.code; }).length;
+      var tr = document.createElement('tr');
+      var src = v.img ? '/api/inv/img?var=' + encodeURIComponent(v.code) + '&t=' + v.updatedAt : '';
+      var spec = [v.cup, v.stem, v.ns ? 'N.S. ' + v.ns + ' cm' : '', v.ht ? '株高 ' + v.ht + ' cm' : '']
+        .filter(Boolean).join(' · ');
+      tr.innerHTML =
+        '<td>' + (src ? '<img class="thumb" src="' + src + '" alt="">' : '<span class="nothumb"></span>') + '</td>' +
+        '<td class="mono">' + esc(v.code) + '</td>' +
+        '<td>' + esc(v.nameEn) + (v.nameZh ? ' · ' + esc(v.nameZh) : '') + '</td>' +
+        '<td>' + esc(spec || '—') + '</td>' +
+        '<td class="num">' + used + '</td>' +
+        '<td><button class="btn ghost sm" data-ved="' + esc(v.code) + '">编辑</button> ' +
+            '<button class="btn ghost sm" data-vdel="' + esc(v.code) + '">删除</button></td>';
+      tb.appendChild(tr);
+    });
+
+    if (nMissing) {
+      var tr2 = document.createElement('tr');
+      tr2.innerHTML = '<td></td><td colspan="5" class="lead" style="padding:10px 5px;">' +
+        '还没建品种的在用编号：<b class="mono">' + Object.keys(missing).sort().map(esc).join('、') + '</b>' +
+        '　—　建好之后，这些批次会自动带出名称、规格和照片。</td>';
+      tb.appendChild(tr2);
+    }
+  }
+
+  $('libTable').addEventListener('click', function (e) {
+    var ed = e.target.closest('[data-ved]'), del = e.target.closest('[data-vdel]');
+    if (ed) { editVariety(ed.dataset.ved); return; }
+    if (del) {
+      var code = del.dataset.vdel;
+      var used = items.filter(function (i) { return i.code === code; }).length;
+      if (!confirm('删除品种 ' + code + '？' + (used ? '\n\n有 ' + used + ' 个批次在用这个编号，删除后它们会失去名称、规格和照片。' : ''))) return;
+      api.saveVariety(pass, { code: code, delete: true }).then(function () { loadVarieties(); reload(); });
+    }
+  });
+
+  var vShotPlant = photoField('v-img', 'vImgPrev', 'vImgNone', 'vImgClear', 760, false, 'vStatus');
+  var vShotFlower = photoField('v-img2', 'vImgPrev2', 'vImgNone2', 'vImgClear2', 620, true, 'vStatus');
+
+  function editVariety(code) {
+    var v = VARS[code]; if (!v) return;
+    editingVar = code;
+    $('libTitle').textContent = '编辑品种 ' + code;
+    $('v-code').value = v.code; $('v-nameEn').value = v.nameEn; $('v-nameZh').value = v.nameZh || '';
+    $('v-cup').value = v.cup || ''; $('v-stem').value = v.stem || '';
+    $('v-ns').value = v.ns || ''; $('v-ht').value = v.ht || ''; $('v-pattern').value = v.pattern || '';
+    vShotPlant.reset(); vShotFlower.reset();
+    vShotPlant.show(v.img ? '/api/inv/img?var=' + encodeURIComponent(v.code) + '&t=' + v.updatedAt : '');
+    vShotFlower.show(v.img2 ? '/api/inv/img?var=' + encodeURIComponent(v.code) + '&shot=flower&t=' + v.updatedAt : '');
+    $('vReset').hidden = false; st('vStatus', '');
+    syncVarKey();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function resetVariety() {
+    editingVar = null;
+    $('libTitle').textContent = '添加品种';
+    ['v-code', 'v-nameEn', 'v-nameZh', 'v-cup', 'v-ns', 'v-ht'].forEach(function (k) { $(k).value = ''; });
+    $('v-stem').value = ''; $('v-pattern').value = '';
+    vShotPlant.reset(); vShotFlower.reset();
+    $('vReset').hidden = true; st('vStatus', '');
+    syncVarKey();
+  }
+  $('vReset').addEventListener('click', resetVariety);
+
+  function syncVarKey() { paintCodeKey($('v-code').value, $('vCodeKey')); }
+  $('v-code').addEventListener('input', syncVarKey);
+
+  $('vSave').addEventListener('click', function () {
+    var body = {
+      code: $('v-code').value.trim(), nameEn: $('v-nameEn').value.trim(),
+      nameZh: $('v-nameZh').value.trim(), cup: $('v-cup').value.trim(),
+      stem: $('v-stem').value, ns: $('v-ns').value || 0, ht: $('v-ht').value || 0,
+      pattern: $('v-pattern').value,
+    };
+    if (!body.code || !body.nameEn) { st('vStatus', '编号和英文名必填', true); return; }
+    if (vShotPlant.pending !== undefined) body.img = vShotPlant.pending;
+    else if (editingVar) body.img = '__keep__';
+    if (vShotFlower.pending !== undefined) body.img2 = vShotFlower.pending;
+    else if (editingVar) body.img2 = '__keep__';
+
+    $('vSave').disabled = true; st('vStatus', '保存中…');
+    api.saveVariety(pass, body).then(function (r) {
+      $('vSave').disabled = false;
+      if (!r.ok) { st('vStatus', r.error || '保存失败', true); return; }
+      resetVariety();                 // this blanks the status line
+      st('vStatus', '已保存');
+      loadVarieties();
+      reload();          // batches inherit from it, so their rows change too
+    }).catch(function () { $('vSave').disabled = false; st('vStatus', '无法连接服务器', true); });
   });
 
   /* ---------- inquiries ---------- */

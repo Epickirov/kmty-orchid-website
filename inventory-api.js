@@ -10,6 +10,9 @@
 //   inv:<id>          → a batch (see below); no images, so lists stay small
 //   invimg:<id>       → the whole-plant photo, as a data URL
 //   invimg2:<id>      → the single-flower cut-out, as a data URL
+//   var:<CODE>        → a variety: the name, grade and photos a code always has
+//   varimg:<CODE>     → the variety's whole-plant photo
+//   varimg2:<CODE>    → the variety's single-flower cut-out
 //   inq:<ts>-<rand>   → an inquiry and its status
 //
 // A batch is what a grower actually has: a quantity of one variety in one cup
@@ -170,6 +173,104 @@ function cleanItem(b, prev) {
   };
 }
 
+/* ---------------- the variety library ----------------
+   A code IS a variety. Its names, its grade and its two photographs are the
+   same in March and in September, and typing them again on every batch is how
+   a catalogue ends up with four spellings of one orchid and a batch nobody
+   photographed. So they are entered once, under `var:<CODE>`, and a batch
+   carries only what is true of that batch: the cup, the quantity, the weeks.
+
+   A batch may still override any of them — the same variety does come in at a
+   different grade some seasons — but a blank on a batch is not a blank. It
+   means "as the library says", and it is filled in on the way out. That is
+   the whole point of a library rather than a one-time autofill: correct a name
+   in one place and every batch that never overrode it is correct too. */
+function cleanVariety(b, prev) {
+  return {
+    code: str(b.code, 24).toUpperCase(),
+    nameEn: str(b.nameEn, 60),
+    nameZh: str(b.nameZh, 60),
+    cup: str(b.cup, 24),                   // the size it is usually grown in
+    stem: stemOf(b.stem),
+    pattern: oneOf(b.pattern, PATTERNS),
+    ns: dec1(b.ns, 0, 60),
+    ht: dec1(b.ht, 0, 300),
+    img: prev ? !!prev.img : false,
+    img2: prev ? !!prev.img2 : false,
+    updatedAt: Date.now(),
+  };
+}
+
+/* The fields a batch inherits. Quantity, weeks, year and note are deliberately
+   not here: those are what a batch IS, and inheriting them would be wrong
+   rather than convenient. */
+const INHERIT = ['nameEn', 'nameZh', 'cup', 'stem', 'pattern', 'ns', 'ht'];
+
+function mergeVariety(item, v) {
+  if (!v) return item;
+  const out = { ...item };
+  for (const f of INHERIT) {
+    const own = out[f];
+    const blank = own === '' || own === 0 || own == null;
+    if (blank && v[f] !== '' && v[f] !== 0 && v[f] != null) out[f] = v[f];
+  }
+  // the inner box follows whichever cup ended up winning
+  if (!out.tray) out.tray = boxForCup(out.cup);
+  if (!out.img && v.img) out.img = true;
+  if (!out.img2 && v.img2) out.img2 = true;
+  /* The photo URL busts its cache with ?t=updatedAt. A row that shows the
+     library's photograph has to move when the LIBRARY changes, or replacing a
+     variety's picture leaves every batch of it showing the old one for a day. */
+  if (v.updatedAt > out.updatedAt) out.updatedAt = v.updatedAt;
+  return out;
+}
+
+async function listVarieties(env) {
+  const K = kv(env); if (!K) return [];
+  const out = [];
+  let cursor;
+  do {
+    const page = await K.list({ prefix: 'var:', cursor, limit: 1000 });
+    for (const k of page.keys) {
+      try { const v = await K.get(k.name); if (v) out.push(JSON.parse(v)); } catch (e) {}
+    }
+    cursor = page.list_complete ? null : page.cursor;
+  } while (cursor);
+  out.sort((a, b) => String(a.code).localeCompare(String(b.code)));
+  return out;
+}
+
+async function saveVariety(request, env) {
+  const K = kv(env); if (!K) return json({ error: 'no kv binding' }, 500);
+  let b; try { b = await request.json(); } catch (e) { return json({ error: 'bad json' }, 400); }
+  const code = str(b.code, 24).toUpperCase();
+  if (!code) return json({ error: 'code' }, 400);
+
+  if (b.delete) {
+    await K.delete('var:' + code);
+    await K.delete('varimg:' + code); await K.delete('varimg2:' + code);
+    return json({ ok: true, deleted: code });
+  }
+
+  let prev = null;
+  try { const raw = await K.get('var:' + code); if (raw) prev = JSON.parse(raw); } catch (e) {}
+  const v = cleanVariety(b, prev);
+  if (!v.nameEn) return json({ error: 'code and English name are required' }, 400);
+
+  for (const [field, prefix] of [['img', 'varimg:'], ['img2', 'varimg2:']]) {
+    const val = b[field];
+    if (typeof val !== 'string' || val === '__keep__') continue;
+    if (val === '') { await K.delete(prefix + code); v[field] = false; continue; }
+    if (!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(val) || val.length >= 3_000_000) {
+      return json({ error: 'photos must be png/jpeg/webp data URLs under 3MB' }, 400);
+    }
+    await K.put(prefix + code, val); v[field] = true;
+  }
+
+  await K.put('var:' + code, JSON.stringify(v));
+  return json({ ok: true, variety: v });
+}
+
 async function listItems(env) {
   const K = kv(env); if (!K) return [];
   const out = [];
@@ -181,8 +282,11 @@ async function listItems(env) {
     }
     cursor = page.list_complete ? null : page.cursor;
   } while (cursor);
-  out.sort((a, b) => a.from - b.from || String(a.code).localeCompare(String(b.code)) || String(a.cup).localeCompare(String(b.cup)));
-  return out;
+  const lib = {};
+  for (const v of await listVarieties(env)) lib[v.code] = v;
+  const merged = out.map(i => mergeVariety(i, lib[i.code]));
+  merged.sort((a, b) => a.from - b.from || String(a.code).localeCompare(String(b.code)) || String(a.cup).localeCompare(String(b.cup)));
+  return merged;
 }
 
 async function saveItem(request, env) {
@@ -199,7 +303,17 @@ async function saveItem(request, env) {
   let prev = null;
   if (b.id) { try { const raw = await K.get('inv:' + str(b.id, 16)); if (raw) prev = JSON.parse(raw); } catch (e) {} }
   const item = cleanItem(b, prev);
-  if (!item.code || !item.nameEn) return json({ error: 'code and English name are required' }, 400);
+  if (!item.code) return json({ error: 'code is required' }, 400);
+
+  /* A spreadsheet row that is nothing but a code, a quantity and two weeks is
+     a valid batch once the library knows the code — that is the point of the
+     library, and the import relies on it. The name is still required, it just
+     does not have to be in this row. */
+  let lib = null;
+  try { const raw = await K.get('var:' + item.code); if (raw) lib = JSON.parse(raw); } catch (e) {}
+  if (!item.nameEn && !(lib && lib.nameEn)) {
+    return json({ error: 'code and English name are required', needsName: item.code }, 400);
+  }
 
   // '__keep__' leaves the stored photo alone, '' removes it, anything else is a
   // new data URL — the same three-way the reseller logos use. Both shots take
@@ -215,15 +329,34 @@ async function saveItem(request, env) {
   }
 
   await K.put('inv:' + item.id, JSON.stringify(item));
-  return json({ ok: true, item });
+  // stored sparse, returned filled in — the caller is drawing a table row
+  return json({ ok: true, item: mergeVariety(item, lib) });
 }
 
 async function serveImage(url, env) {
   const K = kv(env); if (!K) return new Response('', { status: 404 });
   // ?shot=flower asks for the cut-out; anything else (including no shot at all,
   // which is what older links say) means the whole plant
-  const prefix = url.searchParams.get('shot') === 'flower' ? 'invimg2:' : 'invimg:';
-  const raw = await K.get(prefix + str(url.searchParams.get('id'), 16));
+  const flower = url.searchParams.get('shot') === 'flower';
+  const prefix = flower ? 'invimg2:' : 'invimg:';
+
+  /* ?var=<CODE> addresses the library directly, which is what the staff page
+     uses. ?id=<batchId> addresses a batch and falls back to the library, so a
+     variety photographed once shows on every batch of it without the buyer
+     page knowing the library exists. */
+  const code = str(url.searchParams.get('var'), 24).toUpperCase();
+  let raw = null;
+  if (code) {
+    raw = await K.get((flower ? 'varimg2:' : 'varimg:') + code);
+  } else {
+    const id = str(url.searchParams.get('id'), 16);
+    raw = await K.get(prefix + id);
+    if (!raw && id) {
+      let batch = null;
+      try { batch = JSON.parse(await K.get('inv:' + id) || 'null'); } catch (e) {}
+      if (batch && batch.code) raw = await K.get((flower ? 'varimg2:' : 'varimg:') + batch.code);
+    }
+  }
   if (!raw) return new Response('', { status: 404 });
   const m = /^data:(image\/[a-z]+);base64,(.*)$/.exec(raw);
   if (!m) return new Response('', { status: 404 });
@@ -354,6 +487,17 @@ export async function handleInventory(request, env, url, sendMail) {
      ids cannot be enumerated. The commercial information is the numbers, and
      the numbers stay behind the code. */
   if (p === '/api/inv/img' && method === 'GET') return serveImage(url, env);
+
+  /* The library is staff-only. A buyer never needs it: every field it holds
+     reaches them already, merged into the batches they can see. */
+  if (p === '/api/inv/varieties' && method === 'GET') {
+    if (!admin) return json({ error: 'unauthorized' }, 401);
+    return json({ ok: true, varieties: await listVarieties(env) });
+  }
+  if (p === '/api/inv/variety' && method === 'POST') {
+    if (!admin) return json({ error: 'unauthorized' }, 401);
+    return saveVariety(request, env);
+  }
 
   /* A buyer who has sent a request should not have to email and ask what
      happened to it. The reference alone is not enough to look one up — it is

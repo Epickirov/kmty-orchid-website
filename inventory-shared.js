@@ -618,6 +618,8 @@
     // staff
     adminItems: function (pass) { return get('/api/inv/items', { 'x-admin-pass': pass }); },
     saveItem: function (pass, item) { return post('/api/inv/admin/item', item, { 'x-admin-pass': pass }); },
+    varieties: function (pass) { return get('/api/inv/varieties', { 'x-admin-pass': pass }); },
+    saveVariety: function (pass, v) { return post('/api/inv/variety', v, { 'x-admin-pass': pass }); },
     inquiries: function (pass) { return get('/api/inv/admin/inquiries', { 'x-admin-pass': pass }); },
     decide: function (pass, key, action) { return post('/api/inv/admin/decide', { key: key, action: action }, { 'x-admin-pass': pass }); },
     getSettings: function (pass) { return get('/api/inv/admin/settings', { 'x-admin-pass': pass }); },

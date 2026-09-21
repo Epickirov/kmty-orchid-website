@@ -24,6 +24,7 @@ works reliably in mainland China.
 | `inventory-admin.html` | Staff page (`/inventory-admin`): stock, inquiries, access code. |
 | `inventory-shared.js` | ISO-week maths, the four-language dictionary, API client. |
 | `inventory-api.js` | The `/api/inv/*` handlers; imported by `site-worker.js`. |
+| `xlsx-lite.js` | Reads `.xlsx` in the browser — ZIP + XML, no dependency. Used by the staff page's Excel import. |
 | `build_deploy.py` | Assembles the `kmty-site` upload folder (see Deployment). |
 
 ## Live preview
