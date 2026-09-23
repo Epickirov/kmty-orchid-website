@@ -1,4 +1,4 @@
-# Deploy brief — kmty-site, commit `755f4be`
+# Deploy brief — kmty-site
 
 For a **local** Claude Code session with the repo checked out on the operator's
 own machine. Written by the cloud session that produced this work, which cannot
@@ -14,26 +14,26 @@ it, is `docs/DEPLOY-WWW.md`; this brief is self-contained.
 
 ## 0. What is being shipped
 
-Branch `claude/githack-preview-link-9nykre`, head `755f4be`. Four commits, all
-touching the inventory pages and none touching the marketing page's content:
+Branch **`claude/githack-preview-link-9nykre`**, at its head. Deliberately not
+pinned to a commit hash here — the branch has gained commits more than once
+since this file was written, and a stale hash is worse than none. Step 1
+verifies by content instead, which is what actually matters.
 
-| commit | what |
+What the branch adds over what is live:
+
+| area | what |
 |---|---|
-| `5d2e70e` | Flower colour is read off the code's second letter; KMTY mark in the header |
-| `ba84a41` | The C and X availability bars drawn as polka dots / rainbow diagonals |
-| `596b371` | Mix stripe recoloured: no blue; ivory, light green and pink added |
-| `755f4be` | **Excel import with column mapping, and a variety library** |
+| Buyer calendar | Flower colour read off the code's second letter; KMTY mark in the header; C and X bars drawn as polka dots / rainbow diagonals |
+| Staff page | **Excel import with column mapping**, and a **variety library** (品种库 tab) |
+| Marketing page | **Constellation and cut-flower carton specs** in the shipping table |
 
-The last one adds a new file, `xlsx-lite.js`, and new KV keys (`var:<CODE>`,
-`varimg:<CODE>`, `varimg2:<CODE>`). It also adds `xlsx-lite.js` to the upload
-manifest in `build_deploy.py` — without that the staff page ships an import
-button that throws on every file.
+Two of those bring new files or new storage: `xlsx-lite.js` (the in-browser
+.xlsx reader, added to `build_deploy.py`'s manifest) and the KV keys
+`var:<CODE>`, `varimg:<CODE>`, `varimg2:<CODE>`.
 
-Tests at this commit: 334 assertions across 21 suites, 0 failures. They run
-against a local `wrangler pages dev`, not against production, so there is
-nothing to re-run here.
-
----
+Tests on the branch head: 334 assertions across 21 suites, 0 failures. They
+run against a local `wrangler pages dev`, never against production, so there
+is nothing to re-run here.
 
 ## 1. Get the code
 
@@ -41,13 +41,19 @@ nothing to re-run here.
 git fetch origin claude/githack-preview-link-9nykre
 git checkout claude/githack-preview-link-9nykre
 git pull --ff-only
-git log --oneline -1          # must print 755f4be
 ```
 
-If it does not print `755f4be`, stop and say so — do not deploy a different
-commit than the one that was tested.
+Verify by content, not by hash — all four must pass:
 
----
+```bash
+test -f xlsx-lite.js && echo "xlsx reader: ok"
+grep -c "'sh.r5.d1'" i18n.js          # 4  (carton specs, one per language)
+grep -o 'i18n\.js?v=[0-9]*' "KMTY Orchid v5.dc.html"   # i18n.js?v=33
+grep -c '品种库' inventory-admin.html  # >= 1  (variety library tab)
+```
+
+If any of those disagree, stop and say so rather than deploying — it means the
+checkout is not the branch this brief describes.
 
 ## 2. Build the upload folder
 
@@ -126,14 +132,19 @@ success, so this is easy to get wrong and not notice.
 ```bash
 curl -s 'https://www.kmtyorchid.com/?x=1' > /tmp/live.html
 grep -c 'tabular-nums;">' /tmp/live.html      # 18
-grep -o 'i18n\.js?v=[0-9]*' /tmp/live.html    # i18n.js?v=32
+grep -o 'i18n\.js?v=[0-9]*' /tmp/live.html    # i18n.js?v=33
 curl -s -o /dev/null -w '%{http_code}\n' https://www.kmtyorchid.com/inventory   # 200
 curl -s -o /dev/null -w '%{http_code}\n' https://www.kmtyorchid.com/xlsx-lite.js # 200
+grep -c 'sh.r5.d1' /tmp/live.html             # 1   (Constellation carton row)
+grep -c 'sh.r6.d1' /tmp/live.html             # 1   (cut-flower carton row)
 curl -s https://www.kmtyorchid.com/api/inv/items                                 # {"error":"locked"}
 ```
 
-The `xlsx-lite.js` line is new for this release and is the one that proves the
-Excel import will work. A 404 there means step 2's manifest check was skipped.
+The `xlsx-lite.js` line proves the Excel import will work; a 404 there means
+step 2's manifest check was skipped. The two `sh.r` lines prove the new carton
+rows shipped. `i18n.js?v=33` proves the translations are not being served from
+cache — if it still reads `v=32`, the marketing page is stale and the carton
+rows will show in English for every language.
 
 `{"error":"locked"}` from `/api/inv/items` is correct — it means the buyer gate
 is doing its job, not that something is broken.
@@ -161,6 +172,9 @@ automated check covers because it needs a real spreadsheet:
   that are in use but have no variety yet.
 - Create one variety with both photos. Every batch of that code should pick up
   its name and photograph without being edited.
+- The marketing page's **Shipping spec** section now has six rows, ending in
+  **星空 / Constellation** and **切花 / Cut Flower**. Switch language and check
+  both read correctly in 中文 / РУ / VI.
 - **批量导入** → upload a real availability sheet. The columns should be listed
   with sample values and a dropdown each; Chinese headers should map themselves.
   Fix any that guessed wrong, check the preview, import.
