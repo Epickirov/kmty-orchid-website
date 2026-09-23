@@ -25,7 +25,7 @@ What the branch adds over what is live:
 |---|---|
 | Buyer calendar | Flower colour read off the code's second letter; KMTY mark in the header; C and X bars drawn as polka dots / rainbow diagonals |
 | Staff page | **Excel import with column mapping**, and a **variety library** (品种库 tab) |
-| Marketing page | **Constellation and cut-flower carton specs** in the shipping table |
+| Marketing page | **Constellation and cut-flower carton specs** in the shipping table — two new rows with drawings, counts and dimensions, in all four languages |
 
 Two of those bring new files or new storage: `xlsx-lite.js` (the in-browser
 .xlsx reader, added to `build_deploy.py`'s manifest) and the KV keys
@@ -50,6 +50,7 @@ test -f xlsx-lite.js && echo "xlsx reader: ok"
 grep -c "'sh.r5.d1'" i18n.js          # 4  (carton specs, one per language)
 grep -o 'i18n\.js?v=[0-9]*' "KMTY Orchid v5.dc.html"   # i18n.js?v=33
 grep -c '品种库' inventory-admin.html  # >= 1  (variety library tab)
+grep -c "'sh.spb'" i18n.js            # 4  (stems / box, the cut-flower unit)
 ```
 
 If any of those disagree, stop and say so rather than deploying — it means the
@@ -173,8 +174,9 @@ automated check covers because it needs a real spreadsheet:
 - Create one variety with both photos. Every batch of that code should pick up
   its name and photograph without being edited.
 - The marketing page's **Shipping spec** section now has six rows, ending in
-  **星空 / Constellation** and **切花 / Cut Flower**. Switch language and check
-  both read correctly in 中文 / РУ / VI.
+  **星空 / Constellation** (3.5″, 20 a carton) and **切花 / Cut Flower** (10–12
+  stems a box). Switch language and check both read correctly in 中文 / РУ / VI
+  — if they show in English, the i18n marker is being served from cache.
 - **批量导入** → upload a real availability sheet. The columns should be listed
   with sample values and a dropdown each; Chinese headers should map themselves.
   Fix any that guessed wrong, check the preview, import.
