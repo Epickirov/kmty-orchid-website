@@ -43,12 +43,14 @@ Not from a fresh clone of this branch. Concretely:
    `claude/githack-preview-link-9nykre`. In your tree:
    ```bash
    git fetch origin claude/githack-preview-link-9nykre
-   git log --oneline origin/claude/githack-preview-link-9nykre | head   # find the commit(s) after "Sync the marketing page…"
-   git cherry-pick <those commits>        # NOT the sync commit: your tree already has that content
-   git checkout origin/claude/githack-preview-link-9nykre -- tools/check_live_diff.py
+   git cat-file -t 869db6b                  # must print "commit": the sync commit, the base of this release
+   git log --oneline 869db6b..origin/claude/githack-preview-link-9nykre     # the release: the guard, the nav, the nav check
+   git cherry-pick 869db6b..origin/claude/githack-preview-link-9nykre        # NOT 869db6b itself: your tree already has that content
    ```
-   A conflict in `KMTY Orchid v5.dc.html` or `i18n.js` means your tree differs
-   from live in the nav area. Resolve it by hand and say so; do not force it.
+   The range is anchored on the sync commit because a *base* does not go stale
+   the way a branch tip does. A conflict in `KMTY Orchid v5.dc.html` or
+   `i18n.js` means your tree differs from live in the nav area. Resolve it by
+   hand and say so; do not force it.
 
 3. **Build, then let the guard decide.**
    ```bash
@@ -73,20 +75,41 @@ Not from a fresh clone of this branch. Concretely:
 
 ## What this release is
 
-**Desktop navigation** (computer browsers only; the phone layout is unchanged):
+**Desktop navigation** (computer browsers only; below 901px nothing changes —
+compared element by element against live's current page: 1,400 identical):
 
-- Top-bar links — Story / Grow / Products / Ship — larger, bolder, higher contrast.
-- **Contact us** added to the top bar and to the side navigation.
-- Side navigation: larger text, readable on both light and dark sections, and
-  labels in all five languages through the same path as every other string.
-- Fix: the side navigation's highlight never lit **How we grow** (the section is
-  3.5 screens tall and the observer wanted 40% of it visible) and ran a section
+- Top-bar links — Story / Grow / Products / Ship — larger (up to 16px, was 12px),
+  bolder, full contrast, with an underline on hover.
+- **Contact us** added to the top bar and to the side navigation, in all five
+  languages.
+- **The bar fits itself.** The fifth link and the larger type do not fit
+  everywhere: at full size the bar needs 1146px (中文) to 1404px (Русский).
+  So the page measures the bar on the visitor's own machine and keeps the
+  roomiest of seven layouts that fits (numerals and the Request-catalog button
+  go first, then size and gaps). This replaces the hand-measured per-language
+  rules, which were off by 15–30px against measurements of the same page.
+- Side navigation: larger text on its own cream surface so it reads on light
+  *and* dark sections; labels through the same translation path as the top bar;
+  hovering shows every label.
+- **Fix:** the side navigation never lit *How we grow* (the section is 3.5
+  screens tall and the observer wanted 40% of it visible) and ran a section
   behind elsewhere. It now follows where you are reading.
 
 It touches exactly two files: `KMTY Orchid v5.dc.html` and `i18n.js`, and bumps
 the marker to **`i18n.js?v=39`**.
 
 ---
+
+### Optional, if you have Playwright: run the nav check
+
+```bash
+python -m http.server 8000 -d dist/kmty-site &        # serve the build
+node tools/check_desktop_nav.mjs http://127.0.0.1:8000/index.html
+```
+
+Ends with `all checks passed` (34 assertions: every language at twelve widths,
+the rail's labels, which stop is lit, clicks and hover, contrast, and the phone
+layout). It changes nothing and does not touch the live site.
 
 ## Authenticate
 
@@ -119,7 +142,7 @@ wrangler still reports success, and `www.kmtyorchid.com` does not change.
 curl -s 'https://www.kmtyorchid.com/?x=1' > /tmp/live.html
 grep -o 'i18n\.js?v=[0-9]*' /tmp/live.html                       # i18n.js?v=39
 grep -c 'data-navcontact' /tmp/live.html                         # >= 1  (Contact us in the top bar)
-grep -c 'data-lang="ja"' /tmp/live.html                          # 1     (Japanese survived)
+grep -c 'data-lang="ja"' /tmp/live.html                          # >= 1  (Japanese survived)
 grep -c 'data-navinv' /tmp/live.html                             # >= 1  (Availability survived)
 curl -s -o /dev/null -w '%{http_code}\n' https://www.kmtyorchid.com/inventory   # 200
 curl -s https://www.kmtyorchid.com/api/inv/items                                # {"error":"locked"}

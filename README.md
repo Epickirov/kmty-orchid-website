@@ -26,6 +26,8 @@ works reliably in mainland China.
 | `inventory-api.js` | The `/api/inv/*` handlers; imported by `site-worker.js`. |
 | `xlsx-lite.js` | Reads `.xlsx` in the browser — ZIP + XML, no dependency. Used by the staff page's Excel import. |
 | `build_deploy.py` | Assembles the `kmty-site` upload folder (see Deployment). |
+| `tools/check_live_diff.py` | Run before every deploy: compares the upload with the live site and fails on any file that changes without being declared. Exists because the live site has been deployed from a checkout that was never pushed. |
+| `tools/check_desktop_nav.mjs` | Checks the top bar fits in all five languages at every desktop width, and that the side rail is labelled, lit and clickable. Needs Playwright. |
 
 ## Live preview
 
