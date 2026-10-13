@@ -26,6 +26,30 @@ translations and fonts (commit "Sync the marketing page…", a build from which
 reproduces live byte for byte). What it does **not**: the inventory pages, the
 Worker, images, `_headers`.
 
+### Step 0 — before anything else, copy the live site's source off the computer it is on
+
+The work behind `v=38` exists in exactly two places: that computer's folder and
+the files Cloudflare is serving. Nothing else. A disk failure, a reinstall, or one
+mistaken `git checkout .` loses the only editable copy. So, in the checkout that
+produced the live site:
+
+```bash
+git status                       # READ IT before committing anything
+git add -A                       # respects .gitignore
+git commit -m "What was live on 2026-10-13"
+git push origin HEAD:refs/heads/live-snapshot-2026-10-13
+```
+
+- **This repository is public.** Anything `git status` lists that must not be
+  public — keys, tokens, `.env`, `.dev.vars`, customer or order data — is **not**
+  committed. Add it to `.gitignore` or leave it out; do not "fix it later".
+- A **new branch**, not `main`: nothing merges and nothing deploys from it. It is
+  only a copy, so that the source of what is live exists somewhere that is not one
+  computer.
+- If the push is refused (authentication), say so and stop; do not work around it.
+- This also clears the way for step 2: `git cherry-pick` refuses a tree with
+  uncommitted changes.
+
 ### So: deploy from the checkout that produced the live site
 
 Not from a fresh clone of this branch. Concretely:
@@ -173,9 +197,10 @@ should change language and should light for *every* section, including
 - **Do not merge this branch to `main`** without first reverting `netlify.toml`
   (`publish = "netlify-demo"` → `"."`). Deploying does not require the merge.
 - Secrets are never committed.
-- **Push your own checkout to GitHub.** The reason this brief opens the way it
-  does is that a deploy was made from a tree nobody else could see. Whatever
-  you deploy from, push it, so the next person starts from what is live.
+- **Keep what is live on GitHub.** The reason this brief opens the way it does is
+  that a deploy was made from a tree nobody else could see. After every deploy,
+  push the tree you deployed from (step 0 shows how), so the next person starts
+  from what is live and not from a guess.
 
 ## If it goes wrong
 
