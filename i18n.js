@@ -1,4 +1,4 @@
-/* KMTY Orchid — i18n (EN / 中文 / RU / VI) + map labels, pins and base cards.
+/* KMTY Orchid — i18n (EN / 中文 / RU / VI / 日本語) + map labels, pins and base cards.
    Owns all SVG map text (the template runtime cannot render text inside <svg>). */
 (function () {
 'use strict';
@@ -17,7 +17,7 @@ var ACC = {
 };
 
 // CJK has no italic - slanting the glyphs is a faux-italic distortion, so the
-// Chinese dictionary uses upright accent spans (colour alone carries the emphasis)
+// Chinese and Japanese dictionaries use upright accent spans (colour alone carries the emphasis)
 var ACCZ = {};
 Object.keys(ACC).forEach(function (k) { ACCZ[k] = String(ACC[k]).replace('font-style:italic;', ''); });
 var SEP = ' <span style="color:#C86B3E;">/</span> ';
@@ -25,8 +25,8 @@ var SEP = ' <span style="color:#C86B3E;">/</span> ';
 var I18N = {
 /* ------------------------------------------------------------ ENGLISH */
 en: {
-  'nav.s1':'01 Story','nav.s2':'02 Grow','nav.s3':'03 Products','nav.s4':'04 Ship','nav.cta':'Request catalog',
-  'm.story':'Our story','m.grow':'How we grow','m.products':'Products','m.ship':'How it ships','m.cta':'Request catalog →',
+  'nav.s1':'01 Story','nav.s2':'02 Grow','nav.s3':'03 Products','nav.s4':'04 Ship','nav.inv':'Availability','nav.cta':'Request catalog',
+  'm.story':'Our story','m.grow':'How we grow','m.products':'Products','m.ship':'How it ships','m.inv':'Live availability →','m.cta':'Request catalog →',
   'hero.kicker':'Kunming Tong Yi · Est. 2000',
   'hero.h1':'Orchids in every color imaginable — <a href="#art" style="color:inherit;text-decoration:none;">' + ACC.h1 + 'and a few you can’t.' + ACC.s + '</a>',
   'hero.lede':'China’s largest exporter of flowering Phalaenopsis, grown from flask to bloom in the Yunnan highlands — home of the hand-marbled Constellation Orchid, found nowhere else on earth.',
@@ -72,7 +72,7 @@ en: {
   'p.c2.tag':'02 · Pot flower','p.c2.title':'Pot Flower','p.c2.body':'Finished, blooming plants — hand-graded Special to C and ready to retail or gift straight from the box.',
   'p.c3.tag':'03 · Cut flower','p.c3.title':'Cut Flower','p.c3.body':'Fresh-cut spikes, sleeved in foam and packed cold for florists, events and wholesale arrangers. Cold-chained from bench to box, so buds open for your customer — not in transit.',
   'p.slb':'Available sizes','p.slb3':'Per stem',
-  'p.sz.spiking':'3.5″ spiking','p.sz.flowering':'3.8″ flowering','p.sz.large':'Large flower','p.sz.small':'Small flower','p.sz.stems':'5–10 flowers / stem','p.sz.reefer':'Reefer cold-chain',
+  'p.sz.spiking':'3.5″ spiking','p.sz.flowering':'3.8″ flowering','p.sz.large':'Large flower 3.5″','p.sz.small':'Small flower 2.8″ / 3.0″','p.sz.stems':'5–10 flowers / stem','p.sz.reefer':'Reefer cold-chain',
   'p.sz.spk28':'2.8″ spiking','p.sz.spk30':'3.0″ spiking','p.sz.flw28':'2.8″ flowering','p.sz.flw30':'3.0″ flowering','p.sz.flw35':'3.5″ flowering',
   'v.eyebrow':'The collection','v.h2':'Hundreds of varieties, ' + ACC.v + 'and counting.' + ACC.s,
   'v.lede':'Six core colours are only the beginning. Across pot and cut flower we keep hundreds of varieties in production at once — snow whites and blush pinks, wine-reds and golds, speckled picotees and one-of-a-kind marbled novelties — with new crosses spiking every season. Every bloom below has flowered on our own benches.',
@@ -98,21 +98,21 @@ en: {
   'sh.eyebrow':'04 / How it ships','sh.h2':'Packed by hand, ' + ACC.sh + 'shipped cold.' + ACC.s,
   'sh.para':'Every spike is sleeved in foam, every bloom bedded in batting, every carton loaded into a reefer at the door. From our bench to yours — Beijing or Bangkok — the cold chain never breaks.',
   'sh.hd':'Shipping spec','sh.r1.n':'3.8″ Flowering','sh.r2.n':'Large Flower','sh.r3.n':'Small Flower','sh.r4.n':'Seedlings',
-  'sh.r1.c':'cup 3.8″ · 9.7 cm','sh.r2.c':'cup 4.7″ · 12 cm','sh.r3.c':'cup 3.5″ · 9 cm','sh.r4.c':'packed by cup size',
+  'sh.r1.c':'cup 3.8″ · 13 cm','sh.r2.c':'cup 3.5″ · 12 cm','sh.r3.c':'cup 2.8″ / 3.0″ · 9 cm','sh.r4.c':'packed by cup size',
   'sh.ppc':'plants / carton','sh.spb':'stems / box',
   'sh.r1.d1':'master 120×52×49 cm · 0.306 m³','sh.r1.d2':'2 inner trays × 20 · 118×49.5×22 cm · 0.129 m³',
   'sh.r2.d1':'master 110×45×60 cm · 0.297 m³','sh.r2.d2':'3 inner trays × 20 · 108×43×18 cm · 0.084 m³',
   'sh.r3.d1':'master 83×43×61 cm · 0.218 m³','sh.r3.d2':'3 inner trays × 24 · 81×41×19 cm · 0.063 m³',
-  'sh.r5.n':'Constellation','sh.r5.c':'cup 3.5″ · 9 cm','sh.r5.d1':'master 120×45×50 cm · 0.270 m³','sh.r5.d2':'4 inner boxes × 5 · 118×43×11 cm · 0.056 m³',
+  'sh.r5.n':'Constellation','sh.r5.c':'cup 3.5″ · 12 cm','sh.r5.d1':'master 120×45×50 cm · 0.270 m³','sh.r5.d2':'4 inner boxes × 5 · 118×43×11 cm · 0.056 m³',
   'sh.r6.n':'Cut Flower','sh.r6.c':'sleeved spikes','sh.r6.d1':'flat carton 90×38×9 cm · 0.031 m³','sh.r6.d2':'5 boxes / bundle · 50–60 stems',
-  'sh.r4.c1':'1.7″ / 2.0″ cup — 280','sh.r4.c2':'2.5″ / 2.8″ cup — 120','sh.r4.c3':'3.5″ cup — 42','sh.r4.c4':'3.5″ spiking — 32','sh.r4.d1':'uniform carton 61×49×30 cm · 0.090 m³',
+  'sh.r4.c1':'1.7″ / 2.0″ cup — 280','sh.r4.c2':'2.5″ / 2.8″ cup — 96','sh.r4.c5':'3.0″ cup — 72','sh.r4.c3':'3.5″ cup — 42','sh.r4.c4':'3.5″ spiking — 32','sh.r4.d1':'2.5″–3.0″: carton 65×45×28 cm · 0.082 m³',
   'sh.fine':'Dimensions are empty-carton outer sizes (cm); packed cartons bulge ≈1–2 cm per side. Volumes are freight-estimate values.',
   'sh.wt':'A full 60-plant large-flower carton weighs about 35 kg; airlines bill dimensional weight — about 51 kg for the same box.','sh.ctr':'One 40-ft container holds about 31,200 small-flower plants (1,300 cartons) or 16,800 large-flower plants (840 cartons), give or take about 100 cartons.',
   'sh.ch1':'All major Chinese cities','sh.ch2':'10+ countries','sh.ch3':'Longer shelf-life vs market',
   'c.kick':'Wholesale · Export · Commissions','c.h2':'Let’s grow something<br>' + ACC.c + 'beautiful' + ACC.s + ' together.',
   'c.inv':'Check live availability, week by week →',
   'c.sub':'Request the current wholesale catalog — varieties, grades, carton counts and lead times for your market.',
-  'c.ph':'Your work email','c.phco':'Company name','c.phnm':'Contact person','c.phtel':'Phone / WhatsApp','c.phmsg':'What are you looking for? (varieties, volumes, destination…)','c.send':'Send inquiry','c.phtype':'Product type','c.phspec':'Specification','c.tSeed':'Seedlings','c.tPot':'Pot Flower','c.tCut':'Cut Flower','c.prf':'Shipping to','c.prfm':'Korea · Vietnam · Philippines · Thailand · Singapore · Dubai · Oman · Brunei · Hong Kong','c.prfr':'Ranked China’s №1 exporter of flowering Phalaenopsis by customs data — every year since 2020.','c.addr':'Xiaojie, Songming County, Kunming','c.langs':'EN · ZH · RU · VI',
+  'c.ph':'Your work email','c.phco':'Company name','c.phnm':'Contact person','c.phtel':'Phone / WhatsApp','c.phmsg':'What are you looking for? (varieties, volumes, destination…)','c.send':'Send inquiry','c.phtype':'Product type','c.phspec':'Specification','c.tSeed':'Seedlings','c.tPot':'Pot Flower','c.tCut':'Cut Flower','c.prf':'Shipping to','c.prfm':'Korea · Vietnam · Philippines · Thailand · Singapore · Dubai · Oman · Brunei · Hong Kong','c.prfr':'Ranked China’s №1 exporter of flowering Phalaenopsis by customs data — every year since 2020.','c.addr':'Xiaojie, Songming County, Kunming','c.langs':'EN · ZH · RU · VI · 日本語',
   'f.about':'Kunming Tong Yi Biotechnology Co., Ltd. Premium Phalaenopsis, grown in Yunnan since 2000.',
   'f.secs':'Sections','f.lang':'Language',
   'f.c1':'© 2000–2026 Kunming Tong Yi Biotechnology','f.c2':'China’s Nº 1 flowering-Phalaenopsis exporter',
@@ -121,8 +121,8 @@ en: {
 },
 /* ------------------------------------------------------------ 中文 */
 zh: {
-  'nav.s1':'01 关于我们','nav.s2':'02 种植','nav.s3':'03 产品','nav.s4':'04 发货','nav.cta':'索取产品目录',
-  'm.story':'关于我们','m.grow':'如何种植','m.products':'产品系列','m.ship':'如何发货','m.cta':'索取产品目录 →',
+  'nav.s1':'01 关于我们','nav.s2':'02 种植','nav.s3':'03 产品','nav.s4':'04 发货','nav.inv':'实时库存','nav.cta':'索取产品目录',
+  'm.story':'关于我们','m.grow':'如何种植','m.products':'产品系列','m.ship':'如何发货','m.inv':'实时库存 →','m.cta':'索取产品目录 →',
   'hero.kicker':'昆明统一生物 · 创立于 2000 年',
   'hero.h1':'色彩万千的<span style="white-space:nowrap;">蝴蝶兰</span> — <a href="#art" style="color:inherit;text-decoration:none;">' + ACCZ.h1 + '还有你想象不到的那几种。' + ACCZ.s + '</a>',
   'hero.lede':'中国最大的开花蝴蝶兰出口商。从组培瓶到盛放，全程在云南高原完成 — 这里也是独一无二的手工大理石纹「星空」的故乡。',
@@ -166,7 +166,7 @@ zh: {
   'p.c2.tag':'02 · 盆花','p.c2.title':'盆花','p.c2.body':'成品开花植株 — 手工分级（特级至 C 级），开箱即可零售或馈赠。',
   'p.c3.tag':'03 · 切花','p.c3.title':'切花','p.c3.body':'新鲜剪切的花梗，泡棉套袋、全程冷链，适合花店、活动与批发插花。冷链从苗床直达纸箱，花苞留给您的客户绽放，而不是在运输途中。',
   'p.slb':'可选规格','p.slb3':'单枝规格',
-  'p.sz.spiking':'3.5″ 抽梗苗','p.sz.flowering':'3.8″ 开花株','p.sz.large':'大花','p.sz.small':'小花','p.sz.stems':'每枝 5–10 朵','p.sz.reefer':'冷链运输',
+  'p.sz.spiking':'3.5″ 抽梗苗','p.sz.flowering':'3.8″ 开花株','p.sz.large':'大花 3.5″','p.sz.small':'小花 2.8″ / 3.0″','p.sz.stems':'每枝 5–10 朵','p.sz.reefer':'冷链运输',
   'p.sz.spk28':'2.8″ 抽梗苗','p.sz.spk30':'3.0″ 抽梗苗','p.sz.flw28':'2.8″ 开花株','p.sz.flw30':'3.0″ 开花株','p.sz.flw35':'3.5″ 开花株',
   'v.eyebrow':'花色图鉴','v.h2':'数百个品种，' + ACCZ.v + '仍在增加。' + ACCZ.s,
   'v.lede':'六大主色只是起点。在盆花与切花两条线中，我们同时保有数百个品种在产 — 雪白与绯粉、酒红与金黄、星点镶边与独一无二的大理石纹新贵 — 每季都有新杂交上梗。下方每一朵，都在我们自己的苗床上开过花。',
@@ -192,21 +192,21 @@ zh: {
   'sh.eyebrow':'04 / 如何发货','sh.h2':'手工包装，' + ACCZ.sh + '全程冷链。' + ACCZ.s,
   'sh.para':'每一枝花梗套上泡棉，每一朵花垫入衬棉，每一箱货物在门口装入冷藏柜。从我们的苗床到您的手中 — 无论北京还是曼谷 — 冷链从不间断。',
   'sh.hd':'发货规格','sh.r1.n':'3.8″ 开花株','sh.r2.n':'大花','sh.r3.n':'小花','sh.r4.n':'种苗',
-  'sh.r1.c':'杯径 3.8″ · 9.7 cm','sh.r2.c':'杯径 4.7″ · 12 cm','sh.r3.c':'杯径 3.5″ · 9 cm','sh.r4.c':'按杯径装箱',
+  'sh.r1.c':'杯径 3.8″ · 13 cm','sh.r2.c':'杯径 3.5″ · 12 cm','sh.r3.c':'杯径 2.8″ / 3.0″ · 9 cm','sh.r4.c':'按杯径装箱',
   'sh.ppc':'株 / 箱','sh.spb':'支 / 箱',
   'sh.r1.d1':'外箱 120×52×49 cm · 0.306 m³','sh.r1.d2':'2 层内托 × 20 · 118×49.5×22 cm · 0.129 m³',
   'sh.r2.d1':'外箱 110×45×60 cm · 0.297 m³','sh.r2.d2':'3 层内托 × 20 · 108×43×18 cm · 0.084 m³',
   'sh.r3.d1':'外箱 83×43×61 cm · 0.218 m³','sh.r3.d2':'3 层内托 × 24 · 81×41×19 cm · 0.063 m³',
-  'sh.r5.n':'星空','sh.r5.c':'杯径 3.5″ · 9 cm','sh.r5.d1':'外箱 120×45×50 cm · 0.270 m³','sh.r5.d2':'4 层内箱 × 5 · 118×43×11 cm · 0.056 m³',
+  'sh.r5.n':'星空','sh.r5.c':'杯径 3.5″ · 12 cm','sh.r5.d1':'外箱 120×45×50 cm · 0.270 m³','sh.r5.d2':'4 层内箱 × 5 · 118×43×11 cm · 0.056 m³',
   'sh.r6.n':'切花','sh.r6.c':'泡棉套袋','sh.r6.d1':'扁箱 90×38×9 cm · 0.031 m³','sh.r6.d2':'5 箱 / 捆 · 50–60 支',
-  'sh.r4.c1':'1.7″ / 2.0″ 杯 — 280','sh.r4.c2':'2.5″ / 2.8″ 杯 — 120','sh.r4.c3':'3.5″ 杯 — 42','sh.r4.c4':'3.5″ 抽梗 — 32','sh.r4.d1':'统一纸箱 61×49×30 cm · 0.090 m³',
+  'sh.r4.c1':'1.7″ / 2.0″ 杯 — 280','sh.r4.c2':'2.5″ / 2.8″ 杯 — 96','sh.r4.c5':'3.0″ 杯 — 72','sh.r4.c3':'3.5″ 杯 — 42','sh.r4.c4':'3.5″ 抽梗 — 32','sh.r4.d1':'2.5″–3.0″：纸箱 65×45×28 cm · 0.082 m³',
   'sh.fine':'尺寸为空箱外径（cm）；装箱后每边约外扩 1–2 cm。体积为运费估算值。',
   'sh.wt':'装满 60 株的大花箱约重 35 kg；空运按体积重计费，同一只箱约 51 kg。','sh.ctr':'一个 40 尺柜约装小花 31,200 株（1,300 箱）或大花 16,800 株（840 箱），上下浮动约 100 箱。',
   'sh.ch1':'覆盖全国主要城市','sh.ch2':'10+ 个国家','sh.ch3':'货架期长于市场平均',
   'c.kick':'批发 · 出口 · 定制','c.h2':'让我们一起，种出<br>' + ACCZ.c + '美好' + ACCZ.s + '。',
   'c.inv':'查看实时库存 · 按周供货 →',
   'c.sub':'索取最新批发目录 — 品种、等级、装箱数与您所在市场的交期。',
-  'c.ph':'您的工作邮箱','c.phco':'公司名称','c.phnm':'联系人','c.phtel':'电话 / WhatsApp','c.phmsg':'您的需求（品种、数量、目的地……）','c.send':'发送询盘','c.phtype':'产品类型','c.phspec':'规格','c.tSeed':'种苗','c.tPot':'盆花','c.tCut':'切花','c.prf':'出口市场','c.prfm':'韩国 · 越南 · 菲律宾 · 泰国 · 新加坡 · 迪拜 · 阿曼 · 文莱 · 香港','c.prfr':'海关数据认证：自 2020 年起，连年位居中国开花蝴蝶兰出口第一。','c.addr':'云南省昆明市嵩明县小街','c.langs':'EN · 中文 · РУ · VI',
+  'c.ph':'您的工作邮箱','c.phco':'公司名称','c.phnm':'联系人','c.phtel':'电话 / WhatsApp','c.phmsg':'您的需求（品种、数量、目的地……）','c.send':'发送询盘','c.phtype':'产品类型','c.phspec':'规格','c.tSeed':'种苗','c.tPot':'盆花','c.tCut':'切花','c.prf':'出口市场','c.prfm':'韩国 · 越南 · 菲律宾 · 泰国 · 新加坡 · 迪拜 · 阿曼 · 文莱 · 香港','c.prfr':'海关数据认证：自 2020 年起，连年位居中国开花蝴蝶兰出口第一。','c.addr':'云南省昆明市嵩明县小街','c.langs':'EN · 中文 · РУ · VI · 日本語',
   'f.about':'昆明统一生物科技有限公司。优质蝴蝶兰，自 2000 年扎根云南。',
   'f.secs':'栏目','f.lang':'语言',
   'f.c1':'© 2000–2026 昆明统一生物科技有限公司','f.c2':'中国第一开花蝴蝶兰出口商',
@@ -215,8 +215,8 @@ zh: {
 },
 /* ------------------------------------------------------------ РУССКИЙ */
 ru: {
-  'nav.s1':'01 История','nav.s2':'02 Выращивание','nav.s3':'03 Продукция','nav.s4':'04 Доставка','nav.cta':'Запросить каталог',
-  'm.story':'Наша история','m.grow':'Как мы выращиваем','m.products':'Продукция','m.ship':'Как мы отгружаем','m.cta':'Запросить каталог →',
+  'nav.s1':'01 История','nav.s2':'02 Выращивание','nav.s3':'03 Продукция','nav.s4':'04 Доставка','nav.inv':'Наличие','nav.cta':'Запросить каталог',
+  'm.story':'Наша история','m.grow':'Как мы выращиваем','m.products':'Продукция','m.ship':'Как мы отгружаем','m.inv':'Наличие по неделям →','m.cta':'Запросить каталог →',
   'hero.kicker':'Куньмин Тун И · осн. в 2000 г.',
   'hero.h1':'Орхидеи всех мыслимых цветов — <a href="#art" style="color:inherit;text-decoration:none;">' + ACC.h1 + 'и нескольких немыслимых.' + ACC.s + '</a>',
   'hero.lede':'Крупнейший в Китае экспортёр цветущих фаленопсисов. Выращены от колбы до цветения на высокогорье Юньнани — родине мраморной орхидеи «Созвездие», которой нет больше нигде на свете.',
@@ -246,7 +246,7 @@ ru: {
   'g.s3.chip':'Месяцы 11–16','g.s3.word':'три','g.s3.title':'Цветонос и холод','g.s3.body':'Пяти–шестимесячная холодовая обработка даёт сильные ровные цветоносы — долгая юньнаньская осень делает сама то, к чему другие принуждают.','g.s3.fact':'5–6 месяцев холодовой обработки','g.s3.note':'— горная осень и есть наша холодильная камера, только с открытыми дверями.',
   'g.s4.chip':'Месяцы 16–18','g.s4.word':'четыре','g.s4.title':'Цветение и сортировка','g.s4.body':'Растения зацветают на стеллаже и сортируются вручную — число цветков, длина цветоноса, стебель, лист и корни — и только потом упаковываются.','g.s4.fact':'Оценка по пяти критериям','g.s4.note':'— пять ручных проверок, прежде чем растение заслужит свою коробку.',
   'gr.eyebrow':'Экспортный стандарт качества','gr.h3':'Сортируем, как драгоценные камни.','gr.side':'Все четыре класса рядом',
-  'gr.c1.name':'Высший','gr.c1.badge':'выбор экспорта',
+  'gr.c1.name':'Высший','pk.reefer':'REEFER','gr.c1.badge':'выбор экспорта',
   'gr.c2.name':'Класс A','gr.c3.name':'Класс B','gr.c4.name':'Класс C',
   'gr.row.f':'цветков и бутонов','gr.row.s':'цветонос',
   'gr.stem.a':'Цветонос цел, не обрезался','gr.leaf.a':'Лист без пятен, трещин и порезов','gr.roots.a':'Корни здоровы — без гнили',
@@ -260,7 +260,7 @@ ru: {
   'p.c2.tag':'02 · Горшечные','p.c2.title':'Горшечные','p.c2.body':'Готовые цветущие растения — ручная сортировка от высшего класса до C, из коробки сразу в продажу или в подарок.',
   'p.c3.tag':'03 · Срезка','p.c3.title':'Срезка','p.c3.body':'Свежесрезанные цветоносы в поролоновых чехлах, упакованные в холоде — для флористов, событий и оптовиков. Холодовая цепь от стеллажа до коробки: бутоны раскроются у вашего клиента, а не в пути.',
   'p.slb':'Доступные размеры','p.slb3':'На стебель',
-  'p.sz.spiking':'3.5″ с цветоносом','p.sz.flowering':'3.8″ цветущие','p.sz.large':'Крупный цветок','p.sz.small':'Мелкий цветок','p.sz.stems':'5–10 цветков / стебель','p.sz.reefer':'Рефрижераторная цепь',
+  'p.sz.spiking':'3.5″ с цветоносом','p.sz.flowering':'3.8″ цветущие','p.sz.large':'Крупный цветок 3.5″','p.sz.small':'Мелкий цветок 2.8″ / 3.0″','p.sz.stems':'5–10 цветков / стебель','p.sz.reefer':'Рефрижераторная цепь',
   'p.sz.spk28':'2.8″ с цветоносом','p.sz.spk30':'3.0″ с цветоносом','p.sz.flw28':'2.8″ цветущие','p.sz.flw30':'3.0″ цветущие','p.sz.flw35':'3.5″ цветущие',
   'v.eyebrow':'Коллекция','v.h2':'Сотни сортов — ' + ACC.v + 'и это не предел.' + ACC.s,
   'v.lede':'Шесть базовых цветов — только начало. В горшечной и срезочной линиях у нас одновременно сотни сортов в производстве: снежно-белые и румяно-розовые, винно-красные и золотые, крапчатые пикоти и единственные в своём роде мраморные новинки — и каждый сезон зацветают новые гибриды. Каждый цветок ниже распустился на наших собственных стеллажах.',
@@ -286,21 +286,21 @@ ru: {
   'sh.eyebrow':'04 / Как мы отгружаем','sh.h2':'Упаковано вручную, ' + ACC.sh + 'отгружено в холоде.' + ACC.s,
   'sh.para':'Каждый цветонос — в поролоновом чехле, каждый цветок — в ватной подложке, каждая коробка грузится в рефконтейнер прямо у дверей. От нашего стеллажа до вашего — Пекин это или Бангкок — холодовая цепь не прерывается.',
   'sh.hd':'Спецификация отгрузки','sh.r1.n':'3.8″ цветущие','sh.r2.n':'Крупный цветок','sh.r3.n':'Мелкий цветок','sh.r4.n':'Сеянцы',
-  'sh.r1.c':'горшок 3.8″ · 9,7 см','sh.r2.c':'горшок 4.7″ · 12 см','sh.r3.c':'горшок 3.5″ · 9 см','sh.r4.c':'упаковка по размеру горшка',
+  'sh.r1.c':'горшок 3.8″ · 13 см','sh.r2.c':'горшок 3.5″ · 12 см','sh.r3.c':'горшок 2.8″ / 3.0″ · 9 см','sh.r4.c':'упаковка по размеру горшка',
   'sh.ppc':'растений / коробка','sh.spb':'стеблей / коробка',
   'sh.r1.d1':'мастер-короб 120×52×49 см · 0,306 м³','sh.r1.d2':'2 лотка × 20 · 118×49,5×22 см · 0,129 м³',
   'sh.r2.d1':'мастер-короб 110×45×60 см · 0,297 м³','sh.r2.d2':'3 лотка × 20 · 108×43×18 см · 0,084 м³',
   'sh.r3.d1':'мастер-короб 83×43×61 см · 0,218 м³','sh.r3.d2':'3 лотка × 24 · 81×41×19 см · 0,063 м³',
-  'sh.r5.n':'Constellation','sh.r5.c':'горшок 3.5″ · 9 см','sh.r5.d1':'мастер-короб 120×45×50 см · 0,270 м³','sh.r5.d2':'4 внутр. короба × 5 · 118×43×11 см · 0,056 м³',
+  'sh.r5.n':'Constellation','sh.r5.c':'горшок 3.5″ · 12 см','sh.r5.d1':'мастер-короб 120×45×50 см · 0,270 м³','sh.r5.d2':'4 внутр. короба × 5 · 118×43×11 см · 0,056 м³',
   'sh.r6.n':'Срезка','sh.r6.c':'цветоносы в рукаве','sh.r6.d1':'плоский короб 90×38×9 см · 0,031 м³','sh.r6.d2':'5 коробов / связка · 50–60 стеблей',
-  'sh.r4.c1':'горшок 1.7″ / 2.0″ — 280','sh.r4.c2':'горшок 2.5″ / 2.8″ — 120','sh.r4.c3':'горшок 3.5″ — 42','sh.r4.c4':'3.5″ с цветоносом — 32','sh.r4.d1':'единый короб 61×49×30 см · 0,090 м³',
+  'sh.r4.c1':'горшок 1.7″ / 2.0″ — 280','sh.r4.c2':'горшок 2.5″ / 2.8″ — 96','sh.r4.c5':'горшок 3.0″ — 72','sh.r4.c3':'горшок 3.5″ — 42','sh.r4.c4':'3.5″ с цветоносом — 32','sh.r4.d1':'2.5″–3.0″: короб 65×45×28 см · 0,082 м³',
   'sh.fine':'Размеры — внешние, по пустой коробке (см); упакованные коробки расширяются на ≈1–2 см с каждой стороны. Объёмы — оценка для фрахта.',
   'sh.wt':'Полный короб крупноцветковых на 60 растений весит около 35 кг; авиакомпании считают объёмный вес — около 51 кг за тот же короб.','sh.ctr':'В один 40-футовый контейнер входит около 31 200 мелкоцветковых растений (1 300 коробов) или 16 800 крупноцветковых (840 коробов), плюс-минус около 100 коробов.',
   'sh.ch1':'Все крупные города Китая','sh.ch2':'10+ стран','sh.ch3':'Дольше стоит, чем рыночный стандарт',
   'c.kick':'Опт · Экспорт · Заказные серии','c.h2':'Давайте вырастим<br>' + ACC.c + 'красоту' + ACC.s + ' вместе.',
   'c.inv':'Посмотреть наличие по неделям →',
   'c.sub':'Запросите актуальный оптовый каталог — сорта, классы, вместимость коробок и сроки поставки для вашего рынка.',
-  'c.ph':'Ваш рабочий e-mail','c.phco':'Название компании','c.phnm':'Контактное лицо','c.phtel':'Телефон / WhatsApp','c.phmsg':'Что вас интересует? (сорта, объёмы, направление…)','c.send':'Отправить запрос','c.phtype':'Тип продукции','c.phspec':'Спецификация','c.tSeed':'Рассада','c.tPot':'Горшечные','c.tCut':'Срезка','c.prf':'Поставляем в','c.prfm':'Корея · Вьетнам · Филиппины · Таиланд · Сингапур · Дубай · Оман · Бруней · Гонконг','c.prfr':'По таможенным данным — экспортёр №1 цветущих фаленопсисов Китая, каждый год с 2020-го.','c.addr':'Сяоцзе, уезд Сунмин, Куньмин','c.langs':'EN · 中文 · РУ · VI',
+  'c.ph':'Ваш рабочий e-mail','c.phco':'Название компании','c.phnm':'Контактное лицо','c.phtel':'Телефон / WhatsApp','c.phmsg':'Что вас интересует? (сорта, объёмы, направление…)','c.send':'Отправить запрос','c.phtype':'Тип продукции','c.phspec':'Спецификация','c.tSeed':'Рассада','c.tPot':'Горшечные','c.tCut':'Срезка','c.prf':'Поставляем в','c.prfm':'Корея · Вьетнам · Филиппины · Таиланд · Сингапур · Дубай · Оман · Бруней · Гонконг','c.prfr':'По таможенным данным — экспортёр №1 цветущих фаленопсисов Китая, каждый год с 2020-го.','c.addr':'Сяоцзе, уезд Сунмин, Куньмин','c.langs':'EN · 中文 · РУ · VI · 日本語',
   'f.about':'Kunming Tong Yi Biotechnology Co., Ltd. Премиальные фаленопсисы, выращиваемые в Юньнани с 2000 года.',
   'f.secs':'Разделы','f.lang':'Язык',
   'f.c1':'© 2000–2026 Kunming Tong Yi Biotechnology','f.c2':'Экспортёр №1 цветущих фаленопсисов Китая',
@@ -309,8 +309,8 @@ ru: {
 },
 /* ------------------------------------------------------------ TIẾNG VIỆT */
 vi: {
-  'nav.s1':'01 Câu chuyện','nav.s2':'02 Canh tác','nav.s3':'03 Sản phẩm','nav.s4':'04 Vận chuyển','nav.cta':'Nhận catalogue',
-  'm.story':'Câu chuyện của chúng tôi','m.grow':'Cách chúng tôi trồng','m.products':'Sản phẩm','m.ship':'Cách giao hàng','m.cta':'Nhận catalogue →',
+  'nav.s1':'01 Câu chuyện','nav.s2':'02 Canh tác','nav.s3':'03 Sản phẩm','nav.s4':'04 Vận chuyển','nav.inv':'Tồn kho','nav.cta':'Nhận catalogue',
+  'm.story':'Câu chuyện của chúng tôi','m.grow':'Cách chúng tôi trồng','m.products':'Sản phẩm','m.ship':'Cách giao hàng','m.inv':'Tồn kho theo tuần →','m.cta':'Nhận catalogue →',
   'hero.kicker':'Kunming Tong Yi · thành lập 2000',
   'hero.h1':'Hồ điệp đủ mọi sắc màu bạn hình dung được — <a href="#art" style="color:inherit;text-decoration:none;">' + ACC.h1 + 'và vài sắc bạn chưa từng.' + ACC.s + '</a>',
   'hero.lede':'Nhà xuất khẩu hồ điệp đang nở lớn nhất Trung Quốc, trồng từ chai mô đến hoa nở trên cao nguyên Vân Nam — quê hương của Lan Chòm Sao vân cẩm thạch thủ công, không nơi nào khác có.',
@@ -340,7 +340,7 @@ vi: {
   'g.s3.chip':'Tháng 11–16','g.s3.word':'ba','g.s3.title':'Ra vòi &amp; phòng lạnh','g.s3.body':'Đợt xử lý lạnh năm–sáu tháng kích vòi hoa khỏe và đều — mùa thu dài của Vân Nam tự làm điều mà nơi khác phải ép buộc.','g.s3.fact':'Xử lý lạnh 5–6 tháng','g.s3.note':'— mùa thu trên núi chính là phòng lạnh của chúng tôi, với cánh cửa để ngỏ.',
   'g.s4.chip':'Tháng 16–18','g.s4.word':'bốn','g.s4.title':'Nở hoa &amp; phân loại','g.s4.body':'Cây nở hoa trên giàn và được phân loại thủ công — số hoa, chiều dài vòi, thân, lá và bộ rễ — trước khi bất kỳ cây nào vào thùng.','g.s4.fact':'Phân loại theo năm tiêu chí','g.s4.note':'— năm lần kiểm tra bằng tay trước khi mỗi cây xứng với chiếc thùng của nó.',
   'gr.eyebrow':'Tiêu chuẩn chất lượng xuất khẩu','gr.h3':'Phân loại như đá quý.','gr.side':'Bốn hạng, xem cùng lúc',
-  'gr.c1.name':'Đặc hạng','gr.c1.badge':'ưu tiên xuất khẩu',
+  'gr.c1.name':'Đặc hạng','pk.reefer':'REEFER','gr.c1.badge':'ưu tiên xuất khẩu',
   'gr.c2.name':'Hạng A','gr.c3.name':'Hạng B','gr.c4.name':'Hạng C',
   'gr.row.f':'hoa &amp; nụ','gr.row.s':'vòi hoa',
   'gr.stem.a':'Vòi nguyên vẹn, chưa từng cắt tỉa','gr.leaf.a':'Lá không đốm, không nứt, không vết cắt','gr.roots.a':'Rễ khỏe — không thối',
@@ -354,7 +354,7 @@ vi: {
   'p.c2.tag':'02 · Hoa chậu','p.c2.title':'Hoa chậu','p.c2.body':'Cây nở hoa hoàn thiện — phân loại thủ công từ Đặc hạng đến C, mở thùng là bán lẻ hoặc làm quà được ngay.',
   'p.c3.tag':'03 · Cắt cành','p.c3.title':'Hoa cắt cành','p.c3.body':'Vòi hoa cắt tươi, bọc xốp và đóng lạnh — cho tiệm hoa, sự kiện và nhà bán buôn. Chuỗi lạnh từ giàn đến thùng — nụ nở cho khách của bạn, không nở giữa đường.',
   'p.slb':'Kích cỡ hiện có','p.slb3':'Mỗi cành',
-  'p.sz.spiking':'3.5″ đang ra vòi','p.sz.flowering':'3.8″ đang nở','p.sz.large':'Hoa lớn','p.sz.small':'Hoa nhỏ','p.sz.stems':'5–10 bông / cành','p.sz.reefer':'Chuỗi lạnh reefer',
+  'p.sz.spiking':'3.5″ đang ra vòi','p.sz.flowering':'3.8″ đang nở','p.sz.large':'Hoa lớn 3.5″','p.sz.small':'Hoa nhỏ 2.8″ / 3.0″','p.sz.stems':'5–10 bông / cành','p.sz.reefer':'Chuỗi lạnh reefer',
   'p.sz.spk28':'2.8″ đang ra vòi','p.sz.spk30':'3.0″ đang ra vòi','p.sz.flw28':'2.8″ đang nở','p.sz.flw30':'3.0″ đang nở','p.sz.flw35':'3.5″ đang nở',
   'v.eyebrow':'Bộ sưu tập','v.h2':'Hàng trăm giống, ' + ACC.v + 'và chưa dừng lại.' + ACC.s,
   'v.lede':'Sáu màu chủ đạo chỉ là khởi đầu. Trên cả hoa chậu lẫn cắt cành, chúng tôi giữ hàng trăm giống cùng lúc trong sản xuất — trắng tuyết và hồng phấn, đỏ rượu vang và vàng kim, chấm sao viền cánh và những tân phẩm vân cẩm thạch độc bản — mùa nào cũng có phép lai mới ra vòi. Mỗi bông dưới đây đều đã nở trên giàn của chính chúng tôi.',
@@ -380,26 +380,124 @@ vi: {
   'sh.eyebrow':'04 / Cách giao hàng','sh.h2':'Đóng gói thủ công, ' + ACC.sh + 'vận chuyển lạnh.' + ACC.s,
   'sh.para':'Mỗi vòi hoa bọc xốp, mỗi bông lót bông đệm, mỗi thùng chất vào container lạnh ngay tại cửa. Từ giàn của chúng tôi đến tay bạn — Bắc Kinh hay Bangkok — chuỗi lạnh không bao giờ đứt.',
   'sh.hd':'Quy cách giao hàng','sh.r1.n':'3.8″ đang nở','sh.r2.n':'Hoa lớn','sh.r3.n':'Hoa nhỏ','sh.r4.n':'Cây giống',
-  'sh.r1.c':'chậu 3.8″ · 9,7 cm','sh.r2.c':'chậu 4.7″ · 12 cm','sh.r3.c':'chậu 3.5″ · 9 cm','sh.r4.c':'đóng theo cỡ chậu',
+  'sh.r1.c':'chậu 3.8″ · 13 cm','sh.r2.c':'chậu 3.5″ · 12 cm','sh.r3.c':'chậu 2.8″ / 3.0″ · 9 cm','sh.r4.c':'đóng theo cỡ chậu',
   'sh.ppc':'cây / thùng','sh.spb':'cành / thùng',
   'sh.r1.d1':'thùng lớn 120×52×49 cm · 0,306 m³','sh.r1.d2':'2 khay trong × 20 · 118×49,5×22 cm · 0,129 m³',
   'sh.r2.d1':'thùng lớn 110×45×60 cm · 0,297 m³','sh.r2.d2':'3 khay trong × 20 · 108×43×18 cm · 0,084 m³',
   'sh.r3.d1':'thùng lớn 83×43×61 cm · 0,218 m³','sh.r3.d2':'3 khay trong × 24 · 81×41×19 cm · 0,063 m³',
-  'sh.r5.n':'Constellation','sh.r5.c':'chậu 3.5″ · 9 cm','sh.r5.d1':'thùng lớn 120×45×50 cm · 0,270 m³','sh.r5.d2':'4 thùng trong × 5 · 118×43×11 cm · 0,056 m³',
+  'sh.r5.n':'Constellation','sh.r5.c':'chậu 3.5″ · 12 cm','sh.r5.d1':'thùng lớn 120×45×50 cm · 0,270 m³','sh.r5.d2':'4 thùng trong × 5 · 118×43×11 cm · 0,056 m³',
   'sh.r6.n':'Hoa cắt cành','sh.r6.c':'vòi hoa bọc xốp','sh.r6.d1':'thùng dẹt 90×38×9 cm · 0,031 m³','sh.r6.d2':'5 thùng / bó · 50–60 cành',
-  'sh.r4.c1':'chậu 1.7″ / 2.0″ — 280','sh.r4.c2':'chậu 2.5″ / 2.8″ — 120','sh.r4.c3':'chậu 3.5″ — 42','sh.r4.c4':'3.5″ ra vòi — 32','sh.r4.d1':'thùng đồng nhất 61×49×30 cm · 0,090 m³',
+  'sh.r4.c1':'chậu 1.7″ / 2.0″ — 280','sh.r4.c2':'chậu 2.5″ / 2.8″ — 96','sh.r4.c5':'chậu 3.0″ — 72','sh.r4.c3':'chậu 3.5″ — 42','sh.r4.c4':'3.5″ ra vòi — 32','sh.r4.d1':'2.5″–3.0″: thùng 65×45×28 cm · 0,082 m³',
   'sh.fine':'Kích thước là số đo ngoài của thùng rỗng (cm); thùng đã đóng phồng thêm ≈1–2 cm mỗi cạnh. Thể tích là giá trị ước tính cước.',
   'sh.wt':'Một thùng hoa lớn đầy 60 cây nặng khoảng 35 kg; hãng bay tính theo trọng lượng thể tích — khoảng 51 kg cho cùng thùng đó.','sh.ctr':'Một container 40 feet chứa khoảng 31.200 cây hoa nhỏ (1.300 thùng) hoặc 16.800 cây hoa lớn (840 thùng), chênh lệch khoảng 100 thùng.',
   'sh.ch1':'Mọi thành phố lớn Trung Quốc','sh.ch2':'10+ quốc gia','sh.ch3':'Tươi lâu hơn mặt bằng thị trường',
   'c.kick':'Bán buôn · Xuất khẩu · Đặt riêng','c.h2':'Cùng nhau trồng nên<br>điều ' + ACC.c + 'tuyệt đẹp' + ACC.s + '.',
   'c.inv':'Xem tồn kho theo tuần →',
   'c.sub':'Yêu cầu catalogue bán buôn hiện hành — giống, hạng, số cây mỗi thùng và thời gian giao cho thị trường của bạn.',
-  'c.ph':'Email công việc của bạn','c.phco':'Tên công ty','c.phnm':'Người liên hệ','c.phtel':'Số điện thoại / WhatsApp','c.phmsg':'Bạn đang tìm gì? (giống, số lượng, điểm đến…)','c.send':'Gửi yêu cầu','c.phtype':'Loại sản phẩm','c.phspec':'Quy cách','c.tSeed':'Cây giống','c.tPot':'Hoa chậu','c.tCut':'Hoa cắt cành','c.prf':'Xuất khẩu đến','c.prfm':'Hàn Quốc · Việt Nam · Philippines · Thái Lan · Singapore · Dubai · Oman · Brunei · Hồng Kông','c.prfr':'Theo dữ liệu hải quan — nhà xuất khẩu hồ điệp nở hoa số 1 Trung Quốc, liên tục từ 2020.','c.addr':'Tiểu Nhai, huyện Tùng Minh, Côn Minh','c.langs':'EN · 中文 · РУ · VI',
+  'c.ph':'Email công việc của bạn','c.phco':'Tên công ty','c.phnm':'Người liên hệ','c.phtel':'Số điện thoại / WhatsApp','c.phmsg':'Bạn đang tìm gì? (giống, số lượng, điểm đến…)','c.send':'Gửi yêu cầu','c.phtype':'Loại sản phẩm','c.phspec':'Quy cách','c.tSeed':'Cây giống','c.tPot':'Hoa chậu','c.tCut':'Hoa cắt cành','c.prf':'Xuất khẩu đến','c.prfm':'Hàn Quốc · Việt Nam · Philippines · Thái Lan · Singapore · Dubai · Oman · Brunei · Hồng Kông','c.prfr':'Theo dữ liệu hải quan — nhà xuất khẩu hồ điệp nở hoa số 1 Trung Quốc, liên tục từ 2020.','c.addr':'Tiểu Nhai, huyện Tùng Minh, Côn Minh','c.langs':'EN · 中文 · РУ · VI · 日本語',
   'f.about':'Kunming Tong Yi Biotechnology Co., Ltd. Hồ điệp cao cấp, trồng tại Vân Nam từ năm 2000.',
   'f.secs':'Chuyên mục','f.lang':'Ngôn ngữ',
   'f.c1':'© 2000–2026 Kunming Tong Yi Biotechnology','f.c2':'Nhà xuất khẩu hồ điệp nở hoa số 1 Trung Quốc',
   '_rail':['Câu chuyện','Cách chúng tôi trồng','Sản phẩm','Lan Chòm Sao','Cách giao hàng'],
   '_geo':{myanmar:'MYANMAR',laos:'LÀO',vietnam:'VIỆT NAM',sichuan:'TỨ XUYÊN',guizhou:'QUÝ CHÂU',guangxi:'QUẢNG TÂY',yunnanBig:'VÂN NAM',yunnanSub:''}
+},
+/* ------------------------------------------------------------ 日本語 */
+// polite business Japanese; upright accents (ACCZ) as in Chinese; brand names, the
+// Constellation plants' English names, codes and units stay as written
+ja: {
+  'nav.s1':'01 私たちについて','nav.s2':'02 栽培','nav.s3':'03 商品','nav.s4':'04 出荷','nav.inv':'在庫状況','nav.cta':'カタログを請求',
+  'm.story':'私たちについて','m.grow':'栽培について','m.products':'商品','m.ship':'出荷について','m.inv':'リアルタイム在庫 →','m.cta':'カタログを請求 →',
+  'hero.kicker':'Kunming Tong Yi · 2000年創業',
+  'hero.h1':'思い描ける<wbr>すべての<wbr>色の<wbr>蘭を&#160;— <a href="#art" style="color:inherit;text-decoration:none;">' + ACCZ.h1 + 'そして、想像を<wbr>超える<wbr>色も。' + ACCZ.s + '</a>',
+  'hero.lede':'開花株の胡蝶蘭で中国最大の輸出企業です。雲南の高原で、フラスコから開花まで一貫して育てています。手作業でマーブル模様に仕上げる「星空」の蘭は、世界でここにしかありません。',
+  'hero.cta1':'私たちについて','hero.cta2':'商品を見る',
+  'hero.art':'✦ 星空シリーズの蘭','hero.s1':'開花株の蘭の輸出企業（中国）','hero.s2':'全国の輸出シェア','hero.s3':'取扱品目 · 苗→切り花','hero.s4':'雲南で創業',
+  'hero.mkts':'輸出先',
+  'mkt.kr':'韓国','mkt.vn':'ベトナム','mkt.ph':'フィリピン','mkt.th':'タイ','mkt.sg':'シンガポール','mkt.bn':'ブルネイ','mkt.db':'ドバイ','mkt.om':'オマーン','mkt.hk':'香港',
+  'ticker':'苗'+SEP+'鉢物'+SEP+'切り花'+SEP+'ウイルスフリー苗の増殖'+SEP+'欧州認証の温室'+SEP+'星空シリーズの蘭'+SEP+'韓国 · ベトナム · フィリピン · タイ · シンガポール · ドバイ · オマーン · ブルネイ · 香港'+SEP,
+  't.eyebrow':'雲南 · 北緯25度の高原','t.h2':ACCZ.t + '雲' + ACCZ.s + 'の憩う地で育つ','t.zhsub':'',
+  't.para':'季節風が山へと上ってくるこの地は、霧が一年中森を潤す、涼しく光あふれる高原です。昆明が本来持つ大きな昼夜の寒暖差と、高地の強い紫外線が、開花株の蘭にとって世界で最も恵まれた自然環境をつくります。' + ACCZ.i + '胡蝶蘭' + ACCZ.is + 'はしっかりとした花茎と深い花色でこたえ、使うエネルギーは低地のガラス温室のほんの一部です。',
+  't.st1':'標高','t.st2':'平均気温','t.st3':'昼夜の寒暖差','t.st4':'日照時間','t.st5':'生育期間',
+  't.adv1.t':'大きな昼夜の寒暖差','t.adv1.b':'暖かい昼に糖を蓄え、冷えた山の夜にそれを閉じ込めます。しっかりとした花茎と、深く長持ちする花色を生む自然の仕組みです。',
+  't.adv2.t':'高地の強い日差し','t.adv2.b':'高原の薄い空気は紫外線をよく通し、花びらの色素を深め、株を丈夫にします。色鮮やかで、輸送に強く長持ちする花に育ちます。',
+  'map.kunming.name':'昆明 · 嵩明本社','map.kunming.sub':'3か所の栽培拠点 · フラスコから開花まで',
+  'map.wenshan.name':'文山拠点','map.wenshan.sub':'育苗農場',
+  'map.hq':'本社','map.base':'拠点',
+  'st.eyebrow':'01 / 私たちについて',
+  'st.h2':'台湾人が<wbr>創業した、雲南高原の<wbr>蘭園です。組織培養の<wbr>フラスコから<wbr>開花株まで、胡蝶蘭の<wbr>育種と<wbr>栽培を<wbr>' + ACCZ.st + 'すべて<wbr>一か所で。' + ACCZ.s,
+  'st.p1':'2000年以来、Kunming Tong Yi Biotechnologyは胡蝶蘭の育種、優良品種の増殖、苗、そして開花株の大規模生産を専門としてきました。拠点は雲南省嵩明県の小街花卉園区にあります。',
+  'st.p2':'税関統計によると、私たちは2020年から毎年、開花株の胡蝶蘭で中国最大の輸出企業となっています。全国の輸出シェアの半分以上を占めています。',
+  'st.b1':'年にわたる<br>育種と栽培','st.b2':'か所の栽培拠点<br>フラスコから開花まで','st.b3':'品種を<br>生産中','st.b4':'か国・地域へ輸出<br>アジアと湾岸諸国',
+  'st.f0':'図 01 — クリーム色の胡蝶蘭が並ぶベンチ（嵩明）','st.f1':'図 02 — 自動化された栽培温室（嵩明）','st.f2':'図 03 — ベンチから下ろしたばかりのさまざまな品種','st.f3':'図 04 — 冷蔵コンテナへの積み込み（昆明本社）',
+  'g.eyebrow':'02 / 栽培について','g.h2':'18か月、' + ACCZ.st + '四季を通じて<wbr>手をかけて。' + ACCZ.s,
+  'g.note':'一株がたどる道のりを、下にすべて並べました。茎に沿って、フラスコから開花までご覧ください。',
+  'g.s1.chip':'0〜5か月目','g.s1.word':'一','g.s1.title':'フラスコと苗','g.s1.body':'増殖に使うのは、健全なウイルスフリーの株だけです。すべての母株をPCRとELISAで検査してから、最初のフラスコを仕込みます。','g.s1.fact':'ウイルスフリーを検査で証明した母株','g.s1.note':'— 無菌の空気が満ちたガラスに播く。瓶のなかに、温室がまるごとひとつ。',
+  'g.s2.chip':'5〜11か月目','g.s2.word':'二','g.s2.title':'栄養成長','g.s2.body':'苗は生育段階ごとに、少なくとも4〜6か月を環境制御のもとで過ごします。光、湿度、かん水は、センサーのデータで昼夜を問わず調整しています。','g.s2.fact':'各段階4〜6か月、自動制御','g.s2.note':'— 暖かな昼と、霧の夜明け。葉は季節ごとに厚みを増していきます。',
+  'g.s3.chip':'11〜16か月目','g.s3.word':'三','g.s3.title':'花茎と低温処理','g.s3.body':'5〜6か月の低温処理で、力強くそろった花茎が出ます。ほかの生産者が人工的に促すことを、雲南の長い秋は自然に行います。','g.s3.fact':'5〜6か月の低温処理','g.s3.note':'— 山の秋が、扉を開け放した私たちの低温室です。',
+  'g.s4.chip':'16〜18か月目','g.s4.word':'四','g.s4.title':'開花と等級分け','g.s4.body':'株はベンチの上で開花し、花数、花茎の長さ、茎、葉、根の健全さを手作業で確かめて等級分けします。箱に詰めるのは、そのあとです。','g.s4.fact':'5つの基準で等級分け','g.s4.note':'— どの株も、手作業による5つの確認を経てはじめて箱に収まります。',
+  'gr.eyebrow':'輸出品質基準','gr.h3':'宝石のように等級分け。','gr.side':'4つの等級を一覧で',
+  'gr.c1.name':'特級','pk.reefer':'冷蔵コンテナ','gr.c1.badge':'輸出で人気',
+  'gr.c2.name':'A級',
+  'gr.c3.name':'B級',
+  'gr.c4.name':'C級',
+  'gr.row.f':'輪（つぼみ含む）','gr.row.s':'花茎長',
+  'gr.stem.a':'花茎に傷がなく、切り戻しなし','gr.leaf.a':'葉に斑点・割れ・切り傷なし','gr.roots.a':'根は健全で、腐れなし',
+  'gr.c3.stem':'花茎はきれいで、切り戻しは可','gr.c3.leaf':'葉の軽い傷は可','gr.c3.roots':'根の傷みは1〜2本まで、ほかは健全',
+  'gr.c4.stem':'花茎の斑点・傷跡は可','gr.c4.leaf':'葉の斑点・割れは可','gr.c4.roots':'生きた根が少ない',
+  'gr.note':'等級は上から順に判定します。その等級に入れるのは、基準を<em>すべて</em>満たした株だけです。切り戻した花茎に9輪咲いていても、A級ではなくB級です。インボイスには、箱の中身をいつも正確に記載します。',
+  'g.co2':'標高1,910 m','g.co3':'平均気温15°C','g.co4':'年間日照2,250時間',
+  'pano.lb':'数あるベンチのひとつ — 嵩明、2月',
+  'p.eyebrow':'03 / 商品','p.h2':'仕入れのニーズに、すべてお応えします。','p.note':'ひとつの栽培農場で、生育の全過程を。フラスコ育ちの苗から、切りたての花茎まで。',
+  'p.c1.tag':'01 · 苗','p.c1.title':'苗','p.c1.body':'PCRとELISAで検査した母株から増殖した、ウイルスフリーの若い株です。お客様の仕上げ栽培のスケジュールに合わせて育てます。',
+  'p.c2.tag':'02 · 鉢物','p.c2.title':'鉢物','p.c2.body':'仕上がった開花株です。特級からC級まで手作業で等級分けし、箱から出してそのまま販売や贈答にお使いいただけます。',
+  'p.c3.tag':'03 · 切り花','p.c3.title':'切り花','p.c3.body':'切りたての花茎を発泡スリーブで包み、低温で梱包します。生花店、イベント、花束加工の卸売業者向けです。ベンチから箱まで低温を保つので、つぼみは輸送中ではなく、貴社のお客様のもとで開きます。',
+  'p.slb':'取扱サイズ','p.slb3':'1本あたり',
+  'p.sz.spiking':'3.5″ 花茎付き','p.sz.flowering':'3.8″ 開花株','p.sz.large':'大輪 3.5″','p.sz.small':'小輪 2.8″ / 3.0″','p.sz.stems':'1本に5〜10輪','p.sz.reefer':'冷蔵コンテナで低温輸送',
+  'p.sz.spk28':'2.8″ 花茎付き','p.sz.spk30':'3.0″ 花茎付き','p.sz.flw28':'2.8″ 開花株','p.sz.flw30':'3.0″ 開花株','p.sz.flw35':'3.5″ 開花株',
+  'v.eyebrow':'品種図鑑','v.h2':'数百の品種、' + ACCZ.v + 'さらに<wbr>増えています。' + ACCZ.s,
+  'v.lede':'6つの基本色は、ほんの始まりです。鉢物と切り花をあわせて、数百の品種を同時に生産しています。雪のような白にほのかなピンク、ワインレッドに黄金色、斑点や覆輪の模様、唯一無二のマーブル模様の新品種まで。季節ごとに新しい交配種が花茎を伸ばします。下に並ぶ花はすべて、私たち自身のベンチで咲いたものです。',
+  'v.b1.n':'雪','v.b1.z':'白','v.b2.n':'象牙色','v.b2.z':'クリーム','v.b3.n':'バタークリーム','v.b3.z':'淡い黄色','v.b4.n':'薄紅','v.b4.z':'淡いピンク',
+  'v.b5.n':'ピンク','v.b5.z':'ピンク','v.b6.n':'ピーチ','v.b6.z':'コーラルピンク','v.b7.n':'珊瑚','v.b7.z':'珊瑚色','v.b8.n':'ローズの二色咲き','v.b8.z':'二色',
+  'v.b9.n':'二色咲き','v.b9.z':'二色','v.b10.n':'フクシア','v.b10.z':'赤紫','v.b11.n':'マゼンタ','v.b11.z':'鮮やか','v.b12.n':'蘭の紫','v.b12.z':'紫紅',
+  'v.b13.n':'ラベンダー','v.b13.z':'藤色','v.b14.n':'紫水晶','v.b14.z':'濃い藤色','v.b15.n':'深紅のビロード','v.b15.z':'ワインレッド','v.b16.n':'黄金','v.b16.z':'黄色',
+  'v.b17.n':'星明かり','v.b17.z':'斑点','v.b18.n':'覆輪','v.b18.z':'縁取り',
+  'v.note':'品種のイメージです。株は手作業で等級分けしており、個体差があります。',
+  'v.f1':'6つの基本色','v.f2':'数十種類の模様','v.f3':'200品種以上を生産','v.f4':'季節ごとに新しい交配種','v.link':'ご希望の色に合う品種をお探しします →',
+  'a.eyebrow':'看板シリーズ','a.h2':'星空シリーズ',
+  'a.lede':'生きた花びらに、夜空がまるごと散りばめられています。緑、琥珀色、すみれ色のマーブル模様は、二度と同じ流れ方をしません。「星空」シリーズは嵩明の温室で' + ACCZ.b + '完全に自社開発' + ACCZ.bs + 'したものです。一株ずつ番号の付いた' + ACCZ.b + '一点物' + ACCZ.bs + 'で、ご注文いただけるのはここだけです。',
+  'a.t1':'星空シリーズ','a.t2':'当社限定','a.t3':'自社育種','a.t4':'一点物','a.plants':'シリーズの株',
+  'a.c1.n':'Citrus Marble','a.c1.t':'鉢物','a.c1.b':'白地に流れるオレンジと緑。星空シリーズのベンチから生まれた最新の株で、自社で育て、仕上げました。',
+  'a.c2.n':'Saffron &amp; Sky','a.c2.t':'禅モダン','a.c2.b':'やわらかな青に溶け込む、温かな琥珀色のマーブル模様。穏やかで、陽だまりのような存在感です。',
+  'a.c3.n':'Porcelain Indigo','a.c3.t':'モダン・ボタニカル','a.c3.b':'明るい白地に渦を巻くコバルトブルー。磁器の染付のような趣です。',
+  'a.c4.n':'Rose Jade','a.c4.t':'手仕事のボタニカル','a.c4.b':'ほのかなピンクと翡翠色が重なり合い、同じ花びらはひとつとしてありません。',
+  'a.c5.n':'Chartreuse Mist','a.c5.t':'ボタニカル・ミニマル','a.c5.b':'クリーム地に漂う淡いライム色。静かで現代的、洗練された佇まいです。',
+  'a.c6.n':'Peach Sorbet','a.c6.t':'パステル・ミニマル','a.c6.b':'やわらかなピーチ色とバターのような黄色が、淡いピンクへとにじみます。自社で仕上げた、温かくやさしいマーブル模様です。',
+  'a.c7.n':'Aurora','a.c7.t':'幻想的なボタニカル','a.c7.b':'ミント色、藤色、珊瑚色が虹色の帯となって、花びらごとに移ろいます。光の映り方も、ひとつとして同じではありません。',
+  'a.g.t':'お好みの色で、<br>お好みの模様を','a.g.link':'オリジナルシリーズのご依頼 →','a.drag':'◄ ドラッグして見る ►',
+  'mix.eyebrow':'試してみる','mix.h':'あなただけの配色を。','mix.sub':'色を3つまで選び、比率を決めて、混ぜてみてください。流し込むたびに模様が変わります。本物の花と同じように。','mix.colors':'色 · 3つまで','mix.balance':'比率','mix.again':'もう一度混ぜる','mix.save':'この配色を保存','mix.disc':'参考イメージです。星空シリーズの蘭はすべて手作業でつくられるため、実際の株や色の模様はこのイメージと異なる場合があります。','mix.order':'この配色で注文する','mix.caption':'あなただけの一点物','mix.savehint':'上の画像を長押しして、「画像を保存」を選んでください。',
+  'sh.eyebrow':'04 / 出荷について','sh.h2':'手作業で<wbr>梱包し、' + ACCZ.sh + '低温で<wbr>出荷。' + ACCZ.s,
+  'sh.para':'花茎は一本ずつ発泡スリーブで包み、花は一輪ずつ緩衝綿で守り、箱は出荷場からそのまま冷蔵コンテナに積み込みます。私たちのベンチからお客様のもとまで、北京でもバンコクでも、低温輸送が途切れることはありません。',
+  'sh.hd':'出荷仕様','sh.r1.n':'3.8″ 開花株','sh.r2.n':'大輪','sh.r3.n':'小輪','sh.r4.n':'苗',
+  'sh.r1.c':'カップ径 3.8″ · 13 cm','sh.r2.c':'カップ径 3.5″ · 12 cm','sh.r3.c':'カップ径 2.8″ / 3.0″ · 9 cm','sh.r4.c':'カップ径ごとに梱包',
+  'sh.ppc':'株 / 箱','sh.spb':'本 / 箱',
+  'sh.r1.d1':'外箱 120×52×49 cm · 0.306 m³','sh.r1.d2':'内箱 2段 × 20株 · 118×49.5×22 cm · 0.129 m³',
+  'sh.r2.d1':'外箱 110×45×60 cm · 0.297 m³','sh.r2.d2':'内箱 3段 × 20株 · 108×43×18 cm · 0.084 m³',
+  'sh.r3.d1':'外箱 83×43×61 cm · 0.218 m³','sh.r3.d2':'内箱 3段 × 24株 · 81×41×19 cm · 0.063 m³',
+  'sh.r5.n':'星空シリーズ','sh.r5.c':'カップ径 3.5″ · 12 cm','sh.r5.d1':'外箱 120×45×50 cm · 0.270 m³','sh.r5.d2':'内箱 4個 × 5株 · 118×43×11 cm · 0.056 m³',
+  'sh.r6.n':'切り花','sh.r6.c':'スリーブ包装の花茎','sh.r6.d1':'平箱 90×38×9 cm · 0.031 m³','sh.r6.d2':'5箱 / 1梱 · 50〜60本',
+  'sh.r4.c1':'1.7″ / 2.0″ カップ — 280株','sh.r4.c2':'2.5″ / 2.8″ カップ — 96株','sh.r4.c5':'3.0″ カップ — 72株','sh.r4.c3':'3.5″ カップ — 42株','sh.r4.c4':'3.5″ 花茎付き — 32株','sh.r4.d1':'2.5″〜3.0″：箱 65×45×28 cm · 0.082 m³',
+  'sh.fine':'寸法は空箱の外寸（cm）です。梱包後は各辺が約1〜2 cm膨らみます。容積は運賃見積もり用の目安です。',
+  'sh.wt':'大輪60株入りの箱は約35 kgです。航空会社は容積重量で運賃を計算するため、同じ箱で約51 kgになります。','sh.ctr':'40フィートコンテナ1本に、小輪なら約31,200株（1,300箱）、大輪なら約16,800株（840箱）が入ります。前後100箱ほどの幅があります。',
+  'sh.ch1':'中国の主要都市すべて','sh.ch2':'10か国以上','sh.ch3':'市場平均より長い日持ち',
+  'c.kick':'卸売 · 輸出 · 特注','c.h2':ACCZ.c + '美しいもの' + ACCZ.s + 'を、<br>ともに<wbr>育てましょう。',
+  'c.inv':'リアルタイム在庫を週ごとに確認 →',
+  'c.sub':'最新の卸売カタログをご請求ください。品種、等級、箱の入数、貴社の市場への納期をご案内します。',
+  'c.ph':'会社のメールアドレス','c.phco':'会社名','c.phnm':'ご担当者名','c.phtel':'電話番号 / WhatsApp','c.phmsg':'ご希望の内容（品種、数量、仕向地など）','c.send':'お問い合わせを送信','c.phtype':'商品の種類','c.phspec':'規格','c.tSeed':'苗','c.tPot':'鉢物','c.tCut':'切り花','c.prf':'輸出先','c.prfm':'韓国 · ベトナム · フィリピン · タイ · シンガポール · ドバイ · オマーン · ブルネイ · 香港','c.prfr':'税関統計によると、2020年から毎年、開花株の胡蝶蘭の輸出で中国第1位となっています。','c.addr':'昆明市嵩明県小街','c.langs':'EN · 中文 · РУ · VI · 日本語',
+  'f.about':'Kunming Tong Yi Biotechnology Co., Ltd. 2000年から雲南で上質な胡蝶蘭を育てています。',
+  'f.secs':'メニュー','f.lang':'言語',
+  'f.c1':'© 2000–2026 Kunming Tong Yi Biotechnology','f.c2':'開花株の胡蝶蘭の輸出で中国第1位',
+  '_rail':['私たちについて','栽培について','商品','星空シリーズの蘭','出荷について'],
+  '_geo':{myanmar:'ミャンマー',laos:'ラオス',vietnam:'ベトナム',sichuan:'四川',guizhou:'貴州',guangxi:'広西',yunnanBig:'雲南',yunnanSub:''}
 }
 };
 
@@ -411,7 +509,8 @@ var TITLES = {
   en: 'KMTY Orchid — Kunming Tong Yi · Phalaenopsis from Yunnan',
   zh: '昆明统一生物 KMTY — 云南蝴蝶兰 · 种苗 盆花 切花',
   ru: 'KMTY Orchid — Kunming Tong Yi · фаленопсисы из Юньнани',
-  vi: 'KMTY Orchid — Kunming Tong Yi · hồ điệp từ Vân Nam'
+  vi: 'KMTY Orchid — Kunming Tong Yi · hồ điệp từ Vân Nam',
+  ja: 'KMTY Orchid — Kunming Tong Yi · 雲南の胡蝶蘭'
 };
 function detectLang() {
   try {
@@ -419,6 +518,7 @@ function detectLang() {
     for (var i = 0; i < prefs.length; i++) {
       var p = String(prefs[i]).toLowerCase();
       if (p.indexOf('zh') === 0) return 'zh';
+      if (/^ja(?:[-_]|$)/.test(p)) return 'ja';   // the subtag ja exactly: not jam, jav
       if (p.indexOf('vi') === 0) return 'vi';
       if (p.indexOf('ru') === 0) return 'ru';
       if (p.indexOf('en') === 0) return 'en';   // an explicit English preference outranks the timezone hint
@@ -428,6 +528,7 @@ function detectLang() {
     var tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
     if (/^Asia\/(Shanghai|Chongqing|Urumqi|Harbin|Hong_Kong|Macau|Taipei)$/.test(tz)) return 'zh';
     if (/^Asia\/(Ho_Chi_Minh|Saigon|Hanoi)$/.test(tz)) return 'vi';
+    if (/^Asia\/Tokyo$/.test(tz)) return 'ja';
     if (/^Europe\/(Moscow|Kaliningrad|Samara|Volgograd|Saratov|Kirov|Astrakhan|Ulyanovsk)$/.test(tz) ||
         /^Asia\/(Yekaterinburg|Omsk|Novosibirsk|Barnaul|Tomsk|Novokuznetsk|Krasnoyarsk|Irkutsk|Chita|Yakutsk|Khandyga|Vladivostok|Ust-Nera|Magadan|Sakhalin|Srednekolymsk|Kamchatka|Anadyr)$/.test(tz)) return 'ru';
   } catch (e) {}
@@ -437,8 +538,32 @@ function reflectLang() {
   // applyDict() owns the html lang attribute; this keeps the tab title in step
   try { if (TITLES[LANG]) document.title = TITLES[LANG]; } catch (e) {}
 }
+// A link can open the site in a language (?lang=ja or #lang=ja): taken like a click
+// on the switcher, so it is remembered like one. An unknown code is ignored.
+function urlLang() {
+  try {
+    var m = /[?&#]lang=([a-z]{2})(?![a-z])/i.exec(String(location.search || '') + String(location.hash || ''));
+    var l = m ? m[1].toLowerCase() : '';
+    if (l && I18N.hasOwnProperty(l)) {
+      try { localStorage.setItem('kmty-lang', l); } catch (e) {}
+      return l;
+    }
+  } catch (e) {}
+  return '';
+}
+// A later click wins over the link the visitor came in on: the switcher rewrites any
+// lang= in the address to the language chosen, so a reload or a bookmark keeps it.
+function relink(lang) {
+  try {
+    var re = /([?&#]lang=)[a-z]{2}(?![a-z])/i;
+    var q = location.search.replace(re, '$1' + lang), h = location.hash.replace(re, '$1' + lang);
+    if (q !== location.search || h !== location.hash) history.replaceState(history.state, '', location.pathname + q + h);
+  } catch (e) {}
+}
+// storage is read on its own: a browser that refuses it is still detected by its language
+function storedLang() { try { return localStorage.getItem('kmty-lang'); } catch (e) { return null; } }
 var LANG = 'en';
-try { LANG = localStorage.getItem('kmty-lang') || detectLang(); } catch (e) {}
+try { LANG = urlLang() || storedLang() || detectLang(); } catch (e) {}
 if (!I18N[LANG]) LANG = 'en';
 reflectLang();
 
@@ -474,6 +599,7 @@ window.KMTY_I18N = {
     if (!I18N[lang] || lang === LANG) return;
     LANG = lang;
     try { localStorage.setItem('kmty-lang', lang); } catch (e) {}
+    relink(lang);
     reflectLang();
     applyDict();
     MAP.render();
