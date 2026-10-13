@@ -25,7 +25,8 @@ var SEP = ' <span style="color:#C86B3E;">/</span> ';
 var I18N = {
 /* ------------------------------------------------------------ ENGLISH */
 en: {
-  'nav.s1':'01 Story','nav.s2':'02 Grow','nav.s3':'03 Products','nav.s4':'04 Ship','nav.inv':'Availability','nav.cta':'Request catalog',
+  'nav.s1':'Story','nav.s2':'Grow','nav.s3':'Products','nav.s4':'Ship','nav.inv':'Availability','nav.cta':'Request catalog',
+  'nav.contact':'Contact us',
   'm.story':'Our story','m.grow':'How we grow','m.products':'Products','m.ship':'How it ships','m.inv':'Live availability →','m.cta':'Request catalog →',
   'hero.kicker':'Kunming Tong Yi · Est. 2000',
   'hero.h1':'Orchids in every color imaginable — <a href="#art" style="color:inherit;text-decoration:none;">' + ACC.h1 + 'and a few you can’t.' + ACC.s + '</a>',
@@ -116,12 +117,13 @@ en: {
   'f.about':'Kunming Tong Yi Biotechnology Co., Ltd. Premium Phalaenopsis, grown in Yunnan since 2000.',
   'f.secs':'Sections','f.lang':'Language',
   'f.c1':'© 2000–2026 Kunming Tong Yi Biotechnology','f.c2':'China’s Nº 1 flowering-Phalaenopsis exporter',
-  '_rail':['Our story','How we grow','Products','Constellation Orchid','How it ships'],
+  'rail.story':'Our story','rail.grow':'How we grow','rail.products':'Products','rail.art':'Constellation Orchid','rail.ship':'How it ships','rail.contact':'Contact us',
   '_geo':{myanmar:'MYANMAR',laos:'LAOS',vietnam:'VIETNAM',sichuan:'SICHUAN',guizhou:'GUIZHOU',guangxi:'GUANGXI',yunnanBig:'YUNNAN',yunnanSub:''}
 },
 /* ------------------------------------------------------------ 中文 */
 zh: {
-  'nav.s1':'01 关于我们','nav.s2':'02 种植','nav.s3':'03 产品','nav.s4':'04 发货','nav.inv':'实时库存','nav.cta':'索取产品目录',
+  'nav.s1':'关于我们','nav.s2':'种植','nav.s3':'产品','nav.s4':'发货','nav.inv':'实时库存','nav.cta':'索取产品目录',
+  'nav.contact':'联系我们',
   'm.story':'关于我们','m.grow':'如何种植','m.products':'产品系列','m.ship':'如何发货','m.inv':'实时库存 →','m.cta':'索取产品目录 →',
   'hero.kicker':'昆明统一生物 · 创立于 2000 年',
   'hero.h1':'色彩万千的<span style="white-space:nowrap;">蝴蝶兰</span> — <a href="#art" style="color:inherit;text-decoration:none;">' + ACCZ.h1 + '还有你想象不到的那几种。' + ACCZ.s + '</a>',
@@ -210,12 +212,13 @@ zh: {
   'f.about':'昆明统一生物科技有限公司。优质蝴蝶兰，自 2000 年扎根云南。',
   'f.secs':'栏目','f.lang':'语言',
   'f.c1':'© 2000–2026 昆明统一生物科技有限公司','f.c2':'中国第一开花蝴蝶兰出口商',
-  '_rail':['关于我们','如何种植','产品系列','星空','如何发货'],
+  'rail.story':'关于我们','rail.grow':'如何种植','rail.products':'产品系列','rail.art':'星空','rail.ship':'如何发货','rail.contact':'联系我们',
   '_geo':{myanmar:'缅甸',laos:'老挝',vietnam:'越南',sichuan:'四川',guizhou:'贵州',guangxi:'广西',yunnanBig:'云南',yunnanSub:''}
 },
 /* ------------------------------------------------------------ РУССКИЙ */
 ru: {
-  'nav.s1':'01 История','nav.s2':'02 Выращивание','nav.s3':'03 Продукция','nav.s4':'04 Доставка','nav.inv':'Наличие','nav.cta':'Запросить каталог',
+  'nav.s1':'История','nav.s2':'Выращивание','nav.s3':'Продукция','nav.s4':'Доставка','nav.inv':'Наличие','nav.cta':'Запросить каталог',
+  'nav.contact':'Контакты',
   'm.story':'Наша история','m.grow':'Как мы выращиваем','m.products':'Продукция','m.ship':'Как мы отгружаем','m.inv':'Наличие по неделям →','m.cta':'Запросить каталог →',
   'hero.kicker':'Куньмин Тун И · осн. в 2000 г.',
   'hero.h1':'Орхидеи всех мыслимых цветов — <a href="#art" style="color:inherit;text-decoration:none;">' + ACC.h1 + 'и нескольких немыслимых.' + ACC.s + '</a>',
@@ -304,12 +307,13 @@ ru: {
   'f.about':'Kunming Tong Yi Biotechnology Co., Ltd. Премиальные фаленопсисы, выращиваемые в Юньнани с 2000 года.',
   'f.secs':'Разделы','f.lang':'Язык',
   'f.c1':'© 2000–2026 Kunming Tong Yi Biotechnology','f.c2':'Экспортёр №1 цветущих фаленопсисов Китая',
-  '_rail':['Наша история','Как мы выращиваем','Продукция','Орхидея «Созвездие»','Как мы отгружаем'],
+  'rail.story':'Наша история','rail.grow':'Как мы выращиваем','rail.products':'Продукция','rail.art':'Орхидея «Созвездие»','rail.ship':'Как мы отгружаем','rail.contact':'Контакты',
   '_geo':{myanmar:'МЬЯНМА',laos:'ЛАОС',vietnam:'ВЬЕТНАМ',sichuan:'СЫЧУАНЬ',guizhou:'ГУЙЧЖОУ',guangxi:'ГУАНСИ',yunnanBig:'ЮНЬНАНЬ',yunnanSub:''}
 },
 /* ------------------------------------------------------------ TIẾNG VIỆT */
 vi: {
-  'nav.s1':'01 Câu chuyện','nav.s2':'02 Canh tác','nav.s3':'03 Sản phẩm','nav.s4':'04 Vận chuyển','nav.inv':'Tồn kho','nav.cta':'Nhận catalogue',
+  'nav.s1':'Câu chuyện','nav.s2':'Canh tác','nav.s3':'Sản phẩm','nav.s4':'Vận chuyển','nav.inv':'Tồn kho','nav.cta':'Nhận catalogue',
+  'nav.contact':'Liên hệ',
   'm.story':'Câu chuyện của chúng tôi','m.grow':'Cách chúng tôi trồng','m.products':'Sản phẩm','m.ship':'Cách giao hàng','m.inv':'Tồn kho theo tuần →','m.cta':'Nhận catalogue →',
   'hero.kicker':'Kunming Tong Yi · thành lập 2000',
   'hero.h1':'Hồ điệp đủ mọi sắc màu bạn hình dung được — <a href="#art" style="color:inherit;text-decoration:none;">' + ACC.h1 + 'và vài sắc bạn chưa từng.' + ACC.s + '</a>',
@@ -398,14 +402,15 @@ vi: {
   'f.about':'Kunming Tong Yi Biotechnology Co., Ltd. Hồ điệp cao cấp, trồng tại Vân Nam từ năm 2000.',
   'f.secs':'Chuyên mục','f.lang':'Ngôn ngữ',
   'f.c1':'© 2000–2026 Kunming Tong Yi Biotechnology','f.c2':'Nhà xuất khẩu hồ điệp nở hoa số 1 Trung Quốc',
-  '_rail':['Câu chuyện','Cách chúng tôi trồng','Sản phẩm','Lan Chòm Sao','Cách giao hàng'],
+  'rail.story':'Câu chuyện','rail.grow':'Cách chúng tôi trồng','rail.products':'Sản phẩm','rail.art':'Lan Chòm Sao','rail.ship':'Cách giao hàng','rail.contact':'Liên hệ',
   '_geo':{myanmar:'MYANMAR',laos:'LÀO',vietnam:'VIỆT NAM',sichuan:'TỨ XUYÊN',guizhou:'QUÝ CHÂU',guangxi:'QUẢNG TÂY',yunnanBig:'VÂN NAM',yunnanSub:''}
 },
 /* ------------------------------------------------------------ 日本語 */
 // polite business Japanese; upright accents (ACCZ) as in Chinese; brand names, the
 // Constellation plants' English names, codes and units stay as written
 ja: {
-  'nav.s1':'01 私たちについて','nav.s2':'02 栽培','nav.s3':'03 商品','nav.s4':'04 出荷','nav.inv':'在庫状況','nav.cta':'カタログを請求',
+  'nav.s1':'私たちについて','nav.s2':'栽培','nav.s3':'商品','nav.s4':'出荷','nav.inv':'在庫状況','nav.cta':'カタログを請求',
+  'nav.contact':'お問い合わせ',
   'm.story':'私たちについて','m.grow':'栽培について','m.products':'商品','m.ship':'出荷について','m.inv':'リアルタイム在庫 →','m.cta':'カタログを請求 →',
   'hero.kicker':'Kunming Tong Yi · 2000年創業',
   'hero.h1':'思い描ける<wbr>すべての<wbr>色の<wbr>蘭を&#160;— <a href="#art" style="color:inherit;text-decoration:none;">' + ACCZ.h1 + 'そして、想像を<wbr>超える<wbr>色も。' + ACCZ.s + '</a>',
@@ -496,7 +501,7 @@ ja: {
   'f.about':'Kunming Tong Yi Biotechnology Co., Ltd. 2000年から雲南で上質な胡蝶蘭を育てています。',
   'f.secs':'メニュー','f.lang':'言語',
   'f.c1':'© 2000–2026 Kunming Tong Yi Biotechnology','f.c2':'開花株の胡蝶蘭の輸出で中国第1位',
-  '_rail':['私たちについて','栽培について','商品','星空シリーズの蘭','出荷について'],
+  'rail.story':'私たちについて','rail.grow':'栽培について','rail.products':'商品','rail.art':'星空シリーズの蘭','rail.ship':'出荷について','rail.contact':'お問い合わせ',
   '_geo':{myanmar:'ミャンマー',laos:'ラオス',vietnam:'ベトナム',sichuan:'四川',guizhou:'貴州',guangxi:'広西',yunnanBig:'雲南',yunnanSub:''}
 }
 };
@@ -593,7 +598,7 @@ window.KMTY_I18N = {
   get lang() { return LANG; },
   dcStrings: function () {
     var d = I18N[LANG];
-    return { rail: d._rail, veilOn: d._veilOn, veilOff: d._veilOff };
+    return { veilOn: d._veilOn, veilOff: d._veilOff };
   },
   set: function (lang) {
     if (!I18N[lang] || lang === LANG) return;
